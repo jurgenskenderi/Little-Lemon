@@ -15,12 +15,29 @@ server/     Fastify API, SQLite storage, scraper, and the partner console
 
 ## Try it now
 
-**[Open the preview →](https://claude.ai/code/artifact/4176a1f5-96b5-4fc1-9772-b91cb2499cc1)**
+**[https://jurgenskenderi.github.io/Little-Lemon/](https://jurgenskenderi.github.io/Little-Lemon/)**
 
-A working web build you can open on your phone in Toronto. It uses your real
-location, has the list and map views, the distance slider, and the time filters.
-It runs on **sample data with invented venue names** and needs no server. It is
-a preview of the product, not the shippable app — see *Getting a real app* below.
+Real bars and restaurants near you, on a real map, with a Call button that
+dials. Open it on your phone in Toronto. No key, no account, no server —
+`docs/index.html` is one self-contained page and everything happens on your
+device:
+
+- **the map** is OpenStreetMap's own tiles through Leaflet, so every street is
+  there because it is a real map, not a drawing of one;
+- **the venues** are real, queried live from [Overpass](https://overpass-api.de)
+  as you move — names, addresses, phone numbers, websites and opening hours
+  straight from OpenStreetMap;
+- **open now** is computed from each venue's `opening_hours`, including the
+  ones that run past midnight;
+- **Call, Directions and Website** are ordinary links on an ordinary page, so
+  they do what links do.
+
+Deployed from `docs/` by `.github/workflows/pages.yml` on every push.
+
+There is also a [sample-data preview](https://claude.ai/code/artifact/4176a1f5-96b5-4fc1-9772-b91cb2499cc1)
+showing the happy-hour deal model — time windows, partner ranking, confidence —
+against invented venues. It runs in a sandboxed frame, which is why its map is
+hand-drawn and its Call button cannot dial. Prefer the link above.
 
 ## Quick start
 

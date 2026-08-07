@@ -1,0 +1,841 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0E1518">
+<meta name="description" content="Real bars and restaurants near you in Toronto, with the ones open right now.">
+<title>Clocktails — bars and restaurants near you</title>
+
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+      integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
+<link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230E1518'/%3E%3Ctext x='32' y='44' font-size='34' text-anchor='middle'%3E%F0%9F%8D%B8%3C/text%3E%3C/svg%3E">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ctext x='32' y='48' font-size='44' text-anchor='middle'%3E%F0%9F%8D%B8%3C/text%3E%3C/svg%3E">
+
+<style>
+  :root {
+    --ink:#0E1518; --surface:#172126; --raised:#1F2C32; --border:#2B3A41;
+    --text:#E9F1EE; --muted:#93A6A5; --faint:#6B7E80;
+    --accent:#E8A33D; --on-accent:#1B1206;
+    --open:#4FB477; --closed:#7E9394; --unknown:#7E9394;
+    --display:"Avenir Next Condensed","Helvetica Neue Condensed","Arial Narrow",sans-serif;
+    --body:"Avenir Next",Avenir,"Segoe UI",Roboto,system-ui,sans-serif;
+    --data:ui-monospace,Menlo,Consolas,"DejaVu Sans Mono",monospace;
+  }
+  @media (prefers-color-scheme: light) {
+    :root {
+      --ink:#F3EFE7; --surface:#FFF; --raised:#F7F3EC; --border:#DCD4C6;
+      --text:#17211F; --muted:#5C6B69; --faint:#85918F;
+      --accent:#A9660F; --on-accent:#FFF8EC;
+      --open:#2F8F5B; --closed:#7B8886; --unknown:#7B8886;
+    }
+  }
+  * { box-sizing:border-box; }
+  html, body { height:100%; }
+  body { margin:0; background:var(--ink); color:var(--text); font-family:var(--body);
+         font-size:15px; line-height:1.5; -webkit-font-smoothing:antialiased;
+         overscroll-behavior-y:none; }
+
+  .app { max-width:620px; margin:0 auto; padding:0 14px
+         calc(20px + env(safe-area-inset-bottom)); }
+
+  header { padding:18px 0 10px; }
+  .wordmark { font-family:var(--display); text-transform:uppercase; letter-spacing:.18em;
+              font-size:12px; color:var(--accent); font-weight:700; margin:0 0 4px; }
+  h1 { font-family:var(--display); font-size:31px; line-height:1.05; margin:0; font-weight:700; }
+  .where { color:var(--muted); font-size:13.5px; margin:7px 0 0; }
+  .where button { background:none; border:0; color:var(--accent); font:inherit;
+                  text-decoration:underline; cursor:pointer; padding:0; }
+  .where strong { color:var(--text); }
+
+  /* ---------- controls ---------- */
+  .controls { display:grid; gap:10px; margin-top:12px; }
+  .row { display:flex; align-items:center; gap:10px; }
+  .label { font-family:var(--display); text-transform:uppercase; letter-spacing:.12em;
+           font-size:11px; color:var(--muted); font-weight:600; white-space:nowrap; }
+  input[type=range] { flex:1; accent-color:var(--accent); min-width:0; }
+  .value { font-family:var(--data); font-size:12.5px; color:var(--text); min-width:56px;
+           text-align:right; }
+  .chips { display:flex; gap:6px; overflow-x:auto; padding-bottom:2px;
+           scrollbar-width:none; }
+  .chips::-webkit-scrollbar { display:none; }
+  .chip { flex:0 0 auto; padding:7px 13px; border-radius:999px; border:1px solid var(--border);
+          background:var(--surface); color:var(--muted); font:inherit; font-size:13px;
+          cursor:pointer; white-space:nowrap; }
+  .chip[aria-pressed=true] { background:var(--accent); border-color:var(--accent);
+                             color:var(--on-accent); font-weight:700; }
+
+  .tabs { display:flex; gap:4px; background:var(--surface); border:1px solid var(--border);
+          border-radius:11px; padding:3px; margin-top:12px; }
+  .tabs button { flex:1; padding:8px; border:0; border-radius:8px; background:transparent;
+                 color:var(--muted); font:inherit; font-size:13.5px; font-weight:600;
+                 cursor:pointer; }
+  .tabs button[aria-pressed=true] { background:var(--raised); color:var(--text); }
+
+  /* ---------- map ---------- */
+  #map { height:min(58vh,440px); border-radius:14px; border:1px solid var(--border);
+         margin-top:12px; background:var(--raised); z-index:0; }
+  .leaflet-container { font:inherit; background:var(--raised); }
+  .leaflet-popup-content-wrapper, .leaflet-popup-tip {
+    background:var(--surface); color:var(--text); border:1px solid var(--border); }
+  .leaflet-popup-content { margin:11px 13px; font-size:13.5px; }
+  .leaflet-popup-content b { display:block; font-size:14.5px; margin-bottom:2px; }
+  .leaflet-popup-content a { color:var(--accent); }
+  .leaflet-bar a { background:var(--surface); color:var(--text); border-color:var(--border); }
+  .leaflet-bar a:hover { background:var(--raised); color:var(--text); }
+  .leaflet-control-attribution { background:rgba(0,0,0,.55)!important; color:#CFE0DD!important; }
+  .leaflet-control-attribution a { color:#9FD0FF!important; }
+
+  .pin { display:grid; place-items:center; width:26px; height:26px; border-radius:50%;
+         border:2px solid var(--surface); font-size:13px; line-height:1;
+         box-shadow:0 2px 6px rgba(0,0,0,.4); }
+  .me { width:16px; height:16px; border-radius:50%; background:#4285F4;
+        border:3px solid #fff; box-shadow:0 0 0 1px rgba(0,0,0,.3); }
+
+  /* ---------- list ---------- */
+  .status { margin-top:12px; padding:11px 13px; border-radius:11px; background:var(--raised);
+            border:1px solid var(--border); color:var(--muted); font-size:13px; }
+  .status[hidden] { display:none; }
+  .status strong { color:var(--text); }
+  .status button { background:none; border:0; color:var(--accent); font:inherit;
+                   text-decoration:underline; cursor:pointer; padding:0; }
+
+  .rows { margin-top:12px; display:grid; gap:8px; }
+  .venue { width:100%; text-align:left; display:flex; gap:12px; align-items:center;
+           padding:12px 13px; border-radius:12px; border:1px solid var(--border);
+           background:var(--surface); color:inherit; font:inherit; cursor:pointer; }
+  .venue:hover { border-color:var(--accent); }
+  .glyph { flex:0 0 40px; height:40px; border-radius:10px; background:var(--raised);
+           display:grid; place-items:center; font-size:19px; }
+  .venue .body { flex:1; min-width:0; }
+  .name { font-weight:700; font-size:15px; white-space:nowrap; overflow:hidden;
+          text-overflow:ellipsis; }
+  .sub { color:var(--muted); font-size:12.5px; white-space:nowrap; overflow:hidden;
+         text-overflow:ellipsis; }
+  .right { text-align:right; display:grid; gap:3px; }
+  .state { font-size:12px; font-weight:700; white-space:nowrap; }
+  .dist { font-family:var(--data); font-size:11.5px; color:var(--faint); }
+
+  /* ---------- sheet ---------- */
+  dialog { border:0; padding:0; background:transparent; max-width:520px; width:calc(100% - 24px); }
+  dialog::backdrop { background:rgba(0,0,0,.6); backdrop-filter:blur(3px); }
+  .sheet { background:var(--surface); border:1px solid var(--border); border-radius:16px;
+           padding:20px; }
+  .sheet h2 { font-family:var(--display); font-size:25px; margin:0; line-height:1.1; }
+  .sheet .addr { color:var(--muted); font-size:13.5px; margin:6px 0 0; }
+  .rule { height:1px; background:var(--border); margin:15px 0; }
+  .kv { display:grid; grid-template-columns:auto 1fr; gap:6px 14px; font-size:13.5px; }
+  .kv dt { color:var(--muted); }
+  .kv dd { margin:0; }
+  .tel { font-family:var(--data); font-size:17px; color:var(--accent);
+         text-decoration:none; -webkit-user-select:all; user-select:all; }
+  .hours { font-family:var(--data); font-size:12.5px; color:var(--muted); white-space:pre-wrap; }
+  .actions { display:flex; gap:8px; margin-top:18px; flex-wrap:wrap; }
+  .actions a, .actions button { flex:1 1 30%; text-align:center; padding:11px 8px;
+    border-radius:10px; border:1px solid var(--border); background:transparent;
+    color:var(--text); font:inherit; font-size:14px; font-weight:600; cursor:pointer;
+    text-decoration:none; }
+  .actions .primary { background:var(--accent); border-color:var(--accent);
+                      color:var(--on-accent); }
+
+  footer { margin-top:26px; padding-top:16px; border-top:1px solid var(--border);
+           color:var(--faint); font-size:12px; line-height:1.6; }
+  footer a { color:var(--faint); }
+</style>
+</head>
+<body>
+
+<div class="app">
+  <header>
+    <p class="wordmark">Clocktails · Toronto</p>
+    <h1>Bars &amp; restaurants near you</h1>
+    <p class="where" id="where">Finding you…</p>
+  </header>
+
+  <div class="controls">
+    <div class="row">
+      <span class="label">Within</span>
+      <input type="range" id="radius" min="250" max="3000" step="250" value="1000"
+             aria-label="Search radius">
+      <span class="value" id="radiusValue">1.0 km</span>
+    </div>
+    <div class="chips" id="kindChips" role="group" aria-label="Kind of place"></div>
+    <div class="chips" id="openChips" role="group" aria-label="Opening filter"></div>
+  </div>
+
+  <div class="tabs" role="group" aria-label="View">
+    <button type="button" id="tabMap" aria-pressed="true">Map</button>
+    <button type="button" id="tabList" aria-pressed="false">List</button>
+  </div>
+
+  <div id="mapPane">
+    <div id="map"></div>
+  </div>
+
+  <div id="listPane" hidden>
+    <div class="rows" id="rows"></div>
+  </div>
+
+  <div class="status" id="status" hidden></div>
+
+  <footer>
+    Places and opening hours from <a href="https://www.openstreetmap.org/copyright"
+    target="_blank" rel="noopener">OpenStreetMap</a> contributors, queried live from your
+    device. Hours are what the venue's OSM entry says and can be out of date — call ahead
+    if it matters. Nothing you do here is sent anywhere but OpenStreetMap.
+  </footer>
+</div>
+
+<dialog id="sheet"><div class="sheet" id="sheetBody"></div></dialog>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+        integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+<script>
+"use strict";
+
+/* ==================================================================
+ * Clocktails — the real thing.
+ *
+ * Runs as an ordinary page on GitHub Pages rather than inside a sandboxed
+ * frame, which is what makes the difference: geolocation can prompt, `tel:`
+ * can dial, links can open, and the page can reach a tile server and a live
+ * data API. Venues come from OpenStreetMap via Overpass, free and keyless,
+ * queried from the visitor's own device.
+ * ================================================================== */
+
+const el = (id) => document.getElementById(id);
+const esc = (s) => String(s ?? "").replace(/[&<>"']/g,
+  (c) => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[c]));
+
+const DEFAULT_ORIGIN = { lat: 43.6487, lon: -79.3980, label: "downtown Toronto" };
+
+const KINDS = [
+  { id:"all",        label:"Everything", amenities:["bar","pub","restaurant","cafe","biergarten"] },
+  { id:"drink",      label:"Drinks",     amenities:["bar","pub","biergarten"] },
+  { id:"restaurant", label:"Food",       amenities:["restaurant"] },
+  { id:"cafe",       label:"Cafés",      amenities:["cafe"] },
+];
+
+const OPEN_FILTERS = [
+  { id:"any",  label:"Any time" },
+  { id:"now",  label:"Open now" },
+  { id:"soon", label:"Open in 2 hrs" },
+];
+
+const state = {
+  origin: null, accuracyM: null, locError: null, locating: false, manual: false,
+  radiusM: 1000, kind: "all", openFilter: "now",
+  venues: [], loading: false, dataError: null, view: "map",
+};
+
+/* ---------------- geometry ---------------- */
+const rad = (d) => (d * Math.PI) / 180;
+function haversineM(a, b) {
+  const dLat = rad(b.lat - a.lat), dLon = rad(b.lon - a.lon);
+  const h = Math.sin(dLat/2)**2 +
+    Math.cos(rad(a.lat)) * Math.cos(rad(b.lat)) * Math.sin(dLon/2)**2;
+  return 2 * 6371008.8 * Math.asin(Math.sqrt(h));
+}
+const humanDistance = (m) => m < 100 ? "steps away"
+  : m < 1000 ? `${Math.round(m/10)*10} m away` : `${(m/1000).toFixed(1)} km away`;
+
+/* ==================================================================
+ * Opening hours.
+ *
+ * OSM's `opening_hours` is a small language, and this reads the dialect bars
+ * actually use: "Mo-Fr 16:00-02:00; Sa,Su 12:00-02:00", "24/7", several ranges
+ * in a day. Anything past midnight keeps a single window with an end beyond
+ * 1440, so Friday 16:00-02:00 is one rule rather than two — which is what
+ * makes it still match at half past midnight, when it is technically Saturday
+ * but the deal someone wants is filed under Friday.
+ *
+ * Unparseable input returns null and is reported as "hours unknown" rather
+ * than guessed at. Saying nothing beats saying something wrong when the cost
+ * is a wasted trip.
+ * ================================================================== */
+const OH_DAYS = { Su:0, Mo:1, Tu:2, We:3, Th:4, Fr:5, Sa:6 };
+const DAY_NAMES = ["Su","Mo","Tu","We","Th","Fr","Sa"];
+
+function expandDays(spec) {
+  const days = new Set();
+  for (const part of spec.split(",")) {
+    const range = part.trim().match(/^(Mo|Tu|We|Th|Fr|Sa|Su)\s*-\s*(Mo|Tu|We|Th|Fr|Sa|Su)$/);
+    if (range) {
+      let day = OH_DAYS[range[1]];
+      const end = OH_DAYS[range[2]];
+      // Wraps the week: "Fr-Mo" is Fri, Sat, Sun, Mon.
+      for (let guard = 0; guard < 8; guard += 1) {
+        days.add(day);
+        if (day === end) break;
+        day = (day + 1) % 7;
+      }
+      continue;
+    }
+    const single = part.trim();
+    if (single in OH_DAYS) days.add(OH_DAYS[single]);
+  }
+  return [...days];
+}
+
+function parseOpeningHours(spec) {
+  if (!spec || typeof spec !== "string") return null;
+  const text = spec.trim();
+  if (/^24\s*\/\s*7$/.test(text)) {
+    return [{ days:[0,1,2,3,4,5,6], start:0, end:1440 }];
+  }
+
+  const rules = [];
+  for (const chunk of text.split(";")) {
+    const segment = chunk.trim();
+    if (!segment || /\b(off|closed)\b/i.test(segment)) continue;
+    // Public and school holidays need a calendar we do not have.
+    if (/\b(PH|SH)\b/.test(segment)) continue;
+
+    const dayToken =
+      "(?:Mo|Tu|We|Th|Fr|Sa|Su)(?:\\s*-\\s*(?:Mo|Tu|We|Th|Fr|Sa|Su))?";
+    const matched = segment.match(
+      new RegExp(`^((?:${dayToken})(?:\\s*,\\s*${dayToken})*)\\s+(.+)$`),
+    );
+    const days = matched ? expandDays(matched[1]) : [0,1,2,3,4,5,6];
+    const timesPart = matched ? matched[2] : segment;
+    if (days.length === 0) continue;
+
+    for (const range of timesPart.split(",")) {
+      const times = range.trim().match(/^(\d{1,2}):(\d{2})\s*-\s*(\d{1,2}):(\d{2})$/);
+      if (!times) continue;
+      const start = Number(times[1]) * 60 + Number(times[2]);
+      let end = Number(times[3]) * 60 + Number(times[4]);
+      if (end === 0) end = 1440;                 // "18:00-00:00" means midnight
+      if (end <= start) end += 1440;             // and "16:00-02:00" runs over
+      rules.push({ days, start, end });
+    }
+  }
+  return rules.length > 0 ? rules : null;
+}
+
+/**
+ * Is it open at `date`, or within `withinMin` after? null when we cannot tell.
+ *
+ * Each rule is projected onto the queried day from the day before and after,
+ * so a window that started yesterday and runs past midnight still counts.
+ */
+function openState(rules, date, withinMin = 0) {
+  if (!rules) return { known:false };
+  const day = date.getDay();
+  const minute = date.getHours() * 60 + date.getMinutes();
+  const until = minute + withinMin;
+
+  let soonest = Infinity;
+  for (const rule of rules) {
+    for (const offset of [-1440, 0, 1440]) {
+      const anchorDay = (((day + (offset === -1440 ? -1 : offset === 1440 ? 1 : 0)) % 7) + 7) % 7;
+      if (!rule.days.includes(anchorDay)) continue;
+      const start = rule.start + offset;
+      const end = rule.end + offset;
+      if (start <= minute && minute < end) {
+        return { known:true, open:true, minutesUntilClose: Math.round(end - minute) };
+      }
+      if (start > minute && start <= until) soonest = Math.min(soonest, start - minute);
+    }
+  }
+  if (soonest !== Infinity) {
+    return { known:true, open:false, minutesUntilOpen: Math.round(soonest) };
+  }
+  return { known:true, open:false };
+}
+
+/** The raw spec, tidied enough to read in the detail sheet. */
+function humanHours(spec) {
+  return String(spec).split(";").map((part) => part.trim()).filter(Boolean).join("\n");
+}
+
+/* ==================================================================
+ * Venue data — OpenStreetMap, via Overpass.
+ *
+ * Keyless and free, which is the whole point: no billing account stands
+ * between you and the map working. Overpass is a shared public service, so
+ * results are cached for an hour per area and mirrors are tried in turn
+ * rather than hammering one.
+ * ================================================================== */
+const OVERPASS_MIRRORS = [
+  "https://overpass-api.de/api/interpreter",
+  "https://overpass.kumi.systems/api/interpreter",
+  "https://overpass.private.coffee/api/interpreter",
+];
+
+const GLYPHS = {
+  bar:"🍸", pub:"🍺", biergarten:"🍺", restaurant:"🍽", cafe:"☕",
+};
+const COLOURS = { bar:"#E8A33D", pub:"#C98A2E", biergarten:"#C98A2E",
+                  restaurant:"#4FB477", cafe:"#8C9BE0" };
+
+function overpassQuery(lat, lon, radiusM) {
+  // One `nwr` covers nodes, ways and relations; `out center` collapses the
+  // larger premises to a single point for us.
+  return `[out:json][timeout:30];
+nwr["amenity"~"^(bar|pub|restaurant|cafe|biergarten)$"]["name"](around:${Math.round(radiusM)},${lat.toFixed(6)},${lon.toFixed(6)});
+out center tags 300;`;
+}
+
+const cacheKey = (lat, lon, radiusM) =>
+  `clocktails:osm:${lat.toFixed(3)}:${lon.toFixed(3)}:${Math.round(radiusM/250)}`;
+
+function readCache(key) {
+  try {
+    const raw = JSON.parse(localStorage.getItem(key) || "null");
+    if (raw && Date.now() - raw.at < 3600e3) return raw.venues;
+  } catch { /* unreadable storage is not an error worth surfacing */ }
+  return null;
+}
+
+function writeCache(key, venues) {
+  try {
+    localStorage.setItem(key, JSON.stringify({ at: Date.now(), venues }));
+  } catch { /* quota or private mode; the app works without a cache */ }
+}
+
+function toVenue(element) {
+  const tags = element.tags || {};
+  const lat = element.lat ?? element.center?.lat;
+  const lon = element.lon ?? element.center?.lon;
+  if (lat === undefined || lon === undefined || !tags.name) return null;
+
+  const house = [tags["addr:housenumber"], tags["addr:street"]].filter(Boolean).join(" ");
+  const phone = tags.phone || tags["contact:phone"] || null;
+  const website = tags.website || tags["contact:website"] || null;
+
+  return {
+    id: `${element.type}/${element.id}`,
+    name: tags.name,
+    amenity: tags.amenity,
+    lat, lon,
+    address: house || tags["addr:full"] || null,
+    phone,
+    website: website && /^https?:\/\//i.test(website) ? website
+      : website ? `https://${website}` : null,
+    cuisine: tags.cuisine ? tags.cuisine.replace(/[_;]/g, " ") : null,
+    hoursRaw: tags.opening_hours || null,
+    happyHour: tags.happy_hour || null,
+    outdoor: tags.outdoor_seating === "yes",
+  };
+}
+
+async function loadVenues() {
+  if (!state.origin) return;
+  const { lat, lon } = state.origin;
+  // Always fetch the widest radius the slider offers, so moving it is instant
+  // and does not cost the shared Overpass service another query.
+  const fetchRadius = 3000;
+  const key = cacheKey(lat, lon, fetchRadius);
+
+  const cached = readCache(key);
+  if (cached) { state.venues = cached; state.dataError = null; render(); return; }
+
+  state.loading = true; state.dataError = null; render();
+
+  const body = new URLSearchParams({ data: overpassQuery(lat, lon, fetchRadius) });
+  let lastError = null;
+
+  for (const mirror of OVERPASS_MIRRORS) {
+    try {
+      const controller = new AbortController();
+      const timer = setTimeout(() => controller.abort(), 30000);
+      const response = await fetch(mirror, {
+        method: "POST", body, signal: controller.signal,
+      });
+      clearTimeout(timer);
+      if (!response.ok) { lastError = `${mirror.split("/")[2]} returned ${response.status}`; continue; }
+
+      const payload = await response.json();
+      const venues = (payload.elements || []).map(toVenue).filter(Boolean);
+      state.venues = venues;
+      state.loading = false;
+      state.dataError = venues.length === 0 ? "no-results" : null;
+      writeCache(key, venues);
+      render();
+      return;
+    } catch (error) {
+      lastError = error.name === "AbortError"
+        ? `${mirror.split("/")[2]} timed out` : `${mirror.split("/")[2]}: ${error.message}`;
+    }
+  }
+
+  state.loading = false;
+  state.dataError = lastError || "unreachable";
+  render();
+}
+
+/* ---------------- search over what we loaded ---------------- */
+function results() {
+  if (!state.origin) return [];
+  const kind = KINDS.find((k) => k.id === state.kind);
+  const now = new Date();
+  const within = state.openFilter === "soon" ? 120 : 0;
+
+  const out = [];
+  for (const venue of state.venues) {
+    if (!kind.amenities.includes(venue.amenity)) continue;
+    const distanceM = haversineM(state.origin, venue);
+    if (distanceM > state.radiusM) continue;
+
+    const rules = parseOpeningHours(venue.hoursRaw);
+    const status = openState(rules, now, within);
+
+    if (state.openFilter !== "any") {
+      // Unknown hours are kept rather than hidden: OSM simply has no
+      // opening_hours for a lot of places, and silently dropping them would
+      // make half the neighbourhood vanish.
+      const passes = !status.known || status.open ||
+        (within > 0 && status.minutesUntilOpen !== undefined);
+      if (!passes) continue;
+    }
+
+    out.push({ ...venue, distanceM, status });
+  }
+
+  out.sort((a, b) => {
+    const rank = (v) => (v.status.open ? 0 : v.status.known ? 2 : 1);
+    return rank(a) - rank(b) || a.distanceM - b.distanceM;
+  });
+  return out;
+}
+
+function stateLabel(status) {
+  if (!status.known) return { text:"Hours unknown", colour:"var(--unknown)" };
+  if (status.open) {
+    const mins = status.minutesUntilClose;
+    if (mins !== undefined && mins <= 60) {
+      return { text:`Closes in ${mins} min`, colour:"var(--accent)" };
+    }
+    return { text:"Open now", colour:"var(--open)" };
+  }
+  if (status.minutesUntilOpen !== undefined) {
+    return { text:`Opens in ${status.minutesUntilOpen} min`, colour:"var(--accent)" };
+  }
+  return { text:"Closed", colour:"var(--closed)" };
+}
+
+/* ==================================================================
+ * The map — Leaflet over OpenStreetMap's own tiles.
+ * ================================================================== */
+let map = null, markerLayer = null, meMarker = null, accuracyCircle = null;
+
+function initMap() {
+  if (typeof L === "undefined") {
+    // The tile library is the one external dependency; if it did not load,
+    // say so plainly instead of leaving a grey rectangle.
+    el("map").innerHTML =
+      '<div style="padding:22px;color:var(--muted);font-size:13.5px">' +
+      "Couldn't load the map library. Check your connection and reload — " +
+      "the list still works." + "</div>";
+    return;
+  }
+  map = L.map("map", { zoomControl:true, attributionControl:true })
+    .setView([DEFAULT_ORIGIN.lat, DEFAULT_ORIGIN.lon], 15);
+
+  L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
+    maxZoom: 19,
+    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+  }).addTo(map);
+
+  markerLayer = L.layerGroup().addTo(map);
+
+  // Long-press, or right-click on a desktop, to correct a bad fix.
+  map.on("contextmenu", (event) => {
+    setOrigin({ lat: event.latlng.lat, lon: event.latlng.lng }, { manual:true });
+  });
+}
+
+function drawMap(list) {
+  if (!map) return;
+  markerLayer.clearLayers();
+
+  for (const venue of list) {
+    const colour = COLOURS[venue.amenity] || "var(--accent)";
+    const icon = L.divIcon({
+      className: "",
+      html: `<div class="pin" style="background:${colour}">${GLYPHS[venue.amenity] || "🍽"}</div>`,
+      iconSize: [26, 26], iconAnchor: [13, 13],
+    });
+    L.marker([venue.lat, venue.lon], { icon, title: venue.name })
+      .on("click", () => openSheet(venue))
+      .addTo(markerLayer);
+  }
+
+  if (state.origin) {
+    const here = [state.origin.lat, state.origin.lon];
+    if (meMarker) meMarker.setLatLng(here);
+    else {
+      meMarker = L.marker(here, {
+        icon: L.divIcon({ className:"", html:'<div class="me"></div>',
+                          iconSize:[16,16], iconAnchor:[8,8] }),
+        zIndexOffset: 1000, interactive: false,
+      }).addTo(map);
+    }
+
+    if (accuracyCircle) map.removeLayer(accuracyCircle);
+    if (state.accuracyM && state.accuracyM > 40) {
+      accuracyCircle = L.circle(here, {
+        radius: state.accuracyM, color:"#4285F4", weight:1,
+        fillColor:"#4285F4", fillOpacity:.12, interactive:false,
+      }).addTo(map);
+    }
+  }
+}
+
+let framedFor = null;
+function frameMap() {
+  if (!map || !state.origin) return;
+  const signature = `${state.origin.lat},${state.origin.lon},${state.radiusM}`;
+  if (framedFor === signature) return;
+  framedFor = signature;
+  map.fitBounds(
+    L.latLng(state.origin.lat, state.origin.lon).toBounds(state.radiusM * 2.2),
+    { padding:[10,10] },
+  );
+}
+
+/* ==================================================================
+ * Location.
+ * ================================================================== */
+let watchId = null;
+
+function describeLocError(error) {
+  if (error?.code === 1) {
+    return "You blocked the location request — allow it in your browser's site " +
+      "settings, or right-click the map to drop yourself a pin.";
+  }
+  if (error?.code === 2) return "Your device couldn't get a fix.";
+  if (error?.code === 3) return "Your device took too long to find a fix.";
+  return "This browser doesn't offer location.";
+}
+
+function locate() {
+  if (!navigator.geolocation) {
+    state.locError = describeLocError(null); render(); return;
+  }
+  state.locating = true; state.locError = null; render();
+
+  const options = { enableHighAccuracy:true, timeout:20000, maximumAge:0 };
+  const accept = (position) => {
+    const accuracy = position.coords.accuracy ?? Infinity;
+    // Never let a worse reading replace a better one mid-session.
+    if (state.accuracyM !== null && accuracy > state.accuracyM && !state.locating) return;
+    state.locating = false;
+    state.accuracyM = position.coords.accuracy ?? null;
+    setOrigin({ lat: position.coords.latitude, lon: position.coords.longitude });
+  };
+
+  navigator.geolocation.getCurrentPosition(
+    (position) => {
+      accept(position);
+      // The first fix is usually the coarsest; keep refining briefly.
+      if (watchId !== null) navigator.geolocation.clearWatch(watchId);
+      watchId = navigator.geolocation.watchPosition(accept, () => {}, options);
+      setTimeout(() => {
+        if (watchId !== null) { navigator.geolocation.clearWatch(watchId); watchId = null; }
+      }, 30000);
+    },
+    (error) => {
+      state.locating = false;
+      state.locError = describeLocError(error);
+      if (!state.origin) setOrigin(DEFAULT_ORIGIN, { fallback:true });
+      else render();
+    },
+    options,
+  );
+}
+
+function setOrigin(point, { manual = false, fallback = false } = {}) {
+  const moved = !state.origin ||
+    haversineM(state.origin, point) > 300;
+  state.origin = { lat: point.lat, lon: point.lon };
+  state.manual = manual;
+  state.fallback = fallback;
+  if (manual) { state.accuracyM = null; state.locError = null; }
+  framedFor = null;
+  render();
+  frameMap();
+  if (moved) void loadVenues();
+}
+
+function locationLine() {
+  if (state.locating && !state.origin) return "Finding you…";
+  if (state.manual) {
+    return 'Using the spot you picked · ' +
+      '<button type="button" id="retryLoc">use my GPS instead</button>';
+  }
+  if (state.locError) {
+    return `${esc(state.locError)} · ` +
+      '<button type="button" id="retryLoc">try again</button>';
+  }
+  if (state.fallback) {
+    return `Showing ${DEFAULT_ORIGIN.label} · ` +
+      '<button type="button" id="retryLoc">use my location</button>';
+  }
+  if (state.accuracyM === null) return "Using your location";
+  const accuracy = state.accuracyM >= 1000
+    ? `${(state.accuracyM/1000).toFixed(1)} km` : `${Math.round(state.accuracyM)} m`;
+  return `Using your location, accurate to <strong>${accuracy}</strong>` +
+    (state.accuracyM > 250 ? " — right-click the map to place yourself exactly" : "");
+}
+
+/* ==================================================================
+ * Rendering.
+ * ================================================================== */
+function render() {
+  el("where").innerHTML = locationLine();
+  const retry = el("retryLoc");
+  if (retry) retry.onclick = () => { state.manual = false; state.accuracyM = null; locate(); };
+
+  el("radiusValue").textContent = state.radiusM < 1000
+    ? `${state.radiusM} m` : `${(state.radiusM/1000).toFixed(1)} km`;
+
+  const list = results();
+  drawMap(list);
+  renderRows(list);
+  renderStatus(list);
+}
+
+function renderStatus(list) {
+  const status = el("status");
+  const show = (html) => { status.hidden = false; status.innerHTML = html; };
+
+  if (state.loading) return show("Looking up real places around you from OpenStreetMap…");
+
+  if (state.dataError && state.dataError !== "no-results") {
+    return show(
+      `<strong>Couldn't reach OpenStreetMap.</strong> ${esc(state.dataError)}. ` +
+      `<button type="button" id="retryData">Try again</button>`,
+    );
+  }
+  if (state.venues.length === 0) {
+    return show("No places found here. Try moving the map and dropping a pin, or widen the radius.");
+  }
+  if (list.length === 0) {
+    return show(
+      `<strong>${state.venues.length} places loaded</strong>, but none match this filter. ` +
+      `Widen the radius or switch to “Any time”.`,
+    );
+  }
+  status.hidden = true;
+}
+
+function renderRows(list) {
+  el("rows").innerHTML = list.map((venue) => {
+    const label = stateLabel(venue.status);
+    const sub = [venue.cuisine, venue.address].filter(Boolean).join(" · ") || venue.amenity;
+    return `<button class="venue" data-id="${esc(venue.id)}">
+      <span class="glyph">${GLYPHS[venue.amenity] || "🍽"}</span>
+      <span class="body">
+        <span class="name">${esc(venue.name)}</span>
+        <span class="sub">${esc(sub)}</span>
+      </span>
+      <span class="right">
+        <span class="state" style="color:${label.colour}">${esc(label.text)}</span>
+        <span class="dist">${esc(humanDistance(venue.distanceM).replace(/ away$/, ""))}</span>
+      </span>
+    </button>`;
+  }).join("");
+
+  el("rows").querySelectorAll(".venue").forEach((node) => {
+    node.onclick = () => {
+      const venue = list.find((v) => v.id === node.dataset.id);
+      if (venue) openSheet(venue);
+    };
+  });
+}
+
+function openSheet(venue) {
+  const distance = venue.distanceM ?? haversineM(state.origin, venue);
+  const label = stateLabel(venue.status ?? openState(parseOpeningHours(venue.hoursRaw), new Date()));
+  const directions =
+    `https://www.google.com/maps/dir/?api=1&destination=${venue.lat},${venue.lon}` +
+    `&destination_place_id=&travelmode=walking`;
+
+  el("sheetBody").innerHTML = `
+    <h2>${esc(venue.name)}</h2>
+    <p class="addr">${esc([venue.address, venue.cuisine].filter(Boolean).join(" · ")
+      || venue.amenity)}</p>
+    <p class="addr" style="color:${label.colour};font-weight:700">${esc(label.text)}
+      · ${esc(humanDistance(distance))}</p>
+    <div class="rule"></div>
+    <dl class="kv">
+      ${venue.phone ? `<dt>Phone</dt><dd><a class="tel" href="tel:${esc(venue.phone.replace(/[^\d+]/g,""))}">${esc(venue.phone)}</a></dd>` : ""}
+      ${venue.hoursRaw ? `<dt>Hours</dt><dd class="hours">${esc(humanHours(venue.hoursRaw))}</dd>` : ""}
+      ${venue.happyHour ? `<dt>Happy hour</dt><dd>${esc(venue.happyHour)}</dd>` : ""}
+      ${venue.outdoor ? `<dt>Patio</dt><dd>Yes</dd>` : ""}
+    </dl>
+    ${!venue.phone && !venue.hoursRaw
+      ? '<p class="addr">OpenStreetMap has no phone or hours for this one yet.</p>' : ""}
+    <div class="actions">
+      <a class="primary" href="${directions}" target="_blank" rel="noopener">Directions</a>
+      ${venue.phone ? `<a href="tel:${esc(venue.phone.replace(/[^\d+]/g,""))}">Call</a>` : ""}
+      ${venue.website ? `<a href="${esc(venue.website)}" target="_blank" rel="noopener">Website</a>` : ""}
+      <button type="button" id="closeSheet">Close</button>
+    </div>
+    <p class="addr" style="margin-top:14px;font-size:12px">
+      <a href="https://www.openstreetmap.org/${esc(venue.id)}" target="_blank" rel="noopener"
+         style="color:var(--faint)">Fix this listing on OpenStreetMap</a></p>`;
+
+  el("sheet").showModal();
+  el("closeSheet").onclick = () => el("sheet").close();
+}
+
+/* ---------------- controls ---------------- */
+function buildChips(hostId, choices, current, onPick) {
+  const host = el(hostId);
+  host.innerHTML = choices.map((choice) =>
+    `<button type="button" class="chip" data-id="${choice.id}"
+       aria-pressed="${choice.id === current}">${esc(choice.label)}</button>`).join("");
+  host.querySelectorAll(".chip").forEach((node) => {
+    node.onclick = () => {
+      onPick(node.dataset.id);
+      host.querySelectorAll(".chip")
+        .forEach((other) => other.setAttribute("aria-pressed", String(other === node)));
+      render();
+    };
+  });
+}
+
+el("radius").oninput = () => {
+  state.radiusM = Number(el("radius").value);
+  framedFor = null;
+  render();
+  frameMap();
+};
+
+function setView(view) {
+  state.view = view;
+  el("mapPane").hidden = view !== "map";
+  el("listPane").hidden = view !== "list";
+  el("tabMap").setAttribute("aria-pressed", String(view === "map"));
+  el("tabList").setAttribute("aria-pressed", String(view === "list"));
+  // Leaflet measures the container on creation; it has to be told when the
+  // element goes from hidden to visible or it renders a quarter of a map.
+  if (view === "map" && map) {
+    requestAnimationFrame(() => { map.invalidateSize(); frameMap(); });
+  }
+}
+el("tabMap").onclick = () => setView("map");
+el("tabList").onclick = () => setView("list");
+
+document.addEventListener("click", (event) => {
+  if (event.target?.id === "retryData") void loadVenues();
+});
+
+/* ---------------- go ---------------- */
+buildChips("kindChips", KINDS, state.kind, (id) => { state.kind = id; });
+buildChips("openChips", OPEN_FILTERS, state.openFilter, (id) => { state.openFilter = id; });
+initMap();
+setView("map");
+render();
+locate();
+// Overpass is a shared public service, so don't query downtown and then query
+// again the moment GPS lands. Wait a beat; the error path falls back sooner.
+setTimeout(() => {
+  if (!state.origin) setOrigin(DEFAULT_ORIGIN, { fallback:true });
+}, 4000);
+</script>
+</body>
+</html>
