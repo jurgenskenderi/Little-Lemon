@@ -1,0 +1,21 @@
+{
+  "name": "little-lemon",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Find happy hour deals near you, filtered by distance and by when you actually want to go out.",
+  "workspaces": [
+    "server",
+    "mobile"
+  ],
+  "scripts": {
+    "dev": "npm run dev --workspace server",
+    "test": "npm run test --workspace server",
+    "typecheck": "npm run typecheck --workspace server && npm run typecheck --workspace mobile",
+    "seed": "npm run seed --workspace server",
+    "scrape": "npm run scrape --workspace server",
+    "mobile": "npm run start --workspace mobile"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

@@ -1,0 +1,37 @@
+{
+  "expo": {
+    "name": "Little Lemon",
+    "slug": "little-lemon",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "automatic",
+    "scheme": "littlelemon",
+    "newArchEnabled": true,
+    "splash": {
+      "resizeMode": "contain",
+      "backgroundColor": "#12100E"
+    },
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.littlelemon.app",
+      "infoPlist": {
+        "NSLocationWhenInUseUsageDescription": "Little Lemon uses your location to find happy hour deals near you. Your location is used on the device to search for nearby venues and is not stored."
+      }
+    },
+    "android": {
+      "package": "com.littlelemon.app",
+      "adaptiveIcon": {
+        "backgroundColor": "#12100E"
+      },
+      "permissions": ["ACCESS_COARSE_LOCATION", "ACCESS_FINE_LOCATION"]
+    },
+    "plugins": [
+      [
+        "expo-location",
+        {
+          "locationWhenInUsePermission": "Little Lemon uses your location to find happy hour deals near you."
+        }
+      ]
+    ]
+  }
+}

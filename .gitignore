@@ -1,0 +1,22 @@
+node_modules/
+dist/
+build/
+*.log
+.DS_Store
+
+# local env + secrets
+.env
+.env.local
+
+# sqlite databases and scraper cache
+*.db
+*.db-journal
+*.db-wal
+*.db-shm
+server/data/
+server/.cache/
+
+# expo
+.expo/
+.expo-shared/
+web-build/

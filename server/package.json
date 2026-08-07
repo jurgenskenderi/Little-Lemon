@@ -1,0 +1,25 @@
+{
+  "name": "@little-lemon/server",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "node --experimental-strip-types --watch src/index.ts",
+    "start": "node --experimental-strip-types src/index.ts",
+    "seed": "node --experimental-strip-types src/seed/seed.ts",
+    "scrape": "node --experimental-strip-types src/scraper/cli.ts",
+    "test": "node --experimental-strip-types --test test/*.test.ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.115.0",
+    "better-sqlite3": "^11.7.0",
+    "fastify": "^5.2.0",
+    "zod": "^4.4.3"
+  },
+  "devDependencies": {
+    "@types/better-sqlite3": "^7.6.12",
+    "@types/node": "^22.10.5",
+    "typescript": "^5.7.3"
+  }
+}

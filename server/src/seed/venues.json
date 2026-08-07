@@ -1,0 +1,279 @@
+{
+  "note": "Fictional venues for local development and tests. Coordinates are real Seattle locations, but the businesses and their deals are invented so nothing here misrepresents a real establishment.",
+  "timeZone": "America/Los_Angeles",
+  "venues": [
+    {
+      "id": "ven_seed_brass_lantern",
+      "name": "The Brass Lantern",
+      "address": "1420 Pike St",
+      "city": "Seattle",
+      "region": "WA",
+      "lat": 47.6142,
+      "lon": -122.3283,
+      "website": "https://example.com/brass-lantern",
+      "phone": "+1-206-555-0118",
+      "deals": [
+        {
+          "title": "Happy Hour",
+          "description": "$5 drafts, $7 well cocktails, half off all appetizers.",
+          "priceText": "$5 drafts",
+          "category": "both",
+          "finePrint": "Bar area only.",
+          "confidence": 0.92,
+          "days": [1, 2, 3, 4, 5],
+          "startMin": 960,
+          "endMin": 1080
+        },
+        {
+          "title": "Late Night Happy Hour",
+          "description": "The full happy hour menu returns after 10pm, running until close.",
+          "priceText": "$5 drafts",
+          "category": "both",
+          "finePrint": null,
+          "confidence": 0.78,
+          "days": [4, 5, 6],
+          "startMin": 1320,
+          "endMin": 1560
+        }
+      ]
+    },
+    {
+      "id": "ven_seed_pine_and_third",
+      "name": "Pine & Third",
+      "address": "301 Pine St",
+      "city": "Seattle",
+      "region": "WA",
+      "lat": 47.6108,
+      "lon": -122.3389,
+      "website": "https://example.com/pine-and-third",
+      "phone": "+1-206-555-0142",
+      "deals": [
+        {
+          "title": "Oyster Hour",
+          "description": "$2 oysters and $8 sparkling wine by the glass.",
+          "priceText": "$2 oysters",
+          "category": "both",
+          "finePrint": "While supplies last.",
+          "confidence": 0.88,
+          "days": [2, 3, 4, 5, 6],
+          "startMin": 930,
+          "endMin": 1050
+        }
+      ]
+    },
+    {
+      "id": "ven_seed_harbor_house",
+      "name": "Harbor House Tavern",
+      "address": "88 Alaskan Way",
+      "city": "Seattle",
+      "region": "WA",
+      "lat": 47.6045,
+      "lon": -122.3421,
+      "website": "https://example.com/harbor-house",
+      "phone": "+1-206-555-0167",
+      "deals": [
+        {
+          "title": "Happy Hour",
+          "description": "Half price pitchers and $6 fish tacos, every day.",
+          "priceText": "Half price pitchers",
+          "category": "both",
+          "finePrint": null,
+          "confidence": 0.85,
+          "days": [0, 1, 2, 3, 4, 5, 6],
+          "startMin": 900,
+          "endMin": 1080
+        }
+      ]
+    },
+    {
+      "id": "ven_seed_copper_kettle",
+      "name": "Copper Kettle Bar",
+      "address": "915 E Pike St",
+      "city": "Seattle",
+      "region": "WA",
+      "lat": 47.6141,
+      "lon": -122.3187,
+      "website": "https://example.com/copper-kettle",
+      "phone": "+1-206-555-0193",
+      "deals": [
+        {
+          "title": "Industry Night",
+          "description": "25% off the entire menu for service industry workers.",
+          "priceText": "25% off",
+          "category": "both",
+          "finePrint": "Industry ID required.",
+          "confidence": 0.71,
+          "days": [1],
+          "startMin": 1200,
+          "endMin": 1500
+        },
+        {
+          "title": "Happy Hour",
+          "description": "$6 house cocktails and $4 beers.",
+          "priceText": "$6 cocktails",
+          "category": "drink",
+          "finePrint": null,
+          "confidence": 0.9,
+          "days": [2, 3, 4, 5],
+          "startMin": 1020,
+          "endMin": 1140
+        }
+      ]
+    },
+    {
+      "id": "ven_seed_marigold",
+      "name": "Marigold Wine Room",
+      "address": "612 Union St",
+      "city": "Seattle",
+      "region": "WA",
+      "lat": 47.6096,
+      "lon": -122.3336,
+      "website": "https://example.com/marigold",
+      "phone": "+1-206-555-0121",
+      "deals": [
+        {
+          "title": "Bottle Hour",
+          "description": "$20 off every bottle on the list, plus complimentary bar snacks.",
+          "priceText": "$20 off bottles",
+          "category": "drink",
+          "finePrint": "Excludes reserve list.",
+          "confidence": 0.83,
+          "days": [3, 4],
+          "startMin": 1020,
+          "endMin": 1170
+        }
+      ]
+    },
+    {
+      "id": "ven_seed_ninth_ward",
+      "name": "The Ninth Ward",
+      "address": "2100 9th Ave",
+      "city": "Seattle",
+      "region": "WA",
+      "lat": 47.6172,
+      "lon": -122.3399,
+      "website": "https://example.com/ninth-ward",
+      "phone": "+1-206-555-0155",
+      "deals": [
+        {
+          "title": "Weekend Brunch Deal",
+          "description": "$9 bottomless drip coffee and $12 brunch cocktails.",
+          "priceText": "$12 brunch cocktails",
+          "category": "both",
+          "finePrint": "Two hour limit on bottomless.",
+          "confidence": 0.8,
+          "days": [0, 6],
+          "startMin": 600,
+          "endMin": 840
+        },
+        {
+          "title": "Late Pour",
+          "description": "Half off the back bar from 11pm until 1am.",
+          "priceText": "Half off",
+          "category": "drink",
+          "finePrint": null,
+          "confidence": 0.64,
+          "days": [5, 6],
+          "startMin": 1380,
+          "endMin": 1500
+        }
+      ]
+    },
+    {
+      "id": "ven_seed_elm_street",
+      "name": "Elm Street Social",
+      "address": "1512 Broadway",
+      "city": "Seattle",
+      "region": "WA",
+      "lat": 47.6135,
+      "lon": -122.3211,
+      "website": "https://example.com/elm-street-social",
+      "phone": "+1-206-555-0176",
+      "deals": [
+        {
+          "title": "Taco Tuesday",
+          "description": "$2 tacos all night and $5 margaritas.",
+          "priceText": "$2 tacos",
+          "category": "both",
+          "finePrint": null,
+          "confidence": 0.94,
+          "days": [2],
+          "startMin": 960,
+          "endMin": 1320
+        }
+      ]
+    },
+    {
+      "id": "ven_seed_north_dock",
+      "name": "North Dock Brewing",
+      "address": "4020 Leary Way NW",
+      "city": "Seattle",
+      "region": "WA",
+      "lat": 47.6589,
+      "lon": -122.3653,
+      "website": "https://example.com/north-dock",
+      "phone": "+1-206-555-0188",
+      "deals": [
+        {
+          "title": "Taproom Happy Hour",
+          "description": "$4 pints of anything on the house list.",
+          "priceText": "$4 pints",
+          "category": "drink",
+          "finePrint": null,
+          "confidence": 0.87,
+          "days": [1, 2, 3, 4, 5],
+          "startMin": 900,
+          "endMin": 1020
+        }
+      ]
+    },
+    {
+      "id": "ven_seed_glasshouse",
+      "name": "Glasshouse Kitchen",
+      "address": "220 Boren Ave N",
+      "city": "Seattle",
+      "region": "WA",
+      "lat": 47.6222,
+      "lon": -122.3364,
+      "website": "https://example.com/glasshouse",
+      "phone": "+1-206-555-0134",
+      "deals": [
+        {
+          "title": "Early Bird Prix Fixe",
+          "description": "Three courses for $35 before 6pm.",
+          "priceText": "$35 prix fixe",
+          "category": "food",
+          "finePrint": "Seated by 5:45pm.",
+          "confidence": 0.76,
+          "days": [0, 1, 2, 3, 4],
+          "startMin": 990,
+          "endMin": 1080
+        }
+      ]
+    },
+    {
+      "id": "ven_seed_rainier_room",
+      "name": "The Rainier Room",
+      "address": "1201 1st Ave S",
+      "city": "Seattle",
+      "region": "WA",
+      "lat": 47.5931,
+      "lon": -122.3327,
+      "website": "https://example.com/rainier-room",
+      "phone": "+1-206-555-0109",
+      "deals": [
+        {
+          "title": "Game Day Special",
+          "description": "$3 domestic drafts and $8 nacho platters on game days.",
+          "priceText": "$3 drafts",
+          "category": "both",
+          "finePrint": "Home games only.",
+          "confidence": 0.58,
+          "days": [0, 6],
+          "startMin": 720,
+          "endMin": 1200
+        }
+      ]
+    }
+  ]
+}
