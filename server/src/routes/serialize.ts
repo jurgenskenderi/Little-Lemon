@@ -39,6 +39,7 @@ export function serializeDeal(deal: Deal) {
     sourceUrl: deal.sourceUrl,
     extractedBy: deal.extractedBy,
     partner: deal.partner,
+    imageUrl: deal.imageUrl,
     lastVerifiedAt: deal.lastVerifiedAt,
     windows: deal.windows.map(serializeWindow),
   };

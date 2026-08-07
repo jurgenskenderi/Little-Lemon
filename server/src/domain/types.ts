@@ -33,6 +33,8 @@ export interface Deal {
   extractedBy: "heuristic" | "model" | "seed" | "manual";
   /** Agreed directly with the venue rather than scraped. Ranks first. */
   partner: boolean;
+  /** Photo from the venue's own page, if one could be found. */
+  imageUrl: string | null;
   windows: DealWindow[];
   lastVerifiedAt: string | null;
 }

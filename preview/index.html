@@ -89,9 +89,21 @@
   .toggle button[aria-pressed="true"] { background:var(--accent); color:var(--on-accent); }
   .toggle button:focus-visible { outline:2px solid var(--accent); outline-offset:-2px; }
 
+
+  /* Deal artwork. The preview cannot load a venue's real photo — a sandboxed
+     page blocks external hosts — so it draws the dish or drink instead. The
+     shipping app shows the photo scraped from the venue's own page. */
+  .art { flex:0 0 auto; display:grid; place-items:center; border-radius:9px;
+         border:1px solid var(--border); overflow:hidden; }
+  .art svg { width:64%; height:64%; }
+  .art-row { width:58px; height:58px; }
+  .art-card { width:44px; height:44px; }
+  .art-hero { width:100%; height:120px; border-radius:12px; margin-bottom:16px; }
+  .art-hero svg { width:auto; height:72px; }
+
   /* ---------- list ---------- */
   .rows { display:flex; flex-direction:column; gap:1px; }
-  .row { display:grid; grid-template-columns:3px 1fr auto; gap:14px; align-items:center;
+  .row { display:grid; grid-template-columns:3px auto 1fr auto; gap:12px; align-items:center;
          width:100%; text-align:left; padding:14px 12px 14px 0; background:var(--surface);
          border:0; border-radius:10px; color:inherit; font:inherit; cursor:pointer;
          animation:rise .28s ease both; }
@@ -100,7 +112,7 @@
   @keyframes rise { from{opacity:0;transform:translateY(4px)} to{opacity:1;transform:none} }
   @media (prefers-reduced-motion:reduce){ .row{animation:none} }
   .stripe { align-self:stretch; border-radius:10px 0 0 10px; }
-  .row-main { min-width:0; padding-left:11px; }
+  .row-main { min-width:0; }
   .venue-line { display:flex; align-items:center; gap:7px; }
   .venue { font-family:var(--display); text-transform:uppercase; letter-spacing:.09em;
            font-size:12px; color:var(--muted); font-weight:600; white-space:nowrap;
@@ -153,6 +165,13 @@
   @keyframes drop { from{opacity:0;transform:translate(-50%,-8px)} to{opacity:1;transform:translate(-50%,0)} }
   @media (prefers-reduced-motion:reduce){ .search-area{animation:none} }
 
+  .placing { position:absolute; top:10px; left:50%; transform:translateX(-50%);
+    display:flex; align-items:center; gap:12px; padding:9px 12px 9px 18px;
+    border-radius:999px; background:var(--accent); color:var(--on-accent);
+    font-size:13px; font-weight:700; box-shadow:0 4px 14px rgba(0,0,0,.28);
+    white-space:nowrap; }
+  .placing button { border:0; background:rgba(0,0,0,.18); color:inherit; font:inherit;
+    font-size:12px; padding:4px 10px; border-radius:999px; cursor:pointer; }
   .scalebar { position:absolute; left:12px; bottom:14px; display:flex; align-items:center;
               gap:6px; pointer-events:none; }
   .scalebar .bar { height:3px; background:var(--muted); opacity:.65; border-radius:2px; }
@@ -209,8 +228,9 @@
     <div class="notice">
       <strong>Preview build with sample data.</strong> Venue names and deals here are
       invented — real coordinates, fictional businesses — so nothing misrepresents an
-      actual restaurant. The live app reads the same API, filled by the crawler and
-      your partner deals.
+      actual restaurant. Pictures here are drawings of the dish or drink, not photos:
+      a sandboxed page cannot load a venue's images. The shipping app shows the real
+      photo scraped from each venue's own page.
     </div>
   </header>
 
@@ -249,6 +269,10 @@
       <canvas id="map" tabindex="0" role="application"
               aria-label="Map of nearby deals. Drag to pan, pinch or scroll to zoom."></canvas>
       <button type="button" class="search-area" id="searchArea" hidden>Search this area</button>
+      <div class="placing" id="placingBanner" hidden>
+        Tap where you actually are
+        <button type="button" id="cancelPlacing">Cancel</button>
+      </div>
       <div class="scalebar"><div class="bar" id="scaleBar"></div><span id="scaleText"></span></div>
       <div class="fabs">
         <div class="zoom-stack">
@@ -265,7 +289,9 @@
       <span class="key"><i style="background:var(--later)"></i>Later</span>
       <span class="key" style="margin-left:auto" id="mapCount"></span>
     </div>
-    <p class="map-tip">Drag to pan, pinch or scroll to zoom. Tap a pin or swipe the cards.</p>
+    <p class="map-tip">Drag to pan, pinch or scroll to zoom. Tap a pin or swipe the cards.
+      If the blue circle is nowhere near you, use <em>set it on the map</em> above to pin
+      your real spot.</p>
   </div>
 
   <footer>
@@ -419,9 +445,19 @@ const CATEGORIES = [
 ];
 
 const state = {
-  origin:null, deviceOrigin:null, pannedTo:null, usingFallback:true,
-  radiusKm:2, time:TIME_CHOICES[0], category:null, view:"list", selected:null,
+  origin:null, deviceOrigin:null, pannedTo:null, manualHome:null, usingFallback:true,
+  accuracyM:null, radiusKm:2, time:TIME_CHOICES[0], category:null,
+  view:"list", selected:null, placing:false,
 };
+
+/** A pin the user dropped outlives a reload — they corrected us once already. */
+const SAVED_HOME = "clocktails.home";
+try {
+  const saved = JSON.parse(localStorage.getItem(SAVED_HOME) || "null");
+  if (saved && Number.isFinite(saved.lat) && Number.isFinite(saved.lon)) {
+    state.manualHome = saved;
+  }
+} catch { /* ignore unreadable storage */ }
 
 /* ---------------- search ---------------- */
 function search() {
@@ -461,6 +497,56 @@ function trustNote(deal) {
 const el = (id) => document.getElementById(id);
 const esc = (s) => String(s ?? "").replace(/[&<>"']/g,(c)=>
   ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+
+
+/* ---------------- deal artwork ----------------
+ * Chosen from what the deal actually says, not just its category, so a
+ * "$1.75 oysters" deal shows oysters rather than a generic plate.
+ */
+const ART = {
+  beer: '<svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 16h20l-2 24H16z"/><path d="M34 20h5a3 3 0 0 1 3 3v6a3 3 0 0 1-3 3h-4"/><path d="M14 16c0-4 3-6 6-6 1-3 7-4 9-1 4-1 7 2 5 7"/><path d="M21 25v9M27 25v9"/></svg>',
+  cocktail: '<svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 12h30L24 28z"/><path d="M24 28v12"/><path d="M17 40h14"/><circle cx="32" cy="15" r="2.5"/></svg>',
+  wine: '<svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 8h18v9a9 9 0 0 1-18 0z"/><path d="M24 26v12"/><path d="M17 40h14"/></svg>',
+  fizz: '<svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 8h8l-1 16a3 3 0 0 1-6 0z"/><path d="M17 26v12M13 40h8"/><path d="M27 8h8l-1 16a3 3 0 0 1-6 0z"/><path d="M31 26v12M27 40h8"/></svg>',
+  oyster: '<svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 30c0-9 8-16 18-16s18 7 18 16z"/><path d="M6 30h36"/><path d="M15 30c2-6 5-9 9-9s7 3 9 9"/><path d="M24 21v9"/></svg>',
+  taco: '<svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 32a18 18 0 0 1 36 0z"/><path d="M6 32h36"/><path d="M14 26c3-2 5-2 8 0M26 24c3-2 5-1 8 1"/></svg>',
+  burger: '<svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 20a16 8 0 0 1 32 0z"/><path d="M8 26h32"/><path d="M9 32h30a8 8 0 0 1-8 6H17a8 8 0 0 1-8-6z"/></svg>',
+  plate: '<svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="24" cy="24" r="15"/><circle cx="24" cy="24" r="8"/></svg>',
+  whisky: '<svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 12h24l-3 26H15z"/><path d="M13 24h22"/><circle cx="24" cy="30" r="3"/></svg>',
+};
+
+const ART_TINTS = {
+  beer:"#2C2415", cocktail:"#22262E", wine:"#2B1D22", fizz:"#26221A",
+  oyster:"#1E2E33", taco:"#2E241A", burger:"#2B221A", plate:"#252A26", whisky:"#26221C",
+};
+const ART_TINTS_LIGHT = {
+  beer:"#F6EEDA", cocktail:"#E9EDF4", wine:"#F6E6EA", fizz:"#F6F0E0",
+  oyster:"#E4EEF1", taco:"#F6EADA", burger:"#F6E9DC", plate:"#E9F0E9", whisky:"#F3EADD",
+};
+
+function artKey(deal) {
+  const text = `${deal.t} ${deal.p ?? ""} ${deal.desc ?? ""}`.toLowerCase();
+  if (/oyster|shuck|seafood/.test(text)) return "oyster";
+  if (/taco|margarita|nacho|burrito/.test(text)) return "taco";
+  if (/wine|bottle|sangria/.test(text)) return "wine";
+  if (/prosecco|sparkling|mimosa|spritz|brunch|bubbles/.test(text)) return "fizz";
+  if (/negroni|martini|cocktail|highball/.test(text)) return "cocktail";
+  if (/pint|draft|draught|beer|lager|ale|cider|taproom|brew/.test(text)) return "beer";
+  if (/wing|burger|slider|fries|pizza|pretzel|nacho/.test(text)) return "burger";
+  if (/whisk|rye|scotch|bourbon|shot/.test(text)) return "whisky";
+  if (/meze|plate|prix fixe|supper|course|snack|bite|focaccia/.test(text)) return "plate";
+  return deal.cat === "food" ? "plate" : "cocktail";
+}
+
+function artHtml(deal, size) {
+  const key = artKey(deal);
+  const light = document.documentElement.dataset.theme === "light" ||
+    (!document.documentElement.dataset.theme &&
+      matchMedia("(prefers-color-scheme: light)").matches);
+  const tint = (light ? ART_TINTS_LIGHT : ART_TINTS)[key];
+  return `<span class="art art-${size}" style="background:${tint};color:var(--accent)"
+            aria-hidden="true">${ART[key]}</span>`;
+}
 
 let current = [];
 
@@ -649,6 +735,17 @@ const MapView = (() => {
       }
     }
 
+    // How sure the browser is. Only drawn when the uncertainty is big enough
+    // to matter, so a good fix does not show a distracting blob.
+    if (state.accuracyM && state.accuracyM > 40) {
+      const accuracyPx = (state.accuracyM / 1000) * pxPerKm;
+      if (accuracyPx > 6) {
+        ctx.beginPath(); ctx.arc(home.x, home.y, accuracyPx, 0, Math.PI*2);
+        ctx.fillStyle = "rgba(120,160,255,.13)"; ctx.fill();
+        ctx.lineWidth = 1; ctx.strokeStyle = "rgba(120,160,255,.55)"; ctx.stroke();
+      }
+    }
+
     // You, on top of everything.
     ctx.beginPath(); ctx.arc(home.x, home.y, 16, 0, Math.PI*2);
     ctx.fillStyle = css("--accent"); ctx.globalAlpha = .16; ctx.fill(); ctx.globalAlpha = 1;
@@ -735,6 +832,15 @@ const MapView = (() => {
     endPointer(event);
     if (wasDrag) return;
 
+    if (state.placing) {
+      const point = toLatLon(fromScreen({
+        x: event.clientX - rect.left, y: event.clientY - rect.top,
+      }));
+      el("placingBanner").hidden = true;
+      setHome(point);
+      return;
+    }
+
     const hit = pick(event.clientX - rect.left, event.clientY - rect.top);
     if (!hit) return;
     if (hit.items.length > 1) {
@@ -785,7 +891,7 @@ const MapView = (() => {
 
   /** Offer to re-search once the view has drifted meaningfully off centre. */
   function updateSearchArea() {
-    if (!state.origin) return;
+    if (!state.origin || state.placing) return;
     const home = toScreen(toWorld(state.origin));
     const drift = Math.hypot(home.x - width/2, home.y - height/2);
     el("searchArea").hidden = drift < Math.min(width, height) * 0.22;
@@ -806,7 +912,8 @@ const MapView = (() => {
   new MutationObserver(() => scheduleDraw())
     .observe(document.documentElement, { attributes:true, attributeFilter:["data-theme"] });
 
-  return { resize, draw: scheduleDraw, frameRadius, zoomBy, centreOn, centreLatLon, updateSearchArea };
+  return { resize, draw: scheduleDraw, frameRadius, zoomBy, centreOn, centreLatLon,
+           updateSearchArea, toLatLon, fromScreen };
 })();
 
 /* ---------------- selection, shared by map and carousel ---------------- */
@@ -833,18 +940,51 @@ function render() {
   el("radiusValue").textContent = state.radiusKm < 1 ? `${state.radiusKm*1000} m` : `${state.radiusKm} km`;
   el("timeHint").textContent = state.time.hint(state.time.at(new Date()));
 
-  el("where").innerHTML = state.pannedTo
-    ? 'Searching the area you picked · <button type="button" id="resetArea">back to my location</button>'
-    : state.usingFallback
-      ? `Showing ${DEFAULT_ORIGIN.label} · <button type="button" id="retryLoc">use my location</button>`
-      : "Using your current location";
+  el("where").innerHTML = locationLine();
   const reset = el("resetArea"); if (reset) reset.onclick = () => { state.pannedTo = null; syncOrigin(true); };
-  const retry = el("retryLoc"); if (retry) retry.onclick = locate;
+  const retry = el("retryLoc"); if (retry) retry.onclick = () => {
+    try { localStorage.removeItem(SAVED_HOME); } catch { /* ignore */ }
+    state.manualHome = null; state.accuracyM = null; locate();
+  };
+  const fix = el("fixLoc"); if (fix) fix.onclick = () => { setView("map"); startPlacing(); };
 
   renderRows();
   renderCarousel();
   el("mapCount").textContent = `${current.length} within ${state.radiusKm} km`;
   MapView.draw();
+}
+
+/**
+ * Where results are measured from, in plain words. Accuracy is stated rather
+ * than hidden: "within 2 km" is meaningless if the centre is itself a
+ * kilometre out, and only the user can correct that.
+ */
+function locationLine() {
+  const pin = '<button type="button" id="fixLoc">set it on the map</button>';
+  if (state.pannedTo) {
+    return 'Searching the area you picked · ' +
+      '<button type="button" id="resetArea">back to my location</button>';
+  }
+  if (state.manualHome) {
+    return `Using the spot you pinned · <button type="button" id="retryLoc">use my GPS instead</button>`;
+  }
+  if (state.usingFallback) {
+    return `Showing ${DEFAULT_ORIGIN.label} · ` +
+      '<button type="button" id="retryLoc">use my location</button> · ' + pin;
+  }
+  if (state.accuracyM === null) return "Using your current location";
+  if (state.accuracyM > 250) {
+    return `Your location is only accurate to ${formatAccuracy(state.accuracyM)} — ` + pin;
+  }
+  return `Using your location, accurate to ${formatAccuracy(state.accuracyM)}`;
+}
+
+const formatAccuracy = (m) => m >= 1000 ? `${(m/1000).toFixed(1)} km` : `${Math.round(m)} m`;
+
+function startPlacing() {
+  state.placing = true;
+  el("placingBanner").hidden = false;
+  el("searchArea").hidden = true;
 }
 
 function renderRows() {
@@ -859,6 +999,7 @@ function renderRows() {
     const s = tone(r);
     return `<button class="row" data-id="${esc(r.id)}" style="animation-delay:${Math.min(i*24,240)}ms">
       <span class="stripe" style="background:${s.c}"></span>
+      ${artHtml(r.deal, "row")}
       <span class="row-main">
         <span class="venue-line">${r.deal.partner ? '<span class="flag">PARTNER</span>' : ""}
           <span class="venue">${esc(r.venue.n)}</span></span>
@@ -881,10 +1022,14 @@ function renderCarousel() {
   host.innerHTML = current.map((r) => {
     const s = tone(r);
     return `<button class="card" data-id="${esc(r.id)}" data-active="false">
+      <div style="display:flex;gap:10px;align-items:flex-start">
+      ${artHtml(r.deal, "card")}
+      <div style="min-width:0;flex:1">
       <span class="venue-line">${r.deal.partner ? '<span class="flag">PARTNER</span>' : ""}
         <span class="venue">${esc(r.venue.n)}</span></span>
       <div class="deal-title">${esc(r.deal.t)}</div>
       ${r.deal.p ? `<div class="price">${esc(r.deal.p)}</div>` : ""}
+      </div></div>
       <div class="card-foot">
         <span class="countdown" style="color:${s.c}">${esc(s.text)}</span>
         <span class="dist">${esc(humanDistance(r.km))}</span>
@@ -923,6 +1068,7 @@ function openSheet(r) {
   const s = tone(r), note = trustNote(r.deal);
   const maps = `https://maps.google.com/?q=${encodeURIComponent(r.venue.n)}@${r.venue.lat},${r.venue.lon}`;
   el("sheetBody").innerHTML = `
+    ${artHtml(r.deal, "hero")}
     <h2>${esc(r.venue.n)}</h2>
     <p class="addr">${esc([r.venue.a, r.venue.c, "ON"].filter(Boolean).join(", "))}</p>
     <p class="addr mono">${esc(humanDistance(r.km))} away</p>
@@ -996,6 +1142,11 @@ el("recentre").onclick = () => {
   state.pannedTo = null;
   syncOrigin(true);
 };
+el("cancelPlacing").onclick = () => {
+  state.placing = false;
+  el("placingBanner").hidden = true;
+  MapView.updateSearchArea();
+};
 el("searchArea").onclick = () => {
   state.pannedTo = MapView.centreLatLon();
   el("searchArea").hidden = true;
@@ -1006,24 +1157,66 @@ el("sheet").addEventListener("click", (event) => {
 });
 
 function syncOrigin(reframe) {
-  state.origin = state.pannedTo ?? state.deviceOrigin ?? DEFAULT_ORIGIN;
+  state.origin = state.pannedTo ?? state.manualHome ?? state.deviceOrigin ?? DEFAULT_ORIGIN;
   render();
   if (reframe !== false) MapView.frameRadius();
   else MapView.updateSearchArea();
 }
 
+let watchId = null;
+
+/**
+ * Ask for the most accurate fix the device will give.
+ *
+ * The first attempt used a cached, low-accuracy position, which on a laptop is
+ * a wifi/IP estimate that can land kilometres away — fine for "which city",
+ * useless for "which block". So: high accuracy, no cached fix, a longer timeout
+ * because GPS needs it, and then a watch that keeps only better readings. A
+ * position never gets worse while you are looking at it.
+ */
 function locate() {
   if (!navigator.geolocation) { syncOrigin(true); return; }
+
+  const options = { enableHighAccuracy:true, timeout:20000, maximumAge:0 };
+
+  const accept = (position, reframe) => {
+    const accuracy = position.coords.accuracy ?? Infinity;
+    if (state.accuracyM !== null && accuracy > state.accuracyM) return;
+    state.deviceOrigin = { lat: position.coords.latitude, lon: position.coords.longitude };
+    state.accuracyM = position.coords.accuracy ?? null;
+    state.usingFallback = false;
+    state.pannedTo = null;
+    state.manualHome = null;
+    syncOrigin(reframe);
+  };
+
   navigator.geolocation.getCurrentPosition(
     (position) => {
-      state.deviceOrigin = { lat: position.coords.latitude, lon: position.coords.longitude };
-      state.usingFallback = false;
-      state.pannedTo = null;
-      syncOrigin(true);
+      accept(position, true);
+      // The first fix is often the coarsest; keep refining for a short while.
+      if (watchId !== null) navigator.geolocation.clearWatch(watchId);
+      watchId = navigator.geolocation.watchPosition(
+        (next) => accept(next, false), () => {}, options,
+      );
+      setTimeout(() => {
+        if (watchId !== null) { navigator.geolocation.clearWatch(watchId); watchId = null; }
+      }, 30000);
     },
     () => { state.usingFallback = true; syncOrigin(true); },
-    { enableHighAccuracy:false, timeout:8000, maximumAge:60000 },
+    options,
   );
+}
+
+function setHome(point) {
+  // An explicit pin beats anything the browser guesses, so stop watching.
+  if (watchId !== null) { navigator.geolocation.clearWatch(watchId); watchId = null; }
+  state.manualHome = point;
+  state.pannedTo = null;
+  state.accuracyM = null;
+  state.usingFallback = false;
+  state.placing = false;
+  try { localStorage.setItem(SAVED_HOME, JSON.stringify(point)); } catch { /* private mode */ }
+  syncOrigin(true);
 }
 
 buildChips();

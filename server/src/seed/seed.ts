@@ -22,6 +22,7 @@ interface SeedDeal {
   finePrint: string | null;
   confidence: number;
   partner?: boolean;
+  imageUrl?: string | null;
   days: number[];
   startMin: number;
   endMin: number;
@@ -82,6 +83,7 @@ export function seedDatabase(db: DatabaseHandle): { venues: number; deals: numbe
         sourceUrl: venue.website,
         extractedBy: deal.partner ? "manual" : "seed",
         partner: deal.partner ?? false,
+        imageUrl: deal.imageUrl ?? null,
         windows: deal.days.map((day) => ({
           dayOfWeek: day as DayOfWeek,
           startMin: deal.startMin,

@@ -67,6 +67,7 @@ function addDeal(
     sourceUrl: null,
     extractedBy: options.partner ? "manual" : "seed",
     partner: options.partner ?? false,
+    imageUrl: null,
     windows: options.days.map((day) => ({
       dayOfWeek: day,
       startMin: options.startMin,

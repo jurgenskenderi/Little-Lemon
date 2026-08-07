@@ -32,6 +32,7 @@ export interface ApiDeal {
   sourceUrl: string | null;
   extractedBy: "heuristic" | "model" | "seed" | "manual";
   partner: boolean;
+  imageUrl: string | null;
   lastVerifiedAt: string | null;
   windows: ApiWindow[];
   venue: ApiVenue;

@@ -2,6 +2,7 @@ import { Pressable, StyleSheet, Text, View } from "react-native";
 
 import type { ApiDeal } from "../api/types";
 import { confidenceNote, formatDistance, statusLine } from "../format";
+import { DealImage } from "./DealImage";
 import { theme } from "../theme";
 
 interface Props {
@@ -20,6 +21,9 @@ export function DealCard({ deal, onPress }: Props) {
       accessibilityLabel={`${deal.partner ? "Partner deal. " : ""}${deal.title} at ${deal.venue.name}, ${status.text}, ${formatDistance(deal.distanceKm)} away`}
       style={({ pressed }) => [styles.card, pressed && styles.cardPressed]}
     >
+      <View style={styles.body}>
+      <DealImage deal={deal} style={styles.thumb} />
+      <View style={styles.text}>
       <View style={styles.headerRow}>
         <Text style={styles.venue} numberOfLines={1}>
           {deal.venue.name}
@@ -46,6 +50,9 @@ export function DealCard({ deal, onPress }: Props) {
         </Text>
       ) : null}
 
+      </View>
+      </View>
+
       <View style={styles.footerRow}>
         <View style={[styles.statusDot, { backgroundColor: toneColor(status.tone) }]} />
         <Text style={[styles.status, { color: toneColor(status.tone) }]}>{status.text}</Text>
@@ -64,6 +71,9 @@ function toneColor(tone: "live" | "soon" | "later"): string {
 }
 
 const styles = StyleSheet.create({
+  body: { flexDirection: "row", gap: theme.space(3) },
+  text: { flex: 1, minWidth: 0 },
+  thumb: { width: 74, height: 74, borderRadius: theme.radius.sm },
   card: {
     backgroundColor: theme.color.surface,
     borderRadius: theme.radius.md,

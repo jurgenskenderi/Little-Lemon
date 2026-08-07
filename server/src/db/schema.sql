@@ -43,6 +43,9 @@ CREATE TABLE IF NOT EXISTS deals (
   -- Deals from venues you have an agreement with. These are entered by hand,
   -- outrank scraped results, and are never overwritten by a crawl.
   partner          INTEGER NOT NULL DEFAULT 0 CHECK (partner IN (0, 1)),
+  -- Photo from the venue's own page. Stored as a URL, not a copy: see the
+  -- README on caching these before production traffic hits someone's host.
+  image_url        TEXT,
   last_verified_at TEXT,
   created_at       TEXT NOT NULL DEFAULT (datetime('now')),
   updated_at       TEXT NOT NULL DEFAULT (datetime('now'))

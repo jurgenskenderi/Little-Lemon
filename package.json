@@ -14,7 +14,8 @@
     "seed": "npm run seed --workspace server",
     "scrape": "npm run scrape --workspace server",
     "mobile": "npm run start --workspace mobile",
-    "scrape:toronto": "npm run scrape:toronto --workspace server"
+    "scrape:toronto": "npm run scrape:toronto --workspace server",
+    "verify:extractor": "npm run verify:extractor --workspace server"
   },
   "engines": {
     "node": ">=20"

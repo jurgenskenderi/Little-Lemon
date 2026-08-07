@@ -16,15 +16,20 @@ import type { ApiDeal } from "../api/types";
 import { formatDistance, statusLine } from "../format";
 import type { Coordinates } from "../hooks/useLocation";
 import { theme } from "../theme";
+import { DealImage } from "./DealImage";
 import { DARK_MAP_STYLE } from "./mapStyle";
 
 interface Props {
   deals: ApiDeal[];
   origin: Coordinates;
   radiusKm: number;
+  /** GPS uncertainty in metres, drawn so the user can see how much to trust it. */
+  accuracyM: number | null;
   onOpen: (deal: ApiDeal) => void;
   onSearchArea: (centre: Coordinates) => void;
   onRecentre: () => void;
+  /** Long-press hands the user a way to correct a bad fix themselves. */
+  onSetLocation: (point: Coordinates) => void;
 }
 
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
@@ -45,7 +50,9 @@ function regionFor(centre: Coordinates, radiusKm: number): Region {
   };
 }
 
-export function DealMap({ deals, origin, radiusKm, onOpen, onSearchArea, onRecentre }: Props) {
+export function DealMap({
+  deals, origin, radiusKm, accuracyM, onOpen, onSearchArea, onRecentre, onSetLocation,
+}: Props) {
   const mapRef = useRef<MapView>(null);
   const listRef = useRef<FlatList<ApiDeal>>(null);
   const region = useRef<Region>(regionFor(origin, radiusKm));
@@ -99,6 +106,10 @@ export function DealMap({ deals, origin, radiusKm, onOpen, onSearchArea, onRecen
         showsCompass={false}
         toolbarEnabled={false}
         onPress={() => setSelectedId(null)}
+        onLongPress={(event) => {
+          const { latitude, longitude } = event.nativeEvent.coordinate;
+          onSetLocation({ lat: latitude, lon: longitude });
+        }}
         onRegionChange={(next) => {
           region.current = next;
         }}
@@ -118,6 +129,18 @@ export function DealMap({ deals, origin, radiusKm, onOpen, onSearchArea, onRecen
           fillColor="rgba(232,184,75,0.08)"
           strokeWidth={1.5}
         />
+
+        {/* How sure the device is. Drawn only when it is big enough to matter,
+            so a good fix does not show a distracting blob. */}
+        {accuracyM !== null && accuracyM > 40 ? (
+          <Circle
+            center={{ latitude: origin.lat, longitude: origin.lon }}
+            radius={accuracyM}
+            strokeColor="rgba(120,160,255,0.5)"
+            fillColor="rgba(120,160,255,0.12)"
+            strokeWidth={1}
+          />
+        ) : null}
 
         {deals.map((deal) => {
           const selected = deal.id === selectedId;
@@ -228,6 +251,9 @@ export function DealMap({ deals, origin, radiusKm, onOpen, onSearchArea, onRecen
                 style={[styles.card, selected && styles.cardActive]}
                 onPress={() => (selected ? onOpen(item) : focus(item))}
               >
+                <View style={styles.cardRow}>
+                <DealImage deal={item} style={styles.cardThumb} />
+                <View style={styles.cardText}>
                 <View style={styles.cardTop}>
                   {item.partner ? (
                     <View style={styles.badge}>
@@ -246,6 +272,8 @@ export function DealMap({ deals, origin, radiusKm, onOpen, onSearchArea, onRecen
                     {item.priceText}
                   </Text>
                 ) : null}
+                </View>
+                </View>
                 <View style={styles.cardFoot}>
                   <Text style={[styles.cardStatus, { color: toneColour(status.tone) }]}>
                     {status.text}
@@ -354,6 +382,9 @@ const styles = StyleSheet.create({
     padding: theme.space(3.5),
   },
   cardActive: { borderColor: theme.color.accent },
+  cardRow: { flexDirection: "row", gap: theme.space(2.5) },
+  cardText: { flex: 1, minWidth: 0 },
+  cardThumb: { width: 46, height: 46, borderRadius: theme.radius.sm },
   cardTop: { flexDirection: "row", alignItems: "center", gap: theme.space(2) },
   badge: {
     backgroundColor: theme.color.accent,

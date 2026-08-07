@@ -10,7 +10,8 @@
     "scrape": "node --experimental-strip-types src/scraper/cli.ts",
     "test": "node --experimental-strip-types --test test/*.test.ts",
     "typecheck": "tsc --noEmit",
-    "scrape:toronto": "node --experimental-strip-types src/scraper/cli.ts --preset toronto"
+    "scrape:toronto": "node --experimental-strip-types src/scraper/cli.ts --preset toronto",
+    "verify:extractor": "node --experimental-strip-types src/scraper/verify-extractor.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.115.0",

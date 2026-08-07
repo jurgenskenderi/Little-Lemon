@@ -59,6 +59,8 @@ const dealBody = z.object({
   priceText: z.string().max(80).nullish(),
   category: z.enum(["drink", "food", "both"]).default("both"),
   finePrint: z.string().max(200).nullish(),
+  /** Partner venues usually supply their own photography. */
+  imageUrl: z.string().url().nullish(),
   /** 0 = Sunday. */
   days: z.array(z.number().int().min(0).max(6)).min(1),
   start: clockString,
@@ -196,6 +198,7 @@ export function registerAdminRoutes(app: FastifyInstance, db: DatabaseHandle): v
       sourceUrl: venue.website,
       extractedBy: "manual",
       partner: true,
+      imageUrl: deal.imageUrl ?? null,
       windows: [...new Set(deal.days)].map((day) => ({
         dayOfWeek: day as DayOfWeek,
         startMin,

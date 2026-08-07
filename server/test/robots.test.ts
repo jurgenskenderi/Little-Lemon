@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
 import { isAllowed, parseRobots, policyForStatus } from "../src/scraper/robots.ts";
-import { htmlToText, findPromisingLinks, decodeEntities } from "../src/scraper/html.ts";
+import { bestImage, htmlToText, findPromisingLinks, decodeEntities } from "../src/scraper/html.ts";
 
 const UA = "ClocktailsBot/0.1";
 const url = (path: string) => new URL(`https://example.com${path}`);
@@ -118,5 +118,65 @@ describe("findPromisingLinks", () => {
       "does not wander off-site",
     );
     assert.ok(!links.some((link) => link.url.endsWith(".pdf")));
+  });
+});
+
+describe("findImages", () => {
+  const base = "https://example.com/happy-hour";
+
+  it("prefers the venue's own social preview image", () => {
+    const html = `
+      <meta property="og:image" content="/img/hero-cocktails.jpg">
+      <img src="/img/interior.jpg" width="800" height="600" alt="Dining room">`;
+    assert.equal(bestImage(html, base), "https://example.com/img/hero-cocktails.jpg");
+  });
+
+  it("reads meta tags regardless of attribute order", () => {
+    const html = `<meta content="/img/plates.jpg" name="twitter:image">`;
+    assert.equal(bestImage(html, base), "https://example.com/img/plates.jpg");
+  });
+
+  it("skips logos, icons and social buttons", () => {
+    const html = `
+      <img src="/assets/logo.png" width="400" height="300">
+      <img src="/assets/facebook-icon.png" width="400" height="300">
+      <img src="/photos/oysters.jpg" width="900" height="600" alt="Oysters on ice">`;
+    assert.equal(bestImage(html, base), "https://example.com/photos/oysters.jpg");
+  });
+
+  it("skips images declared too small to be photography", () => {
+    const html = `<img src="/img/thumb.jpg" width="80" height="60">`;
+    assert.equal(bestImage(html, base), null);
+  });
+
+  it("skips SVGs and data URIs", () => {
+    const html = `
+      <meta property="og:image" content="/brand/mark.svg">
+      <img src="data:image/png;base64,AAAA" width="800" height="600">`;
+    assert.equal(bestImage(html, base), null);
+  });
+
+  it("finds lazy-loaded images that have no src yet", () => {
+    const html = `<img data-src="/photos/wings.jpg" width="800" height="600" alt="Wings">`;
+    assert.equal(bestImage(html, base), "https://example.com/photos/wings.jpg");
+  });
+
+  it("resolves relative URLs against the page, not the site root", () => {
+    const html = `<meta property="og:image" content="../shared/patio.jpg">`;
+    assert.equal(
+      bestImage(html, "https://example.com/menus/happy-hour"),
+      "https://example.com/shared/patio.jpg",
+    );
+  });
+
+  it("ranks alt text mentioning food above a bare photo", () => {
+    const html = `
+      <img src="/a.jpg" width="800" height="600" alt="Our team">
+      <img src="/b.jpg" width="800" height="600" alt="Cocktail flight">`;
+    assert.equal(bestImage(html, base), "https://example.com/b.jpg");
+  });
+
+  it("returns null when a page has no usable photo", () => {
+    assert.equal(bestImage("<p>Just words here.</p>", base), null);
   });
 });

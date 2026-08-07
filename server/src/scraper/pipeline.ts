@@ -22,7 +22,7 @@ import type { Venue } from "../domain/types.ts";
 import { extractDealsFromText, type ExtractedDeal } from "./extract-heuristic.ts";
 import { extractDealsWithModel, isModelExtractionAvailable } from "./extract-model.ts";
 import { DisallowedByRobotsError, PoliteFetcher } from "./fetcher.ts";
-import { findPromisingLinks, htmlToText } from "./html.ts";
+import { bestImage, findPromisingLinks, htmlToText } from "./html.ts";
 
 export interface CrawlStats {
   venuesConsidered: number;
@@ -90,8 +90,11 @@ export async function crawlVenue(
 
   const queue: string[] = [venue.website];
   const visited = new Set<string>();
-  const dealsForVenue: ExtractedDeal[] = [];
+  const dealsForVenue: Array<ExtractedDeal & { imageUrl: string | null }> = [];
   let crawledAnything = false;
+  // Falls back to the entry page's photo when a deal page carries none of
+  // its own — a venue's social image is still better than a blank card.
+  let venueImage: string | null = null;
 
   while (queue.length > 0 && visited.size < maxPages) {
     const url = queue.shift();
@@ -166,8 +169,11 @@ export async function crawlVenue(
       error: null,
     });
 
+    const pageImage = bestImage(html, url);
+    venueImage ??= pageImage;
+
     const heuristic = extractDealsFromText(text);
-    dealsForVenue.push(...heuristic);
+    dealsForVenue.push(...heuristic.map((deal) => ({ ...deal, imageUrl: pageImage })));
 
     const confident = heuristic.some((deal) => deal.confidence >= HEURISTIC_TRUST_THRESHOLD);
     const mentionsDeals = /happy hour|specials?|deals?/i.test(text);
@@ -187,7 +193,7 @@ export async function crawlVenue(
           stats.modelRefusals += 1;
           log(`model declined ${url}: ${result.refusal}`);
         }
-        dealsForVenue.push(...result.deals);
+        dealsForVenue.push(...result.deals.map((deal) => ({ ...deal, imageUrl: pageImage })));
       } catch (error) {
         const message = error instanceof Error ? error.message : String(error);
         stats.errors.push(`model ${url}: ${message}`);
@@ -221,6 +227,7 @@ export async function crawlVenue(
         confidence: deal.confidence,
         sourceUrl: venue.website,
         extractedBy: deal.confidence >= HEURISTIC_TRUST_THRESHOLD ? "heuristic" : "model",
+        imageUrl: deal.imageUrl ?? venueImage,
         windows: deal.windows,
         lastVerifiedAt: now,
       })),
@@ -235,8 +242,8 @@ export async function crawlVenue(
  * The same happy hour usually appears on several pages of a site. Collapse by
  * schedule and title, keeping the highest-confidence copy of each.
  */
-function dedupeDeals(deals: ExtractedDeal[]): ExtractedDeal[] {
-  const byKey = new Map<string, ExtractedDeal>();
+function dedupeDeals<T extends ExtractedDeal>(deals: T[]): T[] {
+  const byKey = new Map<string, T>();
 
   for (const deal of deals) {
     const key = `${deal.title.toLowerCase()}|${deal.windows

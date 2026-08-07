@@ -38,7 +38,9 @@ const PAGES: Record<string, { type: string; body: string }> = {
   },
   "/happy-hour": {
     type: "text/html",
-    body: `<!doctype html><html><body>
+    body: `<!doctype html><html><head>
+        <meta property="og:image" content="/photos/happy-hour-spread.jpg">
+      </head><body>
         <h2>Happy Hour</h2>
         <p>Happy Hour Mon-Fri 4-6pm: $6 local pints and half off shared plates.</p>
         <p>Late Night Happy Hour Fri &amp; Sat 10pm-2am, $5 draught.</p>
@@ -160,6 +162,15 @@ describe("crawlVenue against a fixture site", () => {
     assert.ok(
       !deals.some((deal) => deal.windows.some((window) => window.startMin === 660)),
       "11am-11pm is when the door is open, not a happy hour",
+    );
+  });
+
+  it("carries the page's photo through to the stored deal", () => {
+    const deals = getDealsForVenue(db, "ven_fixture");
+    assert.ok(deals.length > 0);
+    assert.ok(
+      deals.every((deal) => deal.imageUrl?.endsWith("/photos/happy-hour-spread.jpg")),
+      `got ${JSON.stringify(deals.map((deal) => deal.imageUrl))}`,
     );
   });
 

@@ -131,3 +131,104 @@ export function findPromisingLinks(html: string, baseUrl: string): DiscoveredLin
 
   return [...seen.values()].sort((a, b) => b.score - a.score);
 }
+
+/* ------------------------------------------------------------------ *
+ * Images
+ * ------------------------------------------------------------------ */
+
+/** Filenames that are almost never a photo of what is being served. */
+const NON_PHOTO =
+  /(logo|icon|favicon|sprite|badge|avatar|placeholder|spacer|pixel|banner-ad|arrow|chevron|social|instagram|facebook|twitter|yelp|opentable|payment|visa|mastercard)/i;
+
+const IMAGE_EXTENSION = /\.(jpe?g|png|webp|avif)(\?|#|$)/i;
+
+export interface ImageCandidate {
+  url: string;
+  /** Higher is more likely to be an appetising photo of food or drink. */
+  score: number;
+  alt: string | null;
+}
+
+function absolute(raw: string, base: URL): string | null {
+  try {
+    const url = new URL(raw.trim(), base);
+    if (url.protocol !== "http:" && url.protocol !== "https:") return null;
+    // SVGs are logos and diagrams, never dish photography.
+    if (/\.svgz?(\?|#|$)/i.test(url.pathname)) return null;
+    return url.toString();
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Find photos on a venue page worth showing next to a deal.
+ *
+ * Social preview images (`og:image`) win by a wide margin: they are chosen by
+ * the venue as the picture that represents them, they are already sized for a
+ * card, and they are stable. Inline images are a fallback, filtered hard —
+ * most `<img>` tags on a restaurant site are chrome, not food.
+ */
+export function findImages(html: string, baseUrl: string): ImageCandidate[] {
+  let base: URL;
+  try {
+    base = new URL(baseUrl);
+  } catch {
+    return [];
+  }
+
+  const found = new Map<string, ImageCandidate>();
+  const add = (raw: string | undefined, score: number, alt: string | null = null) => {
+    if (!raw) return;
+    const url = absolute(decodeEntities(raw), base);
+    if (!url) return;
+    if (NON_PHOTO.test(url)) return;
+    const existing = found.get(url);
+    if (!existing || existing.score < score) found.set(url, { url, score, alt });
+  };
+
+  // Open Graph and Twitter cards, in either attribute order.
+  const meta = /<meta\b[^>]*>/gi;
+  let tag: RegExpExecArray | null;
+  while ((tag = meta.exec(html)) !== null) {
+    const raw = tag[0];
+    const key = /(?:property|name)\s*=\s*["']([^"']+)["']/i.exec(raw)?.[1]?.toLowerCase();
+    const content = /content\s*=\s*["']([^"']+)["']/i.exec(raw)?.[1];
+    if (!key || !content) continue;
+    if (key === "og:image" || key === "og:image:secure_url") add(content, 100);
+    else if (key === "twitter:image" || key === "twitter:image:src") add(content, 90);
+  }
+
+  // Inline images, scored by hints that they are editorial rather than chrome.
+  const img = /<img\b[^>]*>/gi;
+  while ((tag = img.exec(html)) !== null) {
+    const raw = tag[0];
+    const src =
+      /\bsrc\s*=\s*["']([^"']+)["']/i.exec(raw)?.[1] ??
+      // Lazy-loaded images keep the real URL in a data attribute.
+      /\bdata-(?:src|lazy-src|original)\s*=\s*["']([^"']+)["']/i.exec(raw)?.[1];
+    if (!src) continue;
+
+    const alt = /\balt\s*=\s*["']([^"']*)["']/i.exec(raw)?.[1] ?? null;
+    const width = Number(/\bwidth\s*=\s*["']?(\d+)/i.exec(raw)?.[1] ?? 0);
+    const height = Number(/\bheight\s*=\s*["']?(\d+)/i.exec(raw)?.[1] ?? 0);
+
+    // Anything declared tiny is an icon; anything with food words in its alt
+    // text is likely the real thing.
+    if ((width && width < 200) || (height && height < 150)) continue;
+    let score = 20;
+    if (IMAGE_EXTENSION.test(src)) score += 10;
+    if (width >= 600 || height >= 400) score += 15;
+    if (alt && /\b(food|drink|cocktail|beer|wine|dish|plate|menu|bar|burger|taco|oyster|pizza)\b/i.test(alt)) {
+      score += 25;
+    }
+    add(src, score, alt);
+  }
+
+  return [...found.values()].sort((a, b) => b.score - a.score);
+}
+
+/** The single best photo for a page, or null when nothing qualifies. */
+export function bestImage(html: string, baseUrl: string): string | null {
+  return findImages(html, baseUrl)[0]?.url ?? null;
+}

@@ -35,7 +35,7 @@ The app finds the API automatically: it reuses the host Expo is already serving
 the bundle from, so a phone on the same Wi-Fi works without editing an IP.
 Override with `EXPO_PUBLIC_API_URL` if your setup differs.
 
-`npm test` runs the server suite (82 tests). `npm run typecheck` covers both
+`npm test` runs the server suite (92 tests). `npm run typecheck` covers both
 workspaces.
 
 ## Partner deals
@@ -88,6 +88,26 @@ projects windows onto a shared axis so the day before and after are both
 considered. Times are compared in each venue's own timezone, so results hold
 across daylight saving.
 
+## Getting your location right
+
+A happy hour search lives or dies on a couple of hundred metres — the wrong side
+of Queen Street is a different set of bars. Three things make the fix as good as
+the device allows:
+
+- **Highest accuracy, no cached fix.** The browser and the app both ask for GPS
+  rather than accepting the cheap wifi/IP estimate, which on a laptop can land
+  kilometres away. This was the single biggest cause of a wrong starting point.
+- **It refines after the first fix.** The first reading is often the coarsest,
+  so both clients keep watching for ~30 seconds and accept only *better*
+  readings. Your position never drifts worse while you're looking at it.
+- **You can override it.** The status line states the accuracy out loud
+  ("accurate to 35 m"), and when it's poor it offers *set it on the map* —
+  drop a pin where you actually are, and everything measures from there. In the
+  app, long-press the map. The pin is remembered.
+
+The map draws the accuracy radius as a blue circle when it's large enough to
+matter, so you can see how much to trust it rather than guessing.
+
 ## Map search
 
 The map is the second way to browse, and it behaves the way people expect a map
@@ -112,6 +132,24 @@ as an environment variable and `app.config.js` picks it up:
 ```bash
 GOOGLE_MAPS_ANDROID_KEY=your-key npm run mobile
 ```
+
+## Pictures
+
+The crawler pulls a photo for each deal from the venue's own page, preferring
+their Open Graph image — the picture the venue chose to represent itself, already
+sized for a card — and falling back to the largest editorial-looking image on the
+page. Logos, icons, social buttons, tracking pixels, SVGs and anything declared
+smaller than 200×150 are filtered out.
+
+When there's no usable photo, the app draws the dish or drink instead, chosen
+from what the deal actually says: "$1.75 oysters" gets oysters, not a generic
+plate. Partner deals can carry their own `imageUrl` through the admin API, which
+is where you'd put photography a restaurant gives you directly.
+
+**Before production, cache these images rather than hotlinking.** The stored
+value is a URL on the venue's host, so every app user currently costs that
+restaurant bandwidth, and the image breaks the moment they reorganise their site.
+Fetching once into your own bucket fixes both.
 
 ## The scraper
 
@@ -155,7 +193,19 @@ the API rather than parsed out of prose, and every window is re-validated
 locally afterwards.
 
 Set `ANTHROPIC_API_KEY` to enable the model fallback; without it the crawler
-runs on the parser alone and skips what it can't read.
+runs on the parser alone and skips what it can't read. Plenty of Toronto
+restaurants put their happy hour in an image or a booking widget, so the key
+meaningfully changes coverage.
+
+Check it works before committing to a long crawl:
+
+```bash
+ANTHROPIC_API_KEY=sk-ant-... npm run verify:extractor
+```
+
+That runs the real extractor against a sample page written to defeat the
+rule-based parser — prose schedule, implied end time, and a decoy line of
+opening hours. It prints what it found in a couple of seconds.
 
 **A re-crawl replaces a venue's scraped deals wholesale**, so a deal the venue
 removed from its site disappears rather than lingering — but only if the crawl
@@ -230,7 +280,9 @@ Worth knowing before this goes near real users:
   covered end to end by a test that serves a fixture restaurant site over
   loopback — robots.txt, link following, extraction, storage — but the machine
   it was built on has outbound HTTPS blocked at the network policy, so every
-  host including `example.com` returns 403 at the gateway. Run
+  host including `example.com` returns 403 at the gateway. Interestingly
+  `api.anthropic.com` *is* reachable there, so the model extractor could run —
+  but with no venue pages to read, that changes nothing. Run
   `npm run scrape:toronto` from your own machine for real data; the preflight
   will confirm connectivity before it starts.
 - **Timezones are per-crawl, not per-venue.** Overpass returns no timezone, so

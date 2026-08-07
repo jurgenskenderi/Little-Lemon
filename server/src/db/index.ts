@@ -48,6 +48,9 @@ function migrate(db: DatabaseHandle): void {
          CHECK (partner IN (0, 1))`,
     );
   }
+  if (!existing.has("image_url")) {
+    db.exec(`ALTER TABLE deals ADD COLUMN image_url TEXT`);
+  }
 }
 
 interface VenueRow {
@@ -78,6 +81,7 @@ interface DealRow {
   source_url: string | null;
   extracted_by: Deal["extractedBy"];
   partner: number;
+  image_url: string | null;
   last_verified_at: string | null;
 }
 
@@ -184,10 +188,10 @@ export function upsertDeal(db: DatabaseHandle, deal: DealInput): string {
     db.prepare(
       `INSERT INTO deals (id, venue_id, title, description, price_text, category,
                           fine_print, confidence, source_url, extracted_by,
-                          partner, last_verified_at, updated_at)
+                          partner, image_url, last_verified_at, updated_at)
        VALUES (@id, @venue_id, @title, @description, @price_text, @category,
                @fine_print, @confidence, @source_url, @extracted_by,
-               @partner, @last_verified_at, datetime('now'))
+               @partner, @image_url, @last_verified_at, datetime('now'))
        ON CONFLICT (id) DO UPDATE SET
          venue_id = excluded.venue_id,
          title = excluded.title,
@@ -199,6 +203,7 @@ export function upsertDeal(db: DatabaseHandle, deal: DealInput): string {
          source_url = excluded.source_url,
          extracted_by = excluded.extracted_by,
          partner = excluded.partner,
+         image_url = excluded.image_url,
          last_verified_at = excluded.last_verified_at,
          updated_at = datetime('now')`,
     ).run({
@@ -213,6 +218,7 @@ export function upsertDeal(db: DatabaseHandle, deal: DealInput): string {
       source_url: deal.sourceUrl,
       extracted_by: deal.extractedBy,
       partner: deal.partner ? 1 : 0,
+      image_url: deal.imageUrl,
       last_verified_at: deal.lastVerifiedAt,
     });
 
@@ -282,6 +288,7 @@ export function getDealsForVenue(db: DatabaseHandle, venueId: string): Deal[] {
     sourceUrl: row.source_url,
     extractedBy: row.extracted_by,
     partner: row.partner === 1,
+    imageUrl: row.image_url,
     windows: windows.get(row.id) ?? [],
     lastVerifiedAt: row.last_verified_at,
   }));
@@ -345,7 +352,7 @@ export function searchDeals(
     .prepare(
       `SELECT d.id AS deal_id, d.venue_id, d.title, d.description, d.price_text,
               d.category, d.fine_print, d.confidence, d.source_url,
-              d.extracted_by, d.partner, d.last_verified_at,
+              d.extracted_by, d.partner, d.image_url, d.last_verified_at,
               v.id AS v_id, v.name AS v_name, v.address, v.city, v.region,
               v.country, v.lat, v.lon, v.time_zone, v.website, v.phone,
               v.source, v.source_id
@@ -386,6 +393,7 @@ export function searchDeals(
       sourceUrl: row.source_url,
       extractedBy: row.extracted_by,
       partner: row.partner === 1,
+      imageUrl: row.image_url,
       windows: dealWindows,
       lastVerifiedAt: row.last_verified_at,
       venue,

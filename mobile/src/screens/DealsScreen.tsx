@@ -67,13 +67,7 @@ export function DealsScreen() {
         <View style={styles.headerRow}>
           <View style={styles.headerText}>
             <Text style={styles.title}>Happy hours</Text>
-            <Text style={styles.subtitle}>
-              {areaOverride
-                ? "Searching the area you picked on the map"
-                : location.usingFallback
-                  ? `Searching around ${FALLBACK_LOCATION.label}`
-                  : "Near you, right now"}
-            </Text>
+            <Text style={styles.subtitle}>{locationSummary(location, areaOverride !== null)}</Text>
           </View>
           <Pressable
             onPress={() => setView(view === "list" ? "map" : "list")}
@@ -87,6 +81,12 @@ export function DealsScreen() {
         {areaOverride ? (
           <Pressable onPress={() => setAreaOverride(null)} accessibilityRole="button">
             <Text style={styles.resetArea}>Back to my location</Text>
+          </Pressable>
+        ) : location.imprecise ? (
+          <Pressable onPress={() => setView("map")} accessibilityRole="button">
+            <Text style={styles.resetArea}>
+              Not where you are? Open the map and hold to drop a pin
+            </Text>
           </Pressable>
         ) : null}
       </View>
@@ -111,9 +111,14 @@ export function DealsScreen() {
           deals={deals}
           origin={origin}
           radiusKm={radiusKm}
+          accuracyM={areaOverride ? null : location.accuracyM}
           onOpen={setSelected}
           onSearchArea={(centre) => setAreaOverride(centre)}
           onRecentre={() => setAreaOverride(null)}
+          onSetLocation={(point) => {
+            setAreaOverride(null);
+            location.setManual(point);
+          }}
         />
         <DealDetailSheet deal={selected} onClose={() => setSelected(null)} />
       </SafeAreaView>
@@ -147,6 +152,28 @@ export function DealsScreen() {
       <DealDetailSheet deal={selected} onClose={() => setSelected(null)} />
     </SafeAreaView>
   );
+}
+
+/**
+ * One line describing where results are coming from. Accuracy is surfaced
+ * rather than hidden: "within 2 km" means nothing if the starting point is
+ * itself a kilometre out, and the user is the only one who can correct it.
+ */
+function locationSummary(
+  location: ReturnType<typeof useLocation>,
+  pinnedToArea: boolean,
+): string {
+  if (pinnedToArea) return "Searching the area you picked on the map";
+  if (location.usingFallback) return `Searching around ${FALLBACK_LOCATION.label}`;
+  if (location.accuracyM === null) return "Near you, right now";
+  if (location.accuracyM > 250) {
+    return `Near you — but your location is only accurate to ${formatAccuracy(location.accuracyM)}`;
+  }
+  return `Near you, accurate to ${formatAccuracy(location.accuracyM)}`;
+}
+
+function formatAccuracy(metres: number): string {
+  return metres >= 1000 ? `${(metres / 1000).toFixed(1)} km` : `${Math.round(metres)} m`;
 }
 
 function ResultSummary({

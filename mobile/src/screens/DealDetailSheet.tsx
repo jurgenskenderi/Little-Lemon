@@ -3,6 +3,7 @@ import { Linking as RNLinking, Modal, Pressable, ScrollView, StyleSheet, Text, V
 
 import type { ApiDeal } from "../api/types";
 import { categoryLabel, confidenceNote, formatDistance, statusLine } from "../format";
+import { DealImage } from "../components/DealImage";
 import { theme } from "../theme";
 
 interface Props {
@@ -51,6 +52,7 @@ function DetailBody({ deal, onClose }: { deal: ApiDeal; onClose: () => void }) {
       </View>
 
       <ScrollView contentContainerStyle={styles.body}>
+        <DealImage deal={deal} style={styles.hero} rounded={theme.radius.md} />
         <Text style={styles.venueName}>{venue.name}</Text>
         {venue.address ? (
           <Text style={styles.address}>
@@ -178,6 +180,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: theme.space(5),
     paddingBottom: theme.space(10),
   },
+  hero: { width: "100%", height: 170, marginBottom: theme.space(4) },
   venueName: {
     color: theme.color.text,
     fontSize: theme.font.title,
