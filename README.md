@@ -153,6 +153,14 @@ every touch for page scrolling, and the map simply does not pan on a phone.
 Drag pans, pinch and wheel zoom, double-tap zooms in, arrow keys and `+`/`−`
 do the same from the keyboard.
 
+Below the arterials sits the downtown local grid — Portland, John, Duncan,
+Simcoe, York, Victoria, Berkeley and the rest — generated between the arterials
+they actually meet rather than drawn as straight lines, because the core grid is
+tilted about twelve degrees off north and the tilt is not uniform. A local
+street therefore meets King and Queen exactly where King and Queen are. Only
+streets whose downtown position is unambiguous are listed; elsewhere the map
+stays honestly sparse rather than guessing.
+
 You are a blue dot with an accuracy halo, venues are teardrop pins carrying the
 glyph for what's on offer, and dense strips like King West collapse into a
 count until you zoom in.
@@ -164,6 +172,27 @@ as an environment variable and `app.config.js` picks it up:
 ```bash
 GOOGLE_MAPS_ANDROID_KEY=your-key npm run mobile
 ```
+
+## Links out of a sandboxed page
+
+**Call and Directions cannot navigate from the preview.** The artifact runs in
+a sandboxed frame, and Chromium blocks both routes out of it:
+
+```
+Navigation to external protocol blocked by sandbox, because it doesn't contain
+any of: 'allow-top-navigation-to-custom-protocols', … or 'allow-popups'
+Blocked opening 'https://maps.google.com/…' because the request was made in a
+sandboxed frame whose 'allow-popups' permission is not set
+```
+
+Both failures are silent — the anchor looks fine and does nothing, which is
+exactly how a Call button ends up "not working". So the preview no longer
+pretends: the number is always on screen as selectable text and as a `tel:`
+link (which works the moment the page is in its own tab), the buttons detect
+the refusal, and the fallback copies the number or address to the clipboard and
+says what happened. In the app there is no sandbox — `Call` dials, but it now
+checks `canOpenURL` first and says so on a device with no dialler instead of
+failing silently.
 
 ## Pictures
 

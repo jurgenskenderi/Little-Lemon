@@ -1,5 +1,32 @@
 import * as Linking from "expo-linking";
-import { Linking as RNLinking, Modal, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import {
+  Alert,
+  Linking as RNLinking,
+  Modal,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+} from "react-native";
+
+/**
+ * Place a call, and say so when the device can't.
+ *
+ * `tel:` fails on anything without a dialler — a tablet, a simulator, a
+ * desktop build — and `openURL` rejects rather than throwing, so a bare
+ * `void openURL(...)` swallows it and the button looks broken. Punctuation is
+ * stripped because "(416) 555-0100" is not a valid tel: payload everywhere.
+ */
+async function dial(raw: string): Promise<void> {
+  const url = `tel:${raw.replace(/[^\d+]/g, "")}`;
+  try {
+    if (!(await RNLinking.canOpenURL(url))) throw new Error("no dialler");
+    await RNLinking.openURL(url);
+  } catch {
+    Alert.alert("Couldn't start a call", `Dial ${raw} yourself, or copy it from the listing.`);
+  }
+}
 
 import type { ApiDeal } from "../api/types";
 import { categoryLabel, confidenceNote, formatDistance, statusLine } from "../format";
@@ -35,7 +62,9 @@ function DetailBody({ deal, onClose }: { deal: ApiDeal; onClose: () => void }) {
     const label = encodeURIComponent(venue.name);
     // The geo: scheme with a label works on Android; iOS needs maps:.
     const url = `https://maps.google.com/?q=${label}@${venue.lat},${venue.lon}`;
-    void RNLinking.openURL(url);
+    RNLinking.openURL(url).catch(() =>
+      Alert.alert("Couldn't open maps", `${venue.name} is at ${venue.lat}, ${venue.lon}.`),
+    );
   };
 
   return (
@@ -97,12 +126,7 @@ function DetailBody({ deal, onClose }: { deal: ApiDeal; onClose: () => void }) {
 
         <View style={styles.actions}>
           <ActionButton label="Directions" onPress={openMaps} primary />
-          {venue.phone ? (
-            <ActionButton
-              label="Call"
-              onPress={() => void RNLinking.openURL(`tel:${venue.phone}`)}
-            />
-          ) : null}
+          {venue.phone ? <ActionButton label="Call" onPress={() => void dial(venue.phone as string)} /> : null}
           {venue.website ? (
             <ActionButton
               label="Website"

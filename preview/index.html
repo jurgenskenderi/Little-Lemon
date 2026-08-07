@@ -63,6 +63,13 @@
   .where { color:var(--muted); font-size:14px; margin:8px 0 0; }
   .near-picker { display:flex; align-items:center; gap:8px; margin-top:10px;
                  font-size:13px; color:var(--muted); flex-wrap:wrap; }
+  /* When the browser won't give us a fix, this stops being a footnote and
+     becomes the thing to do next. */
+  .near-picker.urgent { display:block; margin-top:12px; padding:12px 14px; border-radius:12px;
+    background:var(--raised); border:1px solid var(--accent); }
+  .near-picker.urgent label { display:block; margin-bottom:8px; color:var(--text);
+    font-weight:700; font-size:13.5px; }
+  .near-picker.urgent select { width:100%; font-size:14px; padding:9px 10px; }
   .near-picker[hidden] { display:none; }
   .near-picker select { font:inherit; font-size:13px; color:var(--text);
     background:var(--raised); border:1px solid var(--border); border-radius:9px;
@@ -218,6 +225,14 @@
   .place-card b { display:block; color:var(--text); font-size:14px; }
   .place-card span { color:var(--muted); font-size:12px; }
   .place-card em { display:block; margin-top:4px; color:var(--faint); font-size:12px; }
+
+  .contact { margin-top:12px; }
+  .contact-line { display:inline-block; font-family:var(--data); font-size:17px;
+    color:var(--accent); text-decoration:none; letter-spacing:.02em;
+    -webkit-user-select:all; user-select:all; }
+  .contact-note { display:block; margin-top:8px; font-size:12px; color:var(--muted);
+    line-height:1.45; }
+  .contact-note[hidden] { display:none; }
   .scalebar { position:absolute; left:12px; bottom:14px; display:flex; align-items:center;
               gap:6px; pointer-events:none; }
   .scalebar .bar { height:3px; background:var(--muted); opacity:.65; border-radius:2px; }
@@ -273,7 +288,7 @@
     <h1>Happy hours near you</h1>
     <p class="where" id="where">Locating…</p>
     <div class="near-picker" id="nearPicker" hidden>
-      <label for="nearSelect">I'm near</label>
+      <label for="nearSelect" id="nearLabel">I'm near</label>
       <select id="nearSelect"><option value="">choose a neighbourhood…</option></select>
     </div>
     <div class="notice">
@@ -759,6 +774,79 @@ const PLACES = [
 /** True when the viewport overlaps the area we have street data for. */
 const COVERAGE = { minLat: 43.58, maxLat: 43.73, minLon: -79.52, maxLon: -79.27 };
 
+/* ------------------------------------------------------------------ *
+ * The downtown local grid.
+ *
+ * Arterials alone leave blocks half a kilometre across with nothing in them,
+ * which is what makes a map look unfinished. These are the through streets of
+ * the core, listed by the longitude they hold as they cross downtown.
+ *
+ * They are not drawn as straight lines. Toronto's core grid is tilted maybe
+ * twelve degrees off north and the tilt is not uniform, so each street is
+ * generated between two arterials we already carry, taking its endpoints from
+ * where those arterials actually run at that longitude. A local street
+ * therefore meets King and Queen exactly where King and Queen are, and the
+ * grid stays square with itself at every zoom.
+ *
+ * Only streets whose position downtown is unambiguous are listed. Elsewhere
+ * the map stays honestly sparse rather than guessing.
+ * ------------------------------------------------------------------ */
+const DOWNTOWN_NS = [
+  ["Strachan Ave",   -79.4110], ["Niagara St",   -79.4055], ["Portland St", -79.4020],
+  ["Brant St",       -79.3990], ["Charlotte St", -79.3940], ["Peter St",    -79.3925],
+  ["Blue Jays Way",  -79.3908], ["John St",      -79.3897], ["Duncan St",   -79.3885],
+  ["Simcoe St",      -79.3868], ["York St",      -79.3825], ["Victoria St", -79.3758],
+  ["Mutual St",      -79.3728], ["George St",    -79.3702], ["Berkeley St", -79.3663],
+  ["Sackville St",   -79.3598], ["Sumach St",    -79.3578],
+];
+
+/** Latitude of a carried road where it crosses `lon`, or null if it doesn't. */
+function latOnRoad(name, lon) {
+  const road = ROADS.find(([roadName]) => roadName === name);
+  if (!road) return null;
+  const points = road[2];
+  for (let i = 0; i < points.length - 1; i += 1) {
+    const [aLat, aLon] = points[i], [bLat, bLon] = points[i + 1];
+    const lo = Math.min(aLon, bLon), hi = Math.max(aLon, bLon);
+    if (lon < lo || lon > hi) continue;
+    const t = bLon === aLon ? 0 : (lon - aLon) / (bLon - aLon);
+    return aLat + (bLat - aLat) * t;
+  }
+  return null;
+}
+
+/**
+ * Build the local streets, anchored on the arterials they actually meet.
+ * Runs once at load: the geometry never changes, so redoing it per frame
+ * would be pure waste.
+ */
+function buildLocalStreets() {
+  const LOCAL = 0;
+  for (const [name, lon] of DOWNTOWN_NS) {
+    const south = latOnRoad("Lake Shore Blvd", lon) ?? latOnRoad("Front St", lon);
+    const north =
+      latOnRoad("College St", lon) ??
+      latOnRoad("Carlton St", lon) ??
+      latOnRoad(lon < -79.38 ? "Queen St W" : "Queen St E", lon);
+    if (south === null || north === null) continue;
+    ROADS.push([name, LOCAL, [[south, lon], [north, lon + 0.0012]]]);
+  }
+
+  // East-west locals, placed as a fixed offset from the arterial they parallel
+  // so they inherit its tilt rather than cutting across it.
+  for (const [name, parallelTo, offset] of [
+    ["Bremner Blvd",  "Front St",     -0.0022],
+    ["Wellington St", "Front St",      0.0016],
+    ["Shuter St",     "Queen St E",    0.0028],
+    ["Charles St",    "Bloor St E",   -0.0018],
+  ]) {
+    const road = ROADS.find(([roadName]) => roadName === parallelTo);
+    if (!road) continue;
+    ROADS.push([name, LOCAL, road[2].map(([lat, lon]) => [lat + offset, lon])]);
+  }
+}
+buildLocalStreets();
+
 /* ================================================================== *
  * The map.
  *
@@ -847,7 +935,8 @@ const MapView = (() => {
     const scale = Math.max(0.55, Math.min(1.6, pxPerKm / 120));
     if (cls === 3) return 6.5 * scale;
     if (cls === 2) return 4.2 * scale;
-    return 2.4 * scale;
+    if (cls === 1) return 2.4 * scale;
+    return 1.6 * scale;
   }
 
   function drawRoadPath(points) {
@@ -920,6 +1009,12 @@ const MapView = (() => {
     return true;
   }
 
+  /** True when the view is inside the area the local street grid covers. */
+  function coversDowntown() {
+    const c = toLatLon(centre);
+    return c.lat > 43.630 && c.lat < 43.672 && c.lon > -79.415 && c.lon < -79.352;
+  }
+
   function drawBasemap() {
     labelBoxes = [];
     const bg = css("--map-bg");
@@ -929,7 +1024,7 @@ const MapView = (() => {
     // Minor streets: a faint block grid standing in for the residential
     // network we do not carry. Only at close zoom, where blocks read as blocks,
     // and under the water and parks — nobody lays out blocks across a lake.
-    if (pxPerKm > 200) {
+    if (pxPerKm > 200 && !coversDowntown()) {
       const step = 0.14 * pxPerKm; // ~140 m, a typical downtown block
       const o = project(anchor.lat, anchor.lon);
       ctx.strokeStyle = css("--map-minor");
@@ -961,7 +1056,9 @@ const MapView = (() => {
     for (const [, ring] of PARKS) drawPolygon(ring, css("--map-park"), null);
 
     // Roads in two passes so junctions look joined: dark casing, then fill.
-    const visible = ROADS.filter(([, cls]) => cls >= (pxPerKm < 45 ? 2 : 1));
+    // Local streets only appear once a block is big enough to read as a block.
+    const floor = pxPerKm < 45 ? 2 : pxPerKm < 130 ? 1 : 0;
+    const visible = ROADS.filter(([, cls]) => cls >= floor);
 
     ctx.strokeStyle = css("--map-casing");
     for (const [, cls, points] of visible) {
@@ -970,15 +1067,18 @@ const MapView = (() => {
     }
     for (const [, cls, points] of visible) {
       ctx.strokeStyle = cls === 3 ? css("--map-highway")
-        : cls === 2 ? css("--map-arterial") : css("--map-road");
+        : cls === 2 ? css("--map-arterial")
+        : cls === 1 ? css("--map-road") : css("--map-minor");
       ctx.lineWidth = roadWidth(cls);
       drawRoadPath(points);
     }
 
     // Street names once there is room for them.
     if (pxPerKm > 55) {
-      for (const [name, cls, points] of visible) {
+      // Highest class first, so an arterial always wins a contested spot.
+      for (const [name, cls, points] of [...visible].sort((a, b) => b[1] - a[1])) {
         if (pxPerKm < 110 && cls < 2) continue;
+        if (pxPerKm < 260 && cls < 1) continue;
         labelRoad(name, points);
       }
     }
@@ -1418,6 +1518,14 @@ function render() {
   el("timeHint").textContent = state.time.hint(state.time.at(new Date()));
 
   el("where").innerHTML = locationLine();
+
+  // No usable fix and nothing pinned: promote the picker from a footnote to
+  // the obvious next step, and say why it is there.
+  const stranded = state.usingFallback && !state.locating && !state.manualHome;
+  el("nearPicker").classList.toggle("urgent", stranded);
+  el("nearLabel").textContent = stranded
+    ? "Tell us where you are and everything below works"
+    : "I'm near";
   const reset = el("resetArea"); if (reset) reset.onclick = () => { state.pannedTo = null; syncOrigin(true); };
   const retry = el("retryLoc"); if (retry) retry.onclick = () => {
     try { localStorage.removeItem(SAVED_HOME); } catch { /* ignore */ }
@@ -1620,13 +1728,64 @@ function openSheet(r) {
         `<div class="${d===r.day?"on":""}">${esc(windowLabel(d, r.deal.s, r.deal.e))}</div>`).join("")}
     </div>
     ${note ? `<p class="hint" style="margin-top:14px;font-style:italic">${esc(note)}</p>` : ""}
+    <div class="rule"></div>
+    <div class="contact">
+      <a class="contact-line" id="telLine" href="tel:${encodeURIComponent(r.venue.tel)}"
+         >${esc(formatPhone(r.venue.tel))}</a>
+      <span class="contact-note" id="handoffNote" hidden></span>
+    </div>
     <div class="sheet-actions">
-      <a class="primary" href="${maps}" target="_blank" rel="noopener">Directions</a>
-      <a href="tel:${esc(r.venue.tel)}">Call</a>
+      <button type="button" class="primary" id="directionsBtn">Directions</button>
+      <button type="button" id="callBtn">Call</button>
       <button type="button" id="closeSheet">Close</button>
     </div>`;
   el("sheet").showModal();
   el("closeSheet").onclick = () => el("sheet").close();
+  el("callBtn").onclick = () =>
+    handoff(`tel:${r.venue.tel}`, formatPhone(r.venue.tel), "phone number");
+  el("directionsBtn").onclick = () =>
+    handoff(maps, `${r.venue.a}, ${r.venue.c}`, "address");
+}
+
+/** North American numbers, in the shape people read them. */
+function formatPhone(raw) {
+  const digits = String(raw ?? "").replace(/\D/g, "");
+  const local = digits.length === 11 && digits.startsWith("1") ? digits.slice(1) : digits;
+  if (local.length !== 10) return String(raw ?? "");
+  return `(${local.slice(0,3)}) ${local.slice(3,6)}-${local.slice(6)}`;
+}
+
+/**
+ * Hand a link off to the device — and cope when the browser refuses.
+ *
+ * This page runs inside a sandboxed frame, which blocks `tel:` outright
+ * ("Navigation to external protocol blocked by sandbox") and blocks
+ * `target="_blank"` without `allow-popups`. Both failures are silent: the
+ * anchor looked fine and did nothing, which is exactly how a Call button ends
+ * up "not working".
+ *
+ * So: try to open it, detect the refusal, and fall back to something the user
+ * can actually act on — the number or address copied to the clipboard, and
+ * printed on screen either way so it is never a dead end.
+ */
+async function handoff(url, plain, kind) {
+  const note = el("handoffNote");
+  const show = (text) => { note.hidden = false; note.textContent = text; };
+
+  let opened = null;
+  try {
+    opened = window.open(url, "_blank", "noopener");
+  } catch { /* sandboxed frames throw rather than return null */ }
+  if (opened) { note.hidden = true; return; }
+
+  try {
+    await navigator.clipboard.writeText(plain);
+    show(`This preview is sandboxed and can't dial or open maps. ${kind === "phone number"
+      ? "Number" : "Address"} copied: ${plain}`);
+  } catch {
+    show(`This preview is sandboxed and can't dial or open maps. The ${kind} is ${plain} — ` +
+      `select it above to copy.`);
+  }
 }
 
 /* ---------------- controls ---------------- */
