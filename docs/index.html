@@ -72,6 +72,25 @@
                  cursor:pointer; }
   .tabs button[aria-pressed=true] { background:var(--raised); color:var(--text); }
 
+  /* ---------- the location ask ---------- */
+  .gate { margin-top:16px; padding:20px; border-radius:16px; background:var(--surface);
+          border:1px solid var(--accent); }
+  .gate[hidden] { display:none; }
+  .gate h2 { font-family:var(--display); font-size:23px; margin:0 0 8px; line-height:1.1; }
+  .gate p { margin:0; color:var(--muted); font-size:14px; }
+  .gate-actions { display:flex; gap:9px; margin-top:16px; flex-wrap:wrap; }
+  .gate-actions button { flex:1 1 auto; padding:12px 16px; border-radius:11px;
+    border:1px solid var(--border); background:transparent; color:var(--text);
+    font:inherit; font-size:14.5px; font-weight:600; cursor:pointer; }
+  .gate-actions .primary { background:var(--accent); border-color:var(--accent);
+                           color:var(--on-accent); }
+  .gate-actions button:disabled { opacity:.6; cursor:default; }
+  .gate-fine { margin-top:14px!important; font-size:12px!important; color:var(--faint)!important;
+               line-height:1.5; }
+
+  .count { margin:12px 0 0; font-size:13px; color:var(--muted); }
+  .count strong { color:var(--text); }
+
   /* ---------- map ---------- */
   #map { height:min(58vh,440px); border-radius:14px; border:1px solid var(--border);
          margin-top:12px; background:var(--raised); z-index:0; }
@@ -152,6 +171,20 @@
     <p class="where" id="where">Finding you…</p>
   </header>
 
+  <div class="gate" id="gate" hidden>
+    <h2 id="gateTitle">Find places near you</h2>
+    <p id="gateBody">Clocktails needs your device's location to show what's around you
+      and how far away it is.</p>
+    <div class="gate-actions">
+      <button type="button" class="primary" id="gateAllow">Use my location</button>
+      <button type="button" id="gateSkip">Browse downtown instead</button>
+    </div>
+    <p class="gate-fine" id="gateFine">Your position never leaves your device. It is used
+      to work out distances here, and rounded to the nearest ~110 m before asking
+      OpenStreetMap what is nearby.</p>
+  </div>
+
+  <div id="mainUi" hidden>
   <div class="controls">
     <div class="row">
       <span class="label">Within</span>
@@ -168,6 +201,8 @@
     <button type="button" id="tabList" aria-pressed="false">List</button>
   </div>
 
+  <p class="count" id="resultCount"></p>
+
   <div id="mapPane">
     <div id="map"></div>
   </div>
@@ -177,6 +212,7 @@
   </div>
 
   <div class="status" id="status" hidden></div>
+  </div>
 
   <footer>
     Places and opening hours from <a href="https://www.openstreetmap.org/copyright"
@@ -422,10 +458,17 @@ function toVenue(element) {
 
 async function loadVenues() {
   if (!state.origin) return;
-  const { lat, lon } = state.origin;
-  // Always fetch the widest radius the slider offers, so moving it is instant
-  // and does not cost the shared Overpass service another query.
-  const fetchRadius = 3000;
+  // Round to three decimals — about 110 m — before anything leaves the device.
+  // Precise coordinates are not needed to ask "what is in this neighbourhood",
+  // the radius is widened to cover the offset, and every distance shown is
+  // still computed from the exact fix, locally.
+  const lat = Math.round(state.origin.lat * 1000) / 1000;
+  const lon = Math.round(state.origin.lon * 1000) / 1000;
+
+  // Always the widest radius the slider offers plus that rounding slack, so
+  // dragging the slider is instant and costs the shared Overpass service
+  // nothing. Must stay >= the slider's max.
+  const fetchRadius = Number(el("radius").max) + 250;
   const key = cacheKey(lat, lon, fetchRadius);
 
   const cached = readCache(key);
@@ -610,6 +653,123 @@ function describeLocError(error) {
   return "This browser doesn't offer location.";
 }
 
+/* ==================================================================
+ * Asking for the location.
+ *
+ * The browser's own permission prompt is one line of chrome with no context,
+ * and on most browsers you only ever get to show it once — a reflexive "block"
+ * is close to permanent. So the page asks first, in its own words, and only
+ * calls getCurrentPosition from the button. That also satisfies the browsers
+ * that require a user gesture before they will prompt at all.
+ *
+ * Someone who has already granted it is not asked again: the Permissions API
+ * says so up front, and the gate is skipped entirely.
+ * ================================================================== */
+const CONSENT_KEY = "clocktails:consent";
+
+function showGate(mode) {
+  const gate = el("gate");
+  gate.hidden = false;
+  el("mainUi").hidden = true;
+
+  const copy = {
+    ask: {
+      title: "Find places near you",
+      body: "Clocktails needs your device's location to show what's around you and " +
+        "how far away it is.",
+      allow: "Use my location",
+    },
+    denied: {
+      title: "Location is blocked",
+      body: "Your browser is refusing the request, so this page can't ask again — " +
+        "you'll need to allow it in the site settings (the icon at the left of the " +
+        "address bar), then try again.",
+      allow: "Try again",
+    },
+    failed: {
+      title: "Couldn't get a fix",
+      body: state.locError || "Your device didn't return a position.",
+      allow: "Try again",
+    },
+  }[mode] || {};
+
+  el("gateTitle").textContent = copy.title;
+  el("gateBody").textContent = copy.body;
+  el("gateAllow").textContent = copy.allow;
+  el("gateAllow").disabled = false;
+  clearTimeout(waitingHint);
+  el("gateFine").textContent =
+    "Your position never leaves your device. It is used to work out distances here, " +
+    "and rounded to the nearest ~110 m before asking OpenStreetMap what is nearby.";
+}
+
+/**
+ * A dismissed permission prompt looks identical to a slow one: the browser
+ * tells the page nothing until getCurrentPosition times out, twenty seconds
+ * later. Rather than leave a disabled button with no explanation for that
+ * long, say what is happening. "Browse downtown instead" stays enabled
+ * throughout, so nobody is ever actually stuck.
+ */
+let waitingHint = null;
+function startWaitingHint() {
+  clearTimeout(waitingHint);
+  waitingHint = setTimeout(() => {
+    if (el("gate").hidden) return;
+    el("gateFine").textContent =
+      "Still waiting on your browser. If you dismissed the prompt without choosing, " +
+      "reload the page to see it again — or browse downtown for now.";
+  }, 7000);
+}
+
+function hideGate() {
+  clearTimeout(waitingHint);
+  el("gate").hidden = true;
+  el("mainUi").hidden = false;
+  // Leaflet sized itself against a hidden container; tell it to measure again.
+  if (map) requestAnimationFrame(() => { map.invalidateSize(); frameMap(); });
+}
+
+el("gateAllow").onclick = () => {
+  el("gateAllow").disabled = true;
+  el("gateAllow").textContent = "Waiting for your browser…";
+  startWaitingHint();
+  locate();
+};
+
+el("gateSkip").onclick = () => {
+  hideGate();
+  setOrigin(DEFAULT_ORIGIN, { fallback:true });
+};
+
+/** granted | prompt | denied | unknown — without triggering a prompt. */
+async function permissionState() {
+  try {
+    if (!navigator.permissions?.query) return "unknown";
+    const status = await navigator.permissions.query({ name: "geolocation" });
+    return status.state;
+  } catch {
+    return "unknown";
+  }
+}
+
+async function start() {
+  if (!navigator.geolocation) {
+    state.locError = describeLocError(null);
+    showGate("failed");
+    return;
+  }
+  const permission = await permissionState();
+  let consented = false;
+  try { consented = localStorage.getItem(CONSENT_KEY) === "yes"; } catch { /* private mode */ }
+
+  if (permission === "granted" || (consented && permission !== "denied")) {
+    hideGate();
+    locate();
+    return;
+  }
+  showGate(permission === "denied" ? "denied" : "ask");
+}
+
 function locate() {
   if (!navigator.geolocation) {
     state.locError = describeLocError(null); render(); return;
@@ -623,6 +783,9 @@ function locate() {
     if (state.accuracyM !== null && accuracy > state.accuracyM && !state.locating) return;
     state.locating = false;
     state.accuracyM = position.coords.accuracy ?? null;
+    // They said yes; don't put the gate in front of them again.
+    try { localStorage.setItem(CONSENT_KEY, "yes"); } catch { /* private mode */ }
+    hideGate();
     setOrigin({ lat: position.coords.latitude, lon: position.coords.longitude });
   };
 
@@ -639,8 +802,11 @@ function locate() {
     (error) => {
       state.locating = false;
       state.locError = describeLocError(error);
-      if (!state.origin) setOrigin(DEFAULT_ORIGIN, { fallback:true });
-      else render();
+      if (state.origin) { render(); return; }
+      // Nothing to show yet: explain in the gate rather than silently
+      // presenting downtown Toronto as though it were an answer.
+      showGate(error?.code === 1 ? "denied" : "failed");
+      render();
     },
     options,
   );
@@ -660,7 +826,10 @@ function setOrigin(point, { manual = false, fallback = false } = {}) {
 }
 
 function locationLine() {
-  if (state.locating && !state.origin) return "Finding you…";
+  // Before consent there is nothing true to say here; the gate is doing the
+  // talking. Claiming "using your location" while asking for it is worse than
+  // saying nothing.
+  if (!state.origin) return state.locating ? "Finding you…" : "";
   if (state.manual) {
     return 'Using the spot you picked · ' +
       '<button type="button" id="retryLoc">use my GPS instead</button>';
@@ -695,6 +864,22 @@ function render() {
   drawMap(list);
   renderRows(list);
   renderStatus(list);
+  renderCount(list);
+}
+
+/** What the current radius and filters actually produced. */
+function renderCount(list) {
+  const node = el("resultCount");
+  if (!state.origin || state.loading || list.length === 0) { node.textContent = ""; return; }
+  const range = state.radiusM < 1000
+    ? `${state.radiusM} m` : `${(state.radiusM / 1000).toFixed(1)} km`;
+  const openNow = list.filter((venue) => venue.status.open).length;
+  const kind = KINDS.find((k) => k.id === state.kind);
+  node.innerHTML =
+    `<strong>${list.length}</strong> ` +
+    `${kind.id === "all" ? "place" : kind.label.toLowerCase().replace(/s$/, "")}` +
+    `${list.length === 1 ? "" : "s"} within <strong>${range}</strong>` +
+    (openNow > 0 ? ` · ${openNow} open now` : "");
 }
 
 function renderStatus(list) {
@@ -830,12 +1015,7 @@ buildChips("openChips", OPEN_FILTERS, state.openFilter, (id) => { state.openFilt
 initMap();
 setView("map");
 render();
-locate();
-// Overpass is a shared public service, so don't query downtown and then query
-// again the moment GPS lands. Wait a beat; the error path falls back sooner.
-setTimeout(() => {
-  if (!state.origin) setOrigin(DEFAULT_ORIGIN, { fallback:true });
-}, 4000);
+void start();
 </script>
 </body>
 </html>

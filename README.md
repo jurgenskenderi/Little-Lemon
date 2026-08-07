@@ -22,6 +22,12 @@ dials. Open it on your phone in Toronto. No key, no account, no server —
 `docs/index.html` is one self-contained page and everything happens on your
 device:
 
+- **it asks you first.** The browser's own permission prompt is one line of
+  chrome with no context, and on most browsers you only get to show it once — a
+  reflexive "block" is close to permanent. So the page explains why it wants
+  your location and only calls `getCurrentPosition` from a button you press,
+  which also satisfies the browsers that require a gesture. Grant it once and
+  you are never asked again; block it and the page says how to undo that.
 - **the map** is OpenStreetMap's own tiles through Leaflet, so every street is
   there because it is a real map, not a drawing of one;
 - **the venues** are real, queried live from [Overpass](https://overpass-api.de)
@@ -31,6 +37,11 @@ device:
   ones that run past midnight;
 - **Call, Directions and Website** are ordinary links on an ordinary page, so
   they do what links do.
+
+Your position is not sent anywhere. Distances are computed on your device from
+the exact fix; the coordinate that goes to Overpass is rounded to three decimals
+— about 110 m — and the query radius widened to cover the offset, because "what
+is in this neighbourhood" does not need to know which building you are in.
 
 Deployed from `docs/` by `.github/workflows/pages.yml` on every push.
 
