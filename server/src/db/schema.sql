@@ -40,6 +40,9 @@ CREATE TABLE IF NOT EXISTS deals (
   source_url       TEXT,
   extracted_by     TEXT NOT NULL DEFAULT 'manual'
                      CHECK (extracted_by IN ('heuristic', 'model', 'seed', 'manual')),
+  -- Deals from venues you have an agreement with. These are entered by hand,
+  -- outrank scraped results, and are never overwritten by a crawl.
+  partner          INTEGER NOT NULL DEFAULT 0 CHECK (partner IN (0, 1)),
   last_verified_at TEXT,
   created_at       TEXT NOT NULL DEFAULT (datetime('now')),
   updated_at       TEXT NOT NULL DEFAULT (datetime('now'))

@@ -21,6 +21,7 @@ interface SeedDeal {
   category: DealCategory;
   finePrint: string | null;
   confidence: number;
+  partner?: boolean;
   days: number[];
   startMin: number;
   endMin: number;
@@ -58,7 +59,7 @@ export function seedDatabase(db: DatabaseHandle): { venues: number; deals: numbe
       address: venue.address,
       city: venue.city,
       region: venue.region,
-      country: "US",
+      country: "CA",
       lat: venue.lat,
       lon: venue.lon,
       timeZone: file.timeZone,
@@ -79,7 +80,8 @@ export function seedDatabase(db: DatabaseHandle): { venues: number; deals: numbe
         finePrint: deal.finePrint,
         confidence: deal.confidence,
         sourceUrl: venue.website,
-        extractedBy: "seed",
+        extractedBy: deal.partner ? "manual" : "seed",
+        partner: deal.partner ?? false,
         windows: deal.days.map((day) => ({
           dayOfWeek: day as DayOfWeek,
           startMin: deal.startMin,

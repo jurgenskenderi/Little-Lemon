@@ -35,13 +35,13 @@ export function useDeals(query: Query | null): DealsState {
 
   const lat = query?.lat;
   const lon = query?.lon;
-  const radiusMi = query?.radiusMi;
+  const radiusKm = query?.radiusKm;
   const atIso = query?.at.toISOString();
   const windowMin = query?.windowMin;
   const category = query?.category;
 
   useEffect(() => {
-    if (lat === undefined || lon === undefined || radiusMi === undefined) return;
+    if (lat === undefined || lon === undefined || radiusKm === undefined) return;
 
     inFlight.current?.abort();
     const controller = new AbortController();
@@ -53,7 +53,7 @@ export function useDeals(query: Query | null): DealsState {
     fetchDeals({
       lat,
       lon,
-      radiusMi,
+      radiusKm,
       at: atIso ? new Date(atIso) : new Date(),
       windowMin: windowMin ?? 0,
       category,
@@ -76,7 +76,7 @@ export function useDeals(query: Query | null): DealsState {
       });
 
     return () => controller.abort();
-  }, [lat, lon, radiusMi, atIso, windowMin, category, nonce]);
+  }, [lat, lon, radiusKm, atIso, windowMin, category, nonce]);
 
   return { deals, loading, refreshing, error, refresh };
 }

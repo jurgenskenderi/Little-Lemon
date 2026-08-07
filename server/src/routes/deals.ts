@@ -3,14 +3,16 @@ import { z } from "zod";
 
 import { config } from "../config.ts";
 import { searchDeals, type DatabaseHandle } from "../db/index.ts";
-import { isValidCoordinate } from "../domain/geo.ts";
+import { isValidCoordinate, kilometersToMeters, milesToMeters } from "../domain/geo.ts";
 import { serializeDealResult } from "./serialize.ts";
 
 const searchQuery = z.object({
   lat: z.coerce.number(),
   lon: z.coerce.number(),
-  // Accepts metres directly or miles, since the app lets people think in miles.
+  // Accepts metres, kilometres, or miles. The app sends km (Canada is metric);
+  // the others are kept so the API is usable from anywhere.
   radiusM: z.coerce.number().positive().max(config.search.maxRadiusM).optional(),
+  radiusKm: z.coerce.number().positive().max(60).optional(),
   radiusMi: z.coerce.number().positive().max(40).optional(),
   /** ISO instant the user is asking about. Defaults to now. */
   at: z.iso.datetime({ offset: true }).optional(),
@@ -44,9 +46,11 @@ export function registerDealRoutes(app: FastifyInstance, db: DatabaseHandle): vo
 
     const radiusM =
       params.radiusM ??
-      (params.radiusMi !== undefined
-        ? params.radiusMi * 1609.344
-        : config.search.defaultRadiusM);
+      (params.radiusKm !== undefined
+        ? kilometersToMeters(params.radiusKm)
+        : params.radiusMi !== undefined
+          ? milesToMeters(params.radiusMi)
+          : config.search.defaultRadiusM);
 
     const at = params.at ? new Date(params.at) : new Date();
     if (Number.isNaN(at.getTime())) {

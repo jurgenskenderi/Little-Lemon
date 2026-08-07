@@ -3,7 +3,8 @@ import { z } from "zod";
 
 import { config } from "./config.ts";
 import { openDatabase } from "./db/index.ts";
-import { milesToMeters } from "./domain/geo.ts";
+import { kilometersToMeters } from "./domain/geo.ts";
+import { registerAdminRoutes } from "./routes/admin.ts";
 import { registerDealRoutes } from "./routes/deals.ts";
 import { registerVenueRoutes } from "./routes/venues.ts";
 import { discoverVenues } from "./scraper/discover.ts";
@@ -39,12 +40,13 @@ app.get("/api/health", async () => {
 
 registerDealRoutes(app, db);
 registerVenueRoutes(app, db);
+registerAdminRoutes(app, db);
 
 const scrapeBody = z.object({
   lat: z.number(),
   lon: z.number(),
-  radiusMi: z.number().positive().max(20).default(2),
-  timeZone: z.string().min(1),
+  radiusKm: z.number().positive().max(30).default(3),
+  timeZone: z.string().min(1).default("America/Toronto"),
   limit: z.number().int().positive().max(200).default(25),
 });
 
@@ -78,7 +80,7 @@ app.post("/api/admin/scrape", async (request, reply) => {
       const discovered = await discoverVenues({
         lat: params.lat,
         lon: params.lon,
-        radiusM: milesToMeters(params.radiusMi),
+        radiusM: kilometersToMeters(params.radiusKm),
         timeZone: params.timeZone,
         limit: params.limit,
       });

@@ -221,7 +221,9 @@ export function parseTimeRanges(text: string): ParsedTimeRange[] {
 // Ordered most specific first: "$5 drafts" is a better answer than "$5", and
 // the first pattern to match wins.
 const PRICE_PATTERNS: RegExp[] = [
-  /\$\s?\d+(?:\.\d{2})?\s*(?:drafts?|beers?|wells?|wines?|cocktails?|shots?|apps?|appetizers?|pints?|tacos?|oysters?|glasses?|pitchers?)\b/i,
+  // One optional adjective is allowed between the price and the noun, so
+  // "$6 local pints" reads as well as "$6 pints".
+  /\$\s?\d+(?:\.\d{2})?\s*(?:[a-z]+\s+)?(?:drafts?|draughts?|beers?|wells?|wines?|cocktails?|shots?|apps?|appetizers?|pints?|tacos?|oysters?|glasses?|pitchers?)\b/i,
   /\bhalf[-\s]?(?:off|price)\b/i,
   /\b(?:2|two)\s*for\s*(?:1|one)\b/i,
   /\bbogo\b/i,

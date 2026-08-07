@@ -31,6 +31,8 @@ export interface Deal {
   confidence: number;
   sourceUrl: string | null;
   extractedBy: "heuristic" | "model" | "seed" | "manual";
+  /** Agreed directly with the venue rather than scraped. Ranks first. */
+  partner: boolean;
   windows: DealWindow[];
   lastVerifiedAt: string | null;
 }

@@ -57,7 +57,7 @@ function DetailBody({ deal, onClose }: { deal: ApiDeal; onClose: () => void }) {
             {[venue.address, venue.city, venue.region].filter(Boolean).join(", ")}
           </Text>
         ) : null}
-        <Text style={styles.distance}>{formatDistance(deal.distanceMi)} away</Text>
+        <Text style={styles.distance}>{formatDistance(deal.distanceKm)} away</Text>
 
         <View style={styles.divider} />
 

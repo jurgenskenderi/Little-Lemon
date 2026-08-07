@@ -6,8 +6,8 @@ import { theme } from "../theme";
 import { TIME_CHOICES, type TimeChoice } from "../timeChoices";
 
 interface Props {
-  radiusMi: number;
-  onRadiusChange: (miles: number) => void;
+  radiusKm: number;
+  onRadiusChange: (kilometres: number) => void;
   timeChoice: TimeChoice;
   onTimeChange: (choice: TimeChoice) => void;
   category: DealCategory | null;
@@ -22,7 +22,7 @@ const CATEGORIES: Array<{ value: DealCategory | null; label: string }> = [
 ];
 
 export function FilterBar({
-  radiusMi,
+  radiusKm,
   onRadiusChange,
   timeChoice,
   onTimeChange,
@@ -35,20 +35,20 @@ export function FilterBar({
       <View style={styles.section}>
         <View style={styles.labelRow}>
           <Text style={styles.label}>Within</Text>
-          <Text style={styles.value}>{formatRadius(radiusMi)}</Text>
+          <Text style={styles.value}>{formatRadius(radiusKm)}</Text>
         </View>
         <Slider
-          minimumValue={0.25}
-          maximumValue={10}
-          step={0.25}
-          value={radiusMi}
+          minimumValue={0.5}
+          maximumValue={15}
+          step={0.5}
+          value={radiusKm}
           // Committing on release rather than on every frame keeps the list
           // from re-querying continuously while the thumb is moving.
           onSlidingComplete={onRadiusChange}
           minimumTrackTintColor={theme.color.accent}
           maximumTrackTintColor={theme.color.border}
           thumbTintColor={theme.color.accent}
-          accessibilityLabel={`Search radius, ${formatRadius(radiusMi)}`}
+          accessibilityLabel={`Search radius, ${formatRadius(radiusKm)}`}
           style={styles.slider}
         />
       </View>
@@ -117,9 +117,9 @@ function Chip({
   );
 }
 
-function formatRadius(miles: number): string {
-  if (miles < 1) return `${Math.round(miles * 5280 / 10) * 10} ft`;
-  return miles === 10 ? "10+ mi" : `${miles.toFixed(2).replace(/\.?0+$/, "")} mi`;
+function formatRadius(kilometres: number): string {
+  if (kilometres < 1) return `${Math.round(kilometres * 1000)} m`;
+  return kilometres === 15 ? "15+ km" : `${String(kilometres).replace(/\.0$/, "")} km`;
 }
 
 const styles = StyleSheet.create({

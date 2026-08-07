@@ -38,7 +38,8 @@ export class ApiError extends Error {
 export interface DealSearchParams {
   lat: number;
   lon: number;
-  radiusMi: number;
+  /** Kilometres — the launch market is Ontario. */
+  radiusKm: number;
   /** The moment being asked about. */
   at: Date;
   /** Minutes past `at` to include; 0 means "open right then". */
@@ -51,7 +52,7 @@ export async function fetchDeals(params: DealSearchParams): Promise<DealsRespons
   const query = new URLSearchParams({
     lat: String(params.lat),
     lon: String(params.lon),
-    radiusMi: String(params.radiusMi),
+    radiusKm: String(params.radiusKm),
     at: params.at.toISOString(),
     windowMin: String(params.windowMin),
     limit: "60",

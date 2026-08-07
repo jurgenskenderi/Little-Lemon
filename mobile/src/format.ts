@@ -1,9 +1,11 @@
 import type { ApiDeal } from "./api/types";
 
-export function formatDistance(miles: number): string {
-  if (miles < 0.1) return "steps away";
-  if (miles < 1) return `${Math.round(miles * 5280 / 100) * 100} ft`;
-  return `${miles.toFixed(1)} mi`;
+export function formatDistance(kilometres: number): string {
+  if (kilometres < 0.05) return "steps away";
+  // Metres up to a kilometre, rounded to the nearest 50 so it reads as an
+  // estimate rather than false precision from a phone GPS fix.
+  if (kilometres < 1) return `${Math.round((kilometres * 1000) / 50) * 50} m`;
+  return `${kilometres.toFixed(1)} km`;
 }
 
 export function formatMinutes(minutes: number): string {

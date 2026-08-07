@@ -13,7 +13,7 @@ import { config } from "../config.ts";
 import {
   getScrapedPage,
   recordScrapedPage,
-  upsertDeal,
+  replaceCrawledDeals,
   upsertVenue,
   type DatabaseHandle,
   type VenueInput,
@@ -205,21 +205,27 @@ export async function crawlVenue(
 
   if (crawledAnything) stats.venuesCrawled = 1;
 
-  for (const deal of dedupeDeals(dealsForVenue)) {
-    upsertDeal(db, {
-      venueId: venue.id,
-      title: deal.title,
-      description: deal.description,
-      priceText: deal.priceText,
-      category: deal.category,
-      finePrint: deal.finePrint,
-      confidence: deal.confidence,
-      sourceUrl: venue.website,
-      extractedBy: deal.confidence >= HEURISTIC_TRUST_THRESHOLD ? "heuristic" : "model",
-      windows: deal.windows,
-      lastVerifiedAt: new Date().toISOString(),
-    });
-    stats.dealsWritten += 1;
+  // Only rewrite this venue's deals if we actually reached its site. A failed
+  // crawl must not be read as "this venue has no deals any more".
+  if (crawledAnything) {
+    const now = new Date().toISOString();
+    const written = replaceCrawledDeals(
+      db,
+      venue.id,
+      dedupeDeals(dealsForVenue).map((deal) => ({
+        title: deal.title,
+        description: deal.description,
+        priceText: deal.priceText,
+        category: deal.category,
+        finePrint: deal.finePrint,
+        confidence: deal.confidence,
+        sourceUrl: venue.website,
+        extractedBy: deal.confidence >= HEURISTIC_TRUST_THRESHOLD ? "heuristic" : "model",
+        windows: deal.windows,
+        lastVerifiedAt: now,
+      })),
+    );
+    stats.dealsWritten += written.length;
   }
 
   return stats;

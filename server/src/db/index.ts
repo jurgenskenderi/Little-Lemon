@@ -29,7 +29,25 @@ export function openDatabase(file: string): DatabaseHandle {
   db.pragma("journal_mode = WAL");
   db.pragma("foreign_keys = ON");
   db.exec(readFileSync(join(here, "schema.sql"), "utf8"));
+  migrate(db);
   return db;
+}
+
+/**
+ * `CREATE TABLE IF NOT EXISTS` does nothing to a table that already exists, so
+ * columns added after someone's database was created need an explicit ALTER.
+ * Adding a column is checked against the live schema and is safe to re-run.
+ */
+function migrate(db: DatabaseHandle): void {
+  const columns = db.prepare(`PRAGMA table_info(deals)`).all() as Array<{ name: string }>;
+  const existing = new Set(columns.map((column) => column.name));
+
+  if (!existing.has("partner")) {
+    db.exec(
+      `ALTER TABLE deals ADD COLUMN partner INTEGER NOT NULL DEFAULT 0
+         CHECK (partner IN (0, 1))`,
+    );
+  }
 }
 
 interface VenueRow {
@@ -59,6 +77,7 @@ interface DealRow {
   confidence: number;
   source_url: string | null;
   extracted_by: Deal["extractedBy"];
+  partner: number;
   last_verified_at: string | null;
 }
 
@@ -152,14 +171,23 @@ export function upsertVenue(db: DatabaseHandle, venue: VenueInput): string {
 export function upsertDeal(db: DatabaseHandle, deal: DealInput): string {
   const id = deal.id ?? slugId("deal", [deal.venueId, deal.title]);
 
+  // A deal negotiated with a venue is authoritative. A later crawl of that
+  // venue's site must not quietly replace it with whatever the page says.
+  if (!deal.partner) {
+    const existing = db
+      .prepare(`SELECT partner FROM deals WHERE id = ?`)
+      .get(id) as { partner: number } | undefined;
+    if (existing?.partner === 1) return id;
+  }
+
   const run = db.transaction(() => {
     db.prepare(
       `INSERT INTO deals (id, venue_id, title, description, price_text, category,
                           fine_print, confidence, source_url, extracted_by,
-                          last_verified_at, updated_at)
+                          partner, last_verified_at, updated_at)
        VALUES (@id, @venue_id, @title, @description, @price_text, @category,
                @fine_print, @confidence, @source_url, @extracted_by,
-               @last_verified_at, datetime('now'))
+               @partner, @last_verified_at, datetime('now'))
        ON CONFLICT (id) DO UPDATE SET
          venue_id = excluded.venue_id,
          title = excluded.title,
@@ -170,6 +198,7 @@ export function upsertDeal(db: DatabaseHandle, deal: DealInput): string {
          confidence = excluded.confidence,
          source_url = excluded.source_url,
          extracted_by = excluded.extracted_by,
+         partner = excluded.partner,
          last_verified_at = excluded.last_verified_at,
          updated_at = datetime('now')`,
     ).run({
@@ -183,6 +212,7 @@ export function upsertDeal(db: DatabaseHandle, deal: DealInput): string {
       confidence: deal.confidence,
       source_url: deal.sourceUrl,
       extracted_by: deal.extractedBy,
+      partner: deal.partner ? 1 : 0,
       last_verified_at: deal.lastVerifiedAt,
     });
 
@@ -251,6 +281,7 @@ export function getDealsForVenue(db: DatabaseHandle, venueId: string): Deal[] {
     confidence: row.confidence,
     sourceUrl: row.source_url,
     extractedBy: row.extracted_by,
+    partner: row.partner === 1,
     windows: windows.get(row.id) ?? [],
     lastVerifiedAt: row.last_verified_at,
   }));
@@ -314,7 +345,7 @@ export function searchDeals(
     .prepare(
       `SELECT d.id AS deal_id, d.venue_id, d.title, d.description, d.price_text,
               d.category, d.fine_print, d.confidence, d.source_url,
-              d.extracted_by, d.last_verified_at,
+              d.extracted_by, d.partner, d.last_verified_at,
               v.id AS v_id, v.name AS v_name, v.address, v.city, v.region,
               v.country, v.lat, v.lon, v.time_zone, v.website, v.phone,
               v.source, v.source_id
@@ -354,6 +385,7 @@ export function searchDeals(
       confidence: row.confidence,
       sourceUrl: row.source_url,
       extractedBy: row.extracted_by,
+      partner: row.partner === 1,
       windows: dealWindows,
       lastVerifiedAt: row.last_verified_at,
       venue,
@@ -373,13 +405,83 @@ export function searchDeals(
         a.minutesUntilStart - b.minutesUntilStart || a.distanceM - b.distanceM
       );
     }
-    // "best": already-open places first, then nearest, because someone
-    // searching at 5pm on a Friday wants a table now, not the best deal across town.
+    // "best": partner venues first — those deals are agreed directly and are
+    // the only ones we can vouch for. Then already-open places, because someone
+    // searching at 5pm on a Friday wants a table now, not the best deal across
+    // town. Distance breaks the remaining ties.
+    if (a.partner !== b.partner) return a.partner ? -1 : 1;
     if (a.activeNow !== b.activeNow) return a.activeNow ? -1 : 1;
     return a.distanceM - b.distanceM;
   });
 
   return results.slice(search.offset, search.offset + search.limit);
+}
+
+/**
+ * Replace every crawled deal for a venue in one transaction.
+ *
+ * A re-crawl treats the venue's own site as the source of truth: a deal it no
+ * longer lists should disappear rather than linger. Partner deals are excluded
+ * from the delete, so an agreement is never collateral damage of a crawl.
+ *
+ * Ids embed the schedule, because a venue can run two deals under one name
+ * ("Happy Hour" at 4pm and again at 10pm) and those must not collide.
+ */
+export function replaceCrawledDeals(
+  db: DatabaseHandle,
+  venueId: string,
+  deals: readonly Omit<DealInput, "venueId" | "partner">[],
+): string[] {
+  const ids: string[] = [];
+
+  const run = db.transaction(() => {
+    db.prepare(`DELETE FROM deals WHERE venue_id = ? AND partner = 0`).run(venueId);
+
+    for (const deal of deals) {
+      const signature = deal.windows
+        .map((window) => `${window.dayOfWeek}-${window.startMin}-${window.endMin}`)
+        .sort()
+        .join("_");
+      const id = deal.id ?? slugId("deal", [venueId, deal.title, signature]);
+      ids.push(upsertDeal(db, { ...deal, id, venueId, partner: false }));
+    }
+  });
+
+  run();
+  return ids;
+}
+
+export function listVenues(
+  db: DatabaseHandle,
+  options: { limit?: number; query?: string } = {},
+): Venue[] {
+  const limit = Math.min(options.limit ?? 200, 500);
+  const rows = options.query
+    ? (db
+        .prepare(
+          `SELECT * FROM venues WHERE name LIKE ? OR city LIKE ? ORDER BY name LIMIT ?`,
+        )
+        .all(`%${options.query}%`, `%${options.query}%`, limit) as VenueRow[])
+    : (db.prepare(`SELECT * FROM venues ORDER BY name LIMIT ?`).all(limit) as VenueRow[]);
+  return rows.map(toVenue);
+}
+
+export function deleteDeal(db: DatabaseHandle, id: string): boolean {
+  const result = db.prepare(`DELETE FROM deals WHERE id = ?`).run(id);
+  return result.changes > 0;
+}
+
+export function deleteVenue(db: DatabaseHandle, id: string): boolean {
+  // deal_windows cascade from deals, which cascade from venues.
+  const result = db.prepare(`DELETE FROM venues WHERE id = ?`).run(id);
+  return result.changes > 0;
+}
+
+export function countPartnerDeals(db: DatabaseHandle): number {
+  const row = db.prepare(`SELECT COUNT(*) AS n FROM deals WHERE partner = 1`).get() as {
+    n: number;
+  };
+  return row.n;
 }
 
 export function recordScrapedPage(

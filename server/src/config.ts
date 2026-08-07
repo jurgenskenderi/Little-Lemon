@@ -20,7 +20,7 @@ export const config = {
   extractionModel: process.env.EXTRACTION_MODEL ?? "claude-opus-5",
 
   search: {
-    defaultRadiusM: intFromEnv("DEFAULT_RADIUS_M", 1600), // ~1 mile
+    defaultRadiusM: intFromEnv("DEFAULT_RADIUS_M", 2000), // 2 km
     maxRadiusM: intFromEnv("MAX_RADIUS_M", 50_000),
     defaultLimit: intFromEnv("DEFAULT_LIMIT", 50),
     maxLimit: intFromEnv("MAX_LIMIT", 200),

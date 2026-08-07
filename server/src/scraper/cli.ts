@@ -1,8 +1,8 @@
 /**
  * Crawl runner.
  *
- *   npm run scrape --workspace server -- --lat 47.6205 --lon -122.3493 \
- *     --radius-mi 2 --tz America/Los_Angeles --limit 25
+ *   npm run scrape --workspace server -- --lat 43.6487 --lon -79.3980 \
+ *     --radius-km 3 --limit 25
  *
  * Discovers venues near a point via OpenStreetMap, then crawls each one's site
  * for deals. Add --dry-run to see what would be crawled without fetching.
@@ -10,7 +10,7 @@
 
 import { config } from "../config.ts";
 import { openDatabase } from "../db/index.ts";
-import { milesToMeters } from "../domain/geo.ts";
+import { kilometersToMeters, milesToMeters } from "../domain/geo.ts";
 import { discoverVenues } from "./discover.ts";
 import { isModelExtractionAvailable } from "./extract-model.ts";
 import { crawlVenues, saveDiscoveredVenues } from "./pipeline.ts";
@@ -49,15 +49,21 @@ function parseArgs(argv: string[]): Args {
     throw new Error("--lat and --lon are required, e.g. --lat 47.62 --lon -122.35");
   }
 
-  const radiusMi = Number(flags.get("radius-mi") ?? 2);
-  const radiusM = Number(flags.get("radius-m") ?? milesToMeters(radiusMi));
+  // Kilometres by default: the launch market is Ontario.
+  const radiusKm = Number(flags.get("radius-km") ?? 3);
+  const radiusMi = flags.get("radius-mi");
+  const radiusM = Number(
+    flags.get("radius-m") ??
+      (radiusMi !== undefined ? milesToMeters(Number(radiusMi)) : kilometersToMeters(radiusKm)),
+  );
 
   return {
     lat,
     lon,
     radiusM,
-    timeZone:
-      flags.get("tz") ?? Intl.DateTimeFormat().resolvedOptions().timeZone ?? "UTC",
+    // Ontario is Eastern time end to end, apart from a small north-western
+    // corner around Atikokan that sits on Central.
+    timeZone: flags.get("tz") ?? "America/Toronto",
     limit: Number(flags.get("limit") ?? 25),
     dryRun: booleans.has("dry-run"),
     force: booleans.has("force"),

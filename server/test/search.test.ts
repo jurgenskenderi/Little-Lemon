@@ -49,6 +49,7 @@ function addDeal(
     title?: string;
     category?: "drink" | "food" | "both";
     confidence?: number;
+    partner?: boolean;
     days: DayOfWeek[];
     startMin: number;
     endMin: number;
@@ -64,7 +65,8 @@ function addDeal(
     finePrint: null,
     confidence: options.confidence ?? 0.9,
     sourceUrl: null,
-    extractedBy: "seed",
+    extractedBy: options.partner ? "manual" : "seed",
+    partner: options.partner ?? false,
     windows: options.days.map((day) => ({
       dayOfWeek: day,
       startMin: options.startMin,
@@ -238,6 +240,73 @@ describe("searchDeals", () => {
 
     assert.deepEqual(results.map((deal) => deal.venue.id), ["ven_late"]);
     assert.equal(results[0]?.activeNow, true);
+  });
+
+  it("ranks partner deals above nearer scraped ones", () => {
+    // Deliberately the furthest venue in the set, so distance alone would bury it.
+    addVenue(db, "ven_partner", "Partner Bar", ORIGIN.lat + 0.02, ORIGIN.lon);
+    addDeal(db, {
+      id: "deal_partner",
+      venueId: "ven_partner",
+      partner: true,
+      days: [5],
+      startMin: 960,
+      endMin: 1080,
+    });
+
+    const results = searchDeals(db, { ...baseSearch, radiusM: milesToMeters(10) });
+    assert.equal(results[0]?.venue.id, "ven_partner", "the agreed deal leads");
+    assert.equal(results[0]?.partner, true);
+    assert.ok(
+      (results[1]?.distanceM ?? Infinity) < (results[0]?.distanceM ?? 0),
+      "even though something closer was available",
+    );
+  });
+
+  it("still respects distance and time filters for partner deals", () => {
+    // A partnership does not exempt a venue from being too far away.
+    addVenue(db, "ven_partner_far", "Far Partner", ORIGIN.lat + 0.1, ORIGIN.lon);
+    addDeal(db, {
+      id: "deal_partner_far",
+      venueId: "ven_partner_far",
+      partner: true,
+      days: [5],
+      startMin: 960,
+      endMin: 1080,
+    });
+
+    const results = searchDeals(db, { ...baseSearch, radiusM: milesToMeters(1) });
+    assert.ok(!results.some((deal) => deal.venue.id === "ven_partner_far"));
+  });
+
+  it("does not let a later crawl overwrite a partner deal", () => {
+    addVenue(db, "ven_agreed", "Agreed Bar", ORIGIN.lat, ORIGIN.lon);
+    addDeal(db, {
+      id: "deal_agreed",
+      venueId: "ven_agreed",
+      title: "Agreed Happy Hour",
+      partner: true,
+      days: [5],
+      startMin: 960,
+      endMin: 1080,
+    });
+
+    // The crawler finds the venue's page and reads different hours off it.
+    addDeal(db, {
+      id: "deal_agreed",
+      venueId: "ven_agreed",
+      title: "Scraped Happy Hour",
+      confidence: 0.5,
+      days: [5],
+      startMin: 1200,
+      endMin: 1320,
+    });
+
+    const results = searchDeals(db, { ...baseSearch, radiusM: milesToMeters(1) });
+    const deal = results.find((candidate) => candidate.id === "deal_agreed");
+    assert.equal(deal?.title, "Agreed Happy Hour", "the negotiated deal survives");
+    assert.equal(deal?.partner, true);
+    assert.equal(deal?.matchedWindow.startMin, 960, "and keeps its agreed hours");
   });
 
   it("paginates without dropping or repeating results", () => {

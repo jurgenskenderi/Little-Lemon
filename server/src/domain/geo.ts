@@ -77,6 +77,14 @@ export function isValidCoordinate(point: Coordinates): boolean {
   );
 }
 
+export function metersToKilometers(meters: number): number {
+  return meters / 1000;
+}
+
+export function kilometersToMeters(kilometers: number): number {
+  return kilometers * 1000;
+}
+
 export function metersToMiles(meters: number): number {
   return meters / 1609.344;
 }

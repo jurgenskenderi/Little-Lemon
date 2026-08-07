@@ -31,10 +31,12 @@ export interface ApiDeal {
   confidence: number;
   sourceUrl: string | null;
   extractedBy: "heuristic" | "model" | "seed" | "manual";
+  partner: boolean;
   lastVerifiedAt: string | null;
   windows: ApiWindow[];
   venue: ApiVenue;
   distanceM: number;
+  distanceKm: number;
   distanceMi: number;
   activeNow: boolean;
   minutesUntilStart: number;

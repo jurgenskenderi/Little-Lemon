@@ -17,19 +17,26 @@ export function DealCard({ deal, onPress }: Props) {
     <Pressable
       onPress={() => onPress(deal)}
       accessibilityRole="button"
-      accessibilityLabel={`${deal.title} at ${deal.venue.name}, ${status.text}, ${formatDistance(deal.distanceMi)} away`}
+      accessibilityLabel={`${deal.partner ? "Partner deal. " : ""}${deal.title} at ${deal.venue.name}, ${status.text}, ${formatDistance(deal.distanceKm)} away`}
       style={({ pressed }) => [styles.card, pressed && styles.cardPressed]}
     >
       <View style={styles.headerRow}>
         <Text style={styles.venue} numberOfLines={1}>
           {deal.venue.name}
         </Text>
-        <Text style={styles.distance}>{formatDistance(deal.distanceMi)}</Text>
+        <Text style={styles.distance}>{formatDistance(deal.distanceKm)}</Text>
       </View>
 
-      <Text style={styles.title} numberOfLines={2}>
-        {deal.title}
-      </Text>
+      <View style={styles.titleRow}>
+        {deal.partner ? (
+          <View style={styles.partnerBadge}>
+            <Text style={styles.partnerBadgeText}>PARTNER</Text>
+          </View>
+        ) : null}
+        <Text style={styles.title} numberOfLines={2}>
+          {deal.title}
+        </Text>
+      </View>
 
       {deal.priceText ? <Text style={styles.price}>{deal.priceText}</Text> : null}
 
@@ -87,11 +94,29 @@ const styles = StyleSheet.create({
     fontSize: theme.font.small,
     fontVariant: ["tabular-nums"],
   },
+  titleRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: theme.space(2),
+    marginTop: theme.space(1.5),
+  },
   title: {
+    flexShrink: 1,
     color: theme.color.text,
     fontSize: theme.font.heading,
     fontWeight: "700",
-    marginTop: theme.space(1.5),
+  },
+  partnerBadge: {
+    backgroundColor: theme.color.accent,
+    borderRadius: theme.radius.sm,
+    paddingHorizontal: theme.space(1.5),
+    paddingVertical: theme.space(0.5),
+  },
+  partnerBadgeText: {
+    color: theme.color.accentText,
+    fontSize: theme.font.tiny,
+    fontWeight: "800",
+    letterSpacing: 0.5,
   },
   price: {
     color: theme.color.accent,

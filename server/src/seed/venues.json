@@ -1,33 +1,34 @@
 {
-  "note": "Fictional venues for local development and tests. Coordinates are real Seattle locations, but the businesses and their deals are invented so nothing here misrepresents a real establishment.",
-  "timeZone": "America/Los_Angeles",
+  "note": "Development dataset for the Ontario launch. Coordinates are real Toronto, Ottawa, and Hamilton locations, but every venue name and every deal is INVENTED. Do not ship this as real listings — publishing made-up happy hour times under a real restaurant's name misinforms customers and misrepresents the business. Replace it with crawled data (npm run scrape) and hand-entered partner deals (/admin).",
+  "timeZone": "America/Toronto",
   "venues": [
     {
-      "id": "ven_seed_brass_lantern",
-      "name": "The Brass Lantern",
-      "address": "1420 Pike St",
-      "city": "Seattle",
-      "region": "WA",
-      "lat": 47.6142,
-      "lon": -122.3283,
-      "website": "https://example.com/brass-lantern",
-      "phone": "+1-206-555-0118",
+      "id": "ven_seed_queen_west_tavern",
+      "name": "The Alder & Oak",
+      "address": "412 Queen St W",
+      "city": "Toronto",
+      "region": "ON",
+      "lat": 43.6479,
+      "lon": -79.3968,
+      "website": "https://example.com/alder-and-oak",
+      "phone": "+1-416-555-0118",
       "deals": [
         {
           "title": "Happy Hour",
-          "description": "$5 drafts, $7 well cocktails, half off all appetizers.",
-          "priceText": "$5 drafts",
+          "description": "$6 local pints, $9 house cocktails, half off all shared plates.",
+          "priceText": "$6 pints",
           "category": "both",
-          "finePrint": "Bar area only.",
-          "confidence": 0.92,
+          "finePrint": "Bar and patio only.",
+          "confidence": 1,
+          "partner": true,
           "days": [1, 2, 3, 4, 5],
           "startMin": 960,
-          "endMin": 1080
+          "endMin": 1140
         },
         {
-          "title": "Late Night Happy Hour",
-          "description": "The full happy hour menu returns after 10pm, running until close.",
-          "priceText": "$5 drafts",
+          "title": "Late Night Menu",
+          "description": "The full happy hour list comes back after 10pm.",
+          "priceText": "$6 pints",
           "category": "both",
           "finePrint": null,
           "confidence": 0.78,
@@ -38,102 +39,78 @@
       ]
     },
     {
-      "id": "ven_seed_pine_and_third",
-      "name": "Pine & Third",
-      "address": "301 Pine St",
-      "city": "Seattle",
-      "region": "WA",
-      "lat": 47.6108,
-      "lon": -122.3389,
-      "website": "https://example.com/pine-and-third",
-      "phone": "+1-206-555-0142",
+      "id": "ven_seed_king_west_social",
+      "name": "Foundry Social",
+      "address": "620 King St W",
+      "city": "Toronto",
+      "region": "ON",
+      "lat": 43.6444,
+      "lon": -79.4005,
+      "website": "https://example.com/foundry-social",
+      "phone": "+1-416-555-0142",
       "deals": [
         {
-          "title": "Oyster Hour",
-          "description": "$2 oysters and $8 sparkling wine by the glass.",
-          "priceText": "$2 oysters",
+          "title": "After Work",
+          "description": "$8 wine by the glass and $1.50 oysters.",
+          "priceText": "$1.50 oysters",
           "category": "both",
           "finePrint": "While supplies last.",
           "confidence": 0.88,
-          "days": [2, 3, 4, 5, 6],
-          "startMin": 930,
-          "endMin": 1050
+          "days": [2, 3, 4, 5],
+          "startMin": 960,
+          "endMin": 1110
         }
       ]
     },
     {
-      "id": "ven_seed_harbor_house",
-      "name": "Harbor House Tavern",
-      "address": "88 Alaskan Way",
-      "city": "Seattle",
-      "region": "WA",
-      "lat": 47.6045,
-      "lon": -122.3421,
-      "website": "https://example.com/harbor-house",
-      "phone": "+1-206-555-0167",
+      "id": "ven_seed_kensington_cantina",
+      "name": "Cantina Verde",
+      "address": "180 Augusta Ave",
+      "city": "Toronto",
+      "region": "ON",
+      "lat": 43.6547,
+      "lon": -79.4025,
+      "website": "https://example.com/cantina-verde",
+      "phone": "+1-416-555-0167",
       "deals": [
         {
-          "title": "Happy Hour",
-          "description": "Half price pitchers and $6 fish tacos, every day.",
-          "priceText": "Half price pitchers",
+          "title": "Taco Tuesday",
+          "description": "$3 tacos all night, $7 margaritas.",
+          "priceText": "$3 tacos",
           "category": "both",
           "finePrint": null,
-          "confidence": 0.85,
-          "days": [0, 1, 2, 3, 4, 5, 6],
-          "startMin": 900,
-          "endMin": 1080
-        }
-      ]
-    },
-    {
-      "id": "ven_seed_copper_kettle",
-      "name": "Copper Kettle Bar",
-      "address": "915 E Pike St",
-      "city": "Seattle",
-      "region": "WA",
-      "lat": 47.6141,
-      "lon": -122.3187,
-      "website": "https://example.com/copper-kettle",
-      "phone": "+1-206-555-0193",
-      "deals": [
-        {
-          "title": "Industry Night",
-          "description": "25% off the entire menu for service industry workers.",
-          "priceText": "25% off",
-          "category": "both",
-          "finePrint": "Industry ID required.",
-          "confidence": 0.71,
-          "days": [1],
-          "startMin": 1200,
-          "endMin": 1500
+          "confidence": 0.94,
+          "days": [2],
+          "startMin": 960,
+          "endMin": 1320
         },
         {
-          "title": "Happy Hour",
-          "description": "$6 house cocktails and $4 beers.",
-          "priceText": "$6 cocktails",
-          "category": "drink",
-          "finePrint": null,
-          "confidence": 0.9,
-          "days": [2, 3, 4, 5],
-          "startMin": 1020,
-          "endMin": 1140
+          "title": "Weekend Brunch",
+          "description": "$12 brunch cocktails and bottomless chips and salsa.",
+          "priceText": "$12 cocktails",
+          "category": "both",
+          "finePrint": "Two hour limit.",
+          "confidence": 0.8,
+          "days": [0, 6],
+          "startMin": 600,
+          "endMin": 870
         }
       ]
     },
     {
-      "id": "ven_seed_marigold",
-      "name": "Marigold Wine Room",
-      "address": "612 Union St",
-      "city": "Seattle",
-      "region": "WA",
-      "lat": 47.6096,
-      "lon": -122.3336,
-      "website": "https://example.com/marigold",
-      "phone": "+1-206-555-0121",
+      "id": "ven_seed_distillery_cellar",
+      "name": "The Copper Cellar",
+      "address": "55 Mill St",
+      "city": "Toronto",
+      "region": "ON",
+      "lat": 43.6503,
+      "lon": -79.3595,
+      "website": "https://example.com/copper-cellar",
+      "phone": "+1-416-555-0193",
       "deals": [
         {
-          "title": "Bottle Hour",
-          "description": "$20 off every bottle on the list, plus complimentary bar snacks.",
+          "title": "Cellar Hour",
+          "description": "$20 off every bottle on the list, complimentary bar snacks.",
           "priceText": "$20 off bottles",
           "category": "drink",
           "finePrint": "Excludes reserve list.",
@@ -145,103 +122,103 @@
       ]
     },
     {
-      "id": "ven_seed_ninth_ward",
-      "name": "The Ninth Ward",
-      "address": "2100 9th Ave",
-      "city": "Seattle",
-      "region": "WA",
-      "lat": 47.6172,
-      "lon": -122.3399,
-      "website": "https://example.com/ninth-ward",
-      "phone": "+1-206-555-0155",
+      "id": "ven_seed_ossington_bar",
+      "name": "Marigold Bar",
+      "address": "88 Ossington Ave",
+      "city": "Toronto",
+      "region": "ON",
+      "lat": 43.647,
+      "lon": -79.42,
+      "website": "https://example.com/marigold-bar",
+      "phone": "+1-416-555-0121",
       "deals": [
         {
-          "title": "Weekend Brunch Deal",
-          "description": "$9 bottomless drip coffee and $12 brunch cocktails.",
-          "priceText": "$12 brunch cocktails",
+          "title": "Industry Night",
+          "description": "25% off the full menu for service industry staff.",
+          "priceText": "25% off",
           "category": "both",
-          "finePrint": "Two hour limit on bottomless.",
-          "confidence": 0.8,
-          "days": [0, 6],
-          "startMin": 600,
-          "endMin": 840
+          "finePrint": "Industry ID required.",
+          "confidence": 0.71,
+          "days": [1],
+          "startMin": 1200,
+          "endMin": 1500
         },
         {
-          "title": "Late Pour",
-          "description": "Half off the back bar from 11pm until 1am.",
-          "priceText": "Half off",
+          "title": "Happy Hour",
+          "description": "$7 house cocktails and $5 draught.",
+          "priceText": "$7 cocktails",
           "category": "drink",
           "finePrint": null,
-          "confidence": 0.64,
-          "days": [5, 6],
-          "startMin": 1380,
-          "endMin": 1500
+          "confidence": 0.9,
+          "days": [2, 3, 4, 5],
+          "startMin": 1020,
+          "endMin": 1140
         }
       ]
     },
     {
-      "id": "ven_seed_elm_street",
-      "name": "Elm Street Social",
-      "address": "1512 Broadway",
-      "city": "Seattle",
-      "region": "WA",
-      "lat": 47.6135,
-      "lon": -122.3211,
-      "website": "https://example.com/elm-street-social",
-      "phone": "+1-206-555-0176",
-      "deals": [
-        {
-          "title": "Taco Tuesday",
-          "description": "$2 tacos all night and $5 margaritas.",
-          "priceText": "$2 tacos",
-          "category": "both",
-          "finePrint": null,
-          "confidence": 0.94,
-          "days": [2],
-          "startMin": 960,
-          "endMin": 1320
-        }
-      ]
-    },
-    {
-      "id": "ven_seed_north_dock",
-      "name": "North Dock Brewing",
-      "address": "4020 Leary Way NW",
-      "city": "Seattle",
-      "region": "WA",
-      "lat": 47.6589,
-      "lon": -122.3653,
-      "website": "https://example.com/north-dock",
-      "phone": "+1-206-555-0188",
+      "id": "ven_seed_liberty_taproom",
+      "name": "Liberty Works Taproom",
+      "address": "125 Atlantic Ave",
+      "city": "Toronto",
+      "region": "ON",
+      "lat": 43.638,
+      "lon": -79.4207,
+      "website": "https://example.com/liberty-works",
+      "phone": "+1-416-555-0155",
       "deals": [
         {
           "title": "Taproom Happy Hour",
-          "description": "$4 pints of anything on the house list.",
-          "priceText": "$4 pints",
+          "description": "$5 pints of anything brewed on site.",
+          "priceText": "$5 pints",
           "category": "drink",
           "finePrint": null,
           "confidence": 0.87,
           "days": [1, 2, 3, 4, 5],
           "startMin": 900,
-          "endMin": 1020
+          "endMin": 1080
         }
       ]
     },
     {
-      "id": "ven_seed_glasshouse",
-      "name": "Glasshouse Kitchen",
-      "address": "220 Boren Ave N",
-      "city": "Seattle",
-      "region": "WA",
-      "lat": 47.6222,
-      "lon": -122.3364,
-      "website": "https://example.com/glasshouse",
-      "phone": "+1-206-555-0134",
+      "id": "ven_seed_danforth_taverna",
+      "name": "Olive Street Taverna",
+      "address": "410 Danforth Ave",
+      "city": "Toronto",
+      "region": "ON",
+      "lat": 43.6779,
+      "lon": -79.3496,
+      "website": "https://example.com/olive-street",
+      "phone": "+1-416-555-0176",
+      "deals": [
+        {
+          "title": "Meze Hour",
+          "description": "Half price meze plates and $8 ouzo flights.",
+          "priceText": "Half price meze",
+          "category": "both",
+          "finePrint": "Dine-in only.",
+          "confidence": 0.82,
+          "days": [0, 1, 2, 3, 4],
+          "startMin": 990,
+          "endMin": 1140
+        }
+      ]
+    },
+    {
+      "id": "ven_seed_leslieville_diner",
+      "name": "Eastside Counter",
+      "address": "1042 Queen St E",
+      "city": "Toronto",
+      "region": "ON",
+      "lat": 43.6626,
+      "lon": -79.3327,
+      "website": "https://example.com/eastside-counter",
+      "phone": "+1-416-555-0188",
       "deals": [
         {
           "title": "Early Bird Prix Fixe",
-          "description": "Three courses for $35 before 6pm.",
-          "priceText": "$35 prix fixe",
+          "description": "Three courses for $39 before 6pm.",
+          "priceText": "$39 prix fixe",
           "category": "food",
           "finePrint": "Seated by 5:45pm.",
           "confidence": 0.76,
@@ -252,26 +229,98 @@
       ]
     },
     {
-      "id": "ven_seed_rainier_room",
-      "name": "The Rainier Room",
-      "address": "1201 1st Ave S",
-      "city": "Seattle",
-      "region": "WA",
-      "lat": 47.5931,
-      "lon": -122.3327,
-      "website": "https://example.com/rainier-room",
-      "phone": "+1-206-555-0109",
+      "id": "ven_seed_yorkville_lounge",
+      "name": "The Glasshouse Lounge",
+      "address": "120 Cumberland St",
+      "city": "Toronto",
+      "region": "ON",
+      "lat": 43.6708,
+      "lon": -79.3934,
+      "website": "https://example.com/glasshouse-lounge",
+      "phone": "+1-416-555-0134",
       "deals": [
         {
-          "title": "Game Day Special",
-          "description": "$3 domestic drafts and $8 nacho platters on game days.",
-          "priceText": "$3 drafts",
+          "title": "Aperitivo",
+          "description": "$10 spritzes with complimentary snacks.",
+          "priceText": "$10 spritzes",
           "category": "both",
-          "finePrint": "Home games only.",
-          "confidence": 0.58,
-          "days": [0, 6],
-          "startMin": 720,
-          "endMin": 1200
+          "finePrint": null,
+          "confidence": 0.85,
+          "days": [2, 3, 4, 5, 6],
+          "startMin": 960,
+          "endMin": 1110
+        }
+      ]
+    },
+    {
+      "id": "ven_seed_financial_pub",
+      "name": "Bay & Wellington Public House",
+      "address": "150 Bay St",
+      "city": "Toronto",
+      "region": "ON",
+      "lat": 43.6487,
+      "lon": -79.3781,
+      "website": "https://example.com/bay-wellington",
+      "phone": "+1-416-555-0109",
+      "deals": [
+        {
+          "title": "Trading Floor Happy Hour",
+          "description": "$5 domestic pints and $9 wing platters.",
+          "priceText": "$5 pints",
+          "category": "both",
+          "finePrint": null,
+          "confidence": 0.89,
+          "days": [1, 2, 3, 4, 5],
+          "startMin": 930,
+          "endMin": 1080
+        }
+      ]
+    },
+    {
+      "id": "ven_seed_hamilton_james",
+      "name": "James North Beer Hall",
+      "address": "220 James St N",
+      "city": "Hamilton",
+      "region": "ON",
+      "lat": 43.2611,
+      "lon": -79.8656,
+      "website": "https://example.com/james-north",
+      "phone": "+1-905-555-0144",
+      "deals": [
+        {
+          "title": "Steel City Happy Hour",
+          "description": "$4 pints and half off pretzels.",
+          "priceText": "$4 pints",
+          "category": "both",
+          "finePrint": null,
+          "confidence": 0.86,
+          "days": [1, 2, 3, 4, 5],
+          "startMin": 960,
+          "endMin": 1110
+        }
+      ]
+    },
+    {
+      "id": "ven_seed_ottawa_byward",
+      "name": "Byward Cellar",
+      "address": "55 York St",
+      "city": "Ottawa",
+      "region": "ON",
+      "lat": 45.4285,
+      "lon": -75.6924,
+      "website": "https://example.com/byward-cellar",
+      "phone": "+1-613-555-0177",
+      "deals": [
+        {
+          "title": "Market Happy Hour",
+          "description": "$6 local drafts and $2 oysters.",
+          "priceText": "$2 oysters",
+          "category": "both",
+          "finePrint": "Bar seating only.",
+          "confidence": 0.84,
+          "days": [2, 3, 4, 5, 6],
+          "startMin": 960,
+          "endMin": 1140
         }
       ]
     }

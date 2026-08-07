@@ -1,0 +1,737 @@
+<title>Little Lemon — Happy hours in Ontario</title>
+<style>
+  :root {
+    --ink:        #0E1518;
+    --surface:    #172126;
+    --raised:     #1F2C32;
+    --border:     #2B3A41;
+    --text:       #E9F1EE;
+    --muted:      #93A6A5;
+    --faint:      #6B7E80;
+    --accent:     #E8A33D;
+    --on-accent:  #1B1206;
+    --open:       #4FB477;
+    --soon:       #E5654B;
+    --later:      #7E9394;
+    --ring:       rgba(232,163,61,.45);
+    --ring-fill:  rgba(232,163,61,.07);
+    --grid:       rgba(147,166,165,.10);
+
+    --display: "Avenir Next Condensed", "Helvetica Neue Condensed", "Arial Narrow", sans-serif;
+    --body: "Avenir Next", Avenir, "Segoe UI", Roboto, system-ui, sans-serif;
+    --data: ui-monospace, Menlo, Consolas, "DejaVu Sans Mono", monospace;
+  }
+
+  /* Daytime. Same amber, warm paper ground — not an inversion. */
+  @media (prefers-color-scheme: light) {
+    :root {
+      --ink: #F3EFE7; --surface: #FFFFFF; --raised: #F7F3EC; --border: #DCD4C6;
+      --text: #17211F; --muted: #5C6B69; --faint: #85918F;
+      --accent: #B4741B; --on-accent: #FFF8EC;
+      --open: #2F8F5B; --soon: #C4462C; --later: #7B8886;
+      --ring: rgba(180,116,27,.40); --ring-fill: rgba(180,116,27,.07);
+      --grid: rgba(23,33,31,.09);
+    }
+  }
+  :root[data-theme="light"] {
+    --ink: #F3EFE7; --surface: #FFFFFF; --raised: #F7F3EC; --border: #DCD4C6;
+    --text: #17211F; --muted: #5C6B69; --faint: #85918F;
+    --accent: #B4741B; --on-accent: #FFF8EC;
+    --open: #2F8F5B; --soon: #C4462C; --later: #7B8886;
+    --ring: rgba(180,116,27,.40); --ring-fill: rgba(180,116,27,.07);
+    --grid: rgba(23,33,31,.09);
+  }
+  :root[data-theme="dark"] {
+    --ink: #0E1518; --surface: #172126; --raised: #1F2C32; --border: #2B3A41;
+    --text: #E9F1EE; --muted: #93A6A5; --faint: #6B7E80;
+    --accent: #E8A33D; --on-accent: #1B1206;
+    --open: #4FB477; --soon: #E5654B; --later: #7E9394;
+    --ring: rgba(232,163,61,.45); --ring-fill: rgba(232,163,61,.07);
+    --grid: rgba(147,166,165,.10);
+  }
+
+  body {
+    margin: 0; background: var(--ink); color: var(--text);
+    font-family: var(--body); font-size: 15px; line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap { max-width: 560px; margin: 0 auto; padding: 0 16px 64px; }
+
+  .label {
+    font-family: var(--display); text-transform: uppercase; letter-spacing: .12em;
+    font-size: 12px; color: var(--muted); font-weight: 600;
+  }
+  .mono { font-family: var(--data); font-variant-numeric: tabular-nums; }
+
+  /* ---------- masthead ---------- */
+  header { padding: 24px 0 12px; }
+  .wordmark {
+    font-family: var(--display); text-transform: uppercase; letter-spacing: .16em;
+    font-size: 13px; color: var(--accent); font-weight: 700; margin: 0 0 6px;
+  }
+  h1 {
+    font-family: var(--display); font-size: 38px; line-height: 1.02; margin: 0;
+    letter-spacing: -0.005em; text-wrap: balance; font-weight: 700;
+  }
+  .where { color: var(--muted); font-size: 14px; margin: 8px 0 0; }
+  .where button {
+    background: none; border: 0; color: var(--accent); font: inherit;
+    text-decoration: underline; cursor: pointer; padding: 0;
+  }
+
+  .notice {
+    margin-top: 14px; padding: 10px 12px; border-radius: 10px;
+    background: var(--raised); border: 1px solid var(--border);
+    color: var(--muted); font-size: 12.5px; line-height: 1.45;
+  }
+  .notice strong { color: var(--text); }
+
+  /* ---------- controls ---------- */
+  .controls { margin-top: 20px; display: flex; flex-direction: column; gap: 16px; }
+  .ctl-head { display: flex; justify-content: space-between; align-items: baseline; }
+  .ctl-value { font-family: var(--data); color: var(--accent); font-weight: 700; font-size: 15px; }
+
+  input[type=range] {
+    -webkit-appearance: none; appearance: none; width: 100%; height: 24px;
+    background: transparent; cursor: pointer; margin: 4px 0 0;
+  }
+  input[type=range]::-webkit-slider-runnable-track {
+    height: 3px; background: var(--border); border-radius: 2px;
+  }
+  input[type=range]::-moz-range-track { height: 3px; background: var(--border); border-radius: 2px; }
+  input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none; appearance: none; width: 20px; height: 20px; margin-top: -8.5px;
+    border-radius: 50%; background: var(--accent); border: 0;
+  }
+  input[type=range]::-moz-range-thumb {
+    width: 20px; height: 20px; border-radius: 50%; background: var(--accent); border: 0;
+  }
+  input[type=range]:focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; }
+
+  .chips { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 2px; scrollbar-width: none; }
+  .chips::-webkit-scrollbar { display: none; }
+  .chip {
+    flex: 0 0 auto; padding: 8px 14px; border-radius: 999px;
+    border: 1px solid var(--border); background: var(--surface); color: var(--muted);
+    font: inherit; font-size: 13px; font-weight: 600; cursor: pointer;
+    transition: background .15s, color .15s, border-color .15s;
+  }
+  .chip[aria-pressed="true"] {
+    background: var(--accent); border-color: var(--accent); color: var(--on-accent);
+  }
+  .chip:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .hint { color: var(--faint); font-size: 12px; margin: 6px 0 0; }
+
+  /* ---------- results ---------- */
+  .board-head {
+    display: flex; justify-content: space-between; align-items: center;
+    margin: 26px 0 10px; padding-bottom: 8px; border-bottom: 1px solid var(--border);
+  }
+  .toggle { display: flex; border: 1px solid var(--border); border-radius: 999px; overflow: hidden; }
+  .toggle button {
+    padding: 6px 14px; background: transparent; border: 0; color: var(--muted);
+    font-family: var(--display); text-transform: uppercase; letter-spacing: .1em;
+    font-size: 11px; font-weight: 700; cursor: pointer;
+  }
+  .toggle button[aria-pressed="true"] { background: var(--accent); color: var(--on-accent); }
+  .toggle button:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+
+  .rows { display: flex; flex-direction: column; gap: 1px; }
+  .row {
+    display: grid; grid-template-columns: 3px 1fr auto; gap: 14px; align-items: center;
+    width: 100%; text-align: left; padding: 14px 12px 14px 0;
+    background: var(--surface); border: 0; border-radius: 10px;
+    color: inherit; font: inherit; cursor: pointer;
+    animation: rise .28s ease both;
+  }
+  .row:hover { background: var(--raised); }
+  .row:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+  @keyframes rise { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
+  @media (prefers-reduced-motion: reduce) { .row { animation: none; } }
+
+  .stripe { align-self: stretch; border-radius: 10px 0 0 10px; }
+  .row-main { min-width: 0; padding-left: 11px; }
+  .venue-line { display: flex; align-items: center; gap: 7px; }
+  .venue {
+    font-family: var(--display); text-transform: uppercase; letter-spacing: .09em;
+    font-size: 12px; color: var(--muted); font-weight: 600;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .flag {
+    flex: 0 0 auto; font-family: var(--display); font-size: 9.5px; font-weight: 700;
+    letter-spacing: .1em; padding: 2px 5px; border-radius: 3px;
+    background: var(--accent); color: var(--on-accent);
+  }
+  .deal-title {
+    font-size: 16px; font-weight: 600; margin-top: 2px;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .price { color: var(--accent); font-size: 13.5px; margin-top: 1px; }
+  .row-meta { text-align: right; display: flex; flex-direction: column; gap: 3px; padding-right: 2px; }
+  .window { font-family: var(--data); font-size: 12.5px; color: var(--muted); white-space: nowrap; }
+  .countdown { font-family: var(--data); font-size: 12px; font-weight: 600; white-space: nowrap; }
+  .dist { font-family: var(--data); font-size: 11.5px; color: var(--faint); }
+
+  .empty { padding: 40px 8px; text-align: center; color: var(--muted); }
+  .empty h3 { font-family: var(--display); font-size: 20px; margin: 0 0 6px; color: var(--text); }
+
+  /* ---------- map ---------- */
+  .map-shell {
+    position: relative; background: var(--surface); border: 1px solid var(--border);
+    border-radius: 12px; overflow: hidden;
+  }
+  .map-shell svg { display: block; width: 100%; height: auto; touch-action: manipulation; }
+  .pin { cursor: pointer; }
+  .pin:focus-visible { outline: 2px solid var(--accent); }
+  .pin-label {
+    font-family: var(--display); text-transform: uppercase; letter-spacing: .07em;
+    font-size: 8.5px; fill: var(--muted); pointer-events: none;
+  }
+  .map-foot {
+    display: flex; gap: 14px; align-items: center; flex-wrap: wrap;
+    padding: 10px 12px; border-top: 1px solid var(--border); font-size: 11.5px; color: var(--muted);
+  }
+  .key { display: flex; align-items: center; gap: 5px; }
+  .key i { width: 8px; height: 8px; border-radius: 50%; display: block; }
+  .map-tip { color: var(--faint); margin: 8px 2px 0; font-size: 12px; }
+  .recentre {
+    position: absolute; top: 10px; left: 50%; transform: translateX(-50%);
+    padding: 8px 16px; border-radius: 999px; border: 0; background: var(--accent);
+    color: var(--on-accent); font: inherit; font-size: 12.5px; font-weight: 700; cursor: pointer;
+  }
+
+  /* ---------- detail ---------- */
+  dialog {
+    border: 0; padding: 0; background: transparent; max-width: 520px; width: calc(100% - 24px);
+  }
+  dialog::backdrop { background: rgba(0,0,0,.62); }
+  .sheet {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 14px;
+    padding: 22px; color: var(--text);
+  }
+  .sheet h2 { font-family: var(--display); font-size: 26px; margin: 0; letter-spacing: -0.005em; }
+  .sheet .addr { color: var(--muted); font-size: 14px; margin: 6px 0 0; }
+  .rule { height: 1px; background: var(--border); margin: 18px 0; }
+  .sched { display: flex; flex-direction: column; gap: 4px; }
+  .sched div { font-family: var(--data); font-size: 13px; color: var(--muted); }
+  .sched div.on { color: var(--accent); font-weight: 700; }
+  .fine {
+    margin-top: 14px; padding: 10px 12px; background: var(--ink);
+    border-radius: 8px; font-size: 13px; color: var(--muted);
+  }
+  .sheet-actions { display: flex; gap: 8px; margin-top: 20px; }
+  .sheet-actions a, .sheet-actions button {
+    flex: 1; text-align: center; padding: 11px; border-radius: 10px;
+    border: 1px solid var(--border); background: transparent; color: var(--text);
+    font: inherit; font-size: 14px; font-weight: 600; cursor: pointer; text-decoration: none;
+  }
+  .sheet-actions .primary { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
+
+  footer { margin-top: 34px; padding-top: 18px; border-top: 1px solid var(--border);
+           color: var(--faint); font-size: 12px; line-height: 1.6; }
+</style>
+
+<div class="wrap">
+  <header>
+    <p class="wordmark">Little Lemon · Ontario</p>
+    <h1>Happy hours near you</h1>
+    <p class="where" id="where">Locating…</p>
+    <div class="notice">
+      <strong>Preview build with sample data.</strong> Venue names and deals here are
+      invented — real coordinates, fictional businesses — so nothing misrepresents an actual
+      restaurant. The live app reads the same API, filled by the crawler and your partner deals.
+    </div>
+  </header>
+
+  <div class="controls">
+    <div>
+      <div class="ctl-head">
+        <span class="label">Within</span>
+        <span class="ctl-value" id="radiusValue">2 km</span>
+      </div>
+      <input type="range" id="radius" min="0.5" max="15" step="0.5" value="2"
+             aria-label="Search radius in kilometres">
+    </div>
+
+    <div>
+      <span class="label">When</span>
+      <div class="chips" id="timeChips" role="group" aria-label="When are you going out"></div>
+      <p class="hint" id="timeHint"></p>
+    </div>
+
+    <div>
+      <span class="label">What</span>
+      <div class="chips" id="catChips" role="group" aria-label="Deal type"></div>
+    </div>
+  </div>
+
+  <div class="board-head">
+    <span class="label" id="count">—</span>
+    <div class="toggle" role="group" aria-label="View">
+      <button type="button" id="viewList" aria-pressed="true">List</button>
+      <button type="button" id="viewMap" aria-pressed="false">Map</button>
+    </div>
+  </div>
+
+  <div id="listView"><div class="rows" id="rows"></div></div>
+
+  <div id="mapView" hidden>
+    <div class="map-shell">
+      <svg id="map" viewBox="0 0 360 360" role="img" aria-label="Map of nearby deals"></svg>
+      <button type="button" class="recentre" id="recentre" hidden>Search this area</button>
+    </div>
+    <div class="map-foot">
+      <span class="key"><i style="background:var(--accent)"></i>Partner</span>
+      <span class="key"><i style="background:var(--open)"></i>On now</span>
+      <span class="key"><i style="background:var(--later)"></i>Later</span>
+      <span class="key" style="margin-left:auto" id="mapCount"></span>
+    </div>
+    <p class="map-tip">Tap a pin for details, or tap anywhere else on the map to search that spot.</p>
+  </div>
+
+  <footer>
+    Times are matched in each venue's local time, so a Friday 10pm–2am deal still shows at
+    12:30am on Saturday. Distances are great-circle from your device's fix.
+  </footer>
+</div>
+
+<dialog id="sheet"><div class="sheet" id="sheetBody"></div></dialog>
+
+<script>
+"use strict";
+
+/* ------------------------------------------------------------------ *
+ * Sample Ontario dataset. Real coordinates, invented venues and deals.
+ * Windows are minutes from local midnight; an end past 1440 runs into
+ * the next morning, which is how "10pm–2am" stays a single window.
+ * ------------------------------------------------------------------ */
+const TZ = "America/Toronto";
+const VENUES = [
+  { n:"The Alder & Oak", a:"412 Queen St W", c:"Toronto", lat:43.6479, lon:-79.3968, tel:"+14165550118",
+    d:[{t:"Happy Hour", p:"$6 pints", cat:"both", partner:true, desc:"$6 local pints, $9 house cocktails, half off shared plates.", fine:"Bar and patio only.", days:[1,2,3,4,5], s:960, e:1140},
+       {t:"Late Night Menu", p:"$6 pints", cat:"both", conf:0.78, desc:"The full happy hour list comes back after 10pm.", days:[4,5,6], s:1320, e:1560}]},
+  { n:"The Ossington Room", a:"77 Ossington Ave", c:"Toronto", lat:43.6472, lon:-79.4203, tel:"+14165550190",
+    d:[{t:"Negotiated Late Night", p:"$4 pints", cat:"drink", partner:true, desc:"House drafts $4 until close.", fine:"Bar only.", days:[5,6], s:1320, e:1560}]},
+  { n:"Foundry Social", a:"620 King St W", c:"Toronto", lat:43.6444, lon:-79.4005, tel:"+14165550142",
+    d:[{t:"After Work", p:"$1.50 oysters", cat:"both", conf:0.88, desc:"$8 wine by the glass and $1.50 oysters.", fine:"While supplies last.", days:[2,3,4,5], s:960, e:1110}]},
+  { n:"Cantina Verde", a:"180 Augusta Ave", c:"Toronto", lat:43.6547, lon:-79.4025, tel:"+14165550167",
+    d:[{t:"Taco Tuesday", p:"$3 tacos", cat:"both", conf:0.94, desc:"$3 tacos all night, $7 margaritas.", days:[2], s:960, e:1320},
+       {t:"Weekend Brunch", p:"$12 cocktails", cat:"both", conf:0.8, desc:"$12 brunch cocktails, bottomless chips and salsa.", fine:"Two hour limit.", days:[0,6], s:600, e:870}]},
+  { n:"The Copper Cellar", a:"55 Mill St", c:"Toronto", lat:43.6503, lon:-79.3595, tel:"+14165550193",
+    d:[{t:"Cellar Hour", p:"$20 off bottles", cat:"drink", conf:0.83, desc:"$20 off every bottle, complimentary bar snacks.", fine:"Excludes reserve list.", days:[3,4], s:1020, e:1170}]},
+  { n:"Marigold Bar", a:"88 Ossington Ave", c:"Toronto", lat:43.6470, lon:-79.4200, tel:"+14165550121",
+    d:[{t:"Industry Night", p:"25% off", cat:"both", conf:0.71, desc:"25% off the full menu for service industry staff.", fine:"Industry ID required.", days:[1], s:1200, e:1500},
+       {t:"Happy Hour", p:"$7 cocktails", cat:"drink", conf:0.9, desc:"$7 house cocktails and $5 draught.", days:[2,3,4,5], s:1020, e:1140}]},
+  { n:"Liberty Works Taproom", a:"125 Atlantic Ave", c:"Toronto", lat:43.6380, lon:-79.4207, tel:"+14165550155",
+    d:[{t:"Taproom Happy Hour", p:"$5 pints", cat:"drink", conf:0.87, desc:"$5 pints of anything brewed on site.", days:[1,2,3,4,5], s:900, e:1080}]},
+  { n:"Olive Street Taverna", a:"410 Danforth Ave", c:"Toronto", lat:43.6779, lon:-79.3496, tel:"+14165550176",
+    d:[{t:"Meze Hour", p:"Half price meze", cat:"both", conf:0.82, desc:"Half price meze plates and $8 ouzo flights.", fine:"Dine-in only.", days:[0,1,2,3,4], s:990, e:1140}]},
+  { n:"Eastside Counter", a:"1042 Queen St E", c:"Toronto", lat:43.6626, lon:-79.3327, tel:"+14165550188",
+    d:[{t:"Early Bird Prix Fixe", p:"$39 prix fixe", cat:"food", conf:0.76, desc:"Three courses for $39 before 6pm.", fine:"Seated by 5:45pm.", days:[0,1,2,3,4], s:990, e:1080}]},
+  { n:"The Glasshouse Lounge", a:"120 Cumberland St", c:"Toronto", lat:43.6708, lon:-79.3934, tel:"+14165550134",
+    d:[{t:"Aperitivo", p:"$10 spritzes", cat:"both", conf:0.85, desc:"$10 spritzes with complimentary snacks.", days:[2,3,4,5,6], s:960, e:1110}]},
+  { n:"Bay & Wellington Public House", a:"150 Bay St", c:"Toronto", lat:43.6487, lon:-79.3781, tel:"+14165550109",
+    d:[{t:"Trading Floor Happy Hour", p:"$5 pints", cat:"both", conf:0.89, desc:"$5 domestic pints and $9 wing platters.", days:[1,2,3,4,5], s:930, e:1080}]},
+  { n:"James North Beer Hall", a:"220 James St N", c:"Hamilton", lat:43.2611, lon:-79.8656, tel:"+19055550144",
+    d:[{t:"Steel City Happy Hour", p:"$4 pints", cat:"both", conf:0.86, desc:"$4 pints and half off pretzels.", days:[1,2,3,4,5], s:960, e:1110}]},
+  { n:"Byward Cellar", a:"55 York St", c:"Ottawa", lat:45.4285, lon:-75.6924, tel:"+16135550177",
+    d:[{t:"Market Happy Hour", p:"$2 oysters", cat:"both", conf:0.84, desc:"$6 local drafts and $2 oysters.", fine:"Bar seating only.", days:[2,3,4,5,6], s:960, e:1140}]},
+];
+
+const DEFAULT_ORIGIN = { lat: 43.6487, lon: -79.3980, label: "downtown Toronto" };
+
+/* ---------------- geometry + time, mirroring the server ---------------- */
+const R = 6371008.8;
+const rad = (d) => (d * Math.PI) / 180;
+
+function haversineKm(a, b) {
+  const dLat = rad(b.lat - a.lat), dLon = rad(b.lon - a.lon);
+  const h = Math.sin(dLat/2)**2 + Math.cos(rad(a.lat)) * Math.cos(rad(b.lat)) * Math.sin(dLon/2)**2;
+  return (2 * R * Math.asin(Math.min(1, Math.sqrt(h)))) / 1000;
+}
+
+const WEEK = { Sun:0, Mon:1, Tue:2, Wed:3, Thu:4, Fri:5, Sat:6 };
+const fmt = new Intl.DateTimeFormat("en-US", {
+  timeZone: TZ, weekday: "short", hour: "2-digit", minute: "2-digit", hourCycle: "h23",
+});
+
+/** Wall-clock day and minute at `date`, as seen in Ontario. */
+function localTime(date) {
+  let day = 0, hour = 0, minute = 0;
+  for (const part of fmt.formatToParts(date)) {
+    if (part.type === "weekday") day = WEEK[part.value] ?? 0;
+    else if (part.type === "hour") hour = Number(part.value);
+    else if (part.type === "minute") minute = Number(part.value);
+  }
+  return { day, min: hour * 60 + minute };
+}
+
+/**
+ * Project a window onto an axis anchored at the query day's midnight, so a
+ * window belonging to yesterday or tomorrow can be compared arithmetically.
+ * This is what makes a Friday 10pm–2am deal match at 00:30 on Saturday.
+ */
+function matchWindow(dayOfWeek, s, e, now, durationMin) {
+  for (const offset of [-1, 0, 1]) {
+    const day = (((now.day + offset) % 7) + 7) % 7;
+    if (day !== dayOfWeek) continue;
+    const shift = offset * 1440;
+    const start = s + shift, end = e + shift;
+    const qs = now.min, qe = now.min + durationMin;
+    const hit = durationMin === 0 ? start <= qs && qs < end : start < qe && qs < end;
+    if (!hit) return null;
+    return {
+      untilStart: Math.max(0, start - qs),
+      untilEnd: end - qs,
+      openNow: start <= qs && qs < end,
+    };
+  }
+  return null;
+}
+
+const DAYS = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+function clock(min) {
+  const m = ((min % 1440) + 1440) % 1440;
+  const h24 = Math.floor(m / 60), mm = m % 60;
+  const suffix = h24 < 12 ? "am" : "pm";
+  const h12 = h24 % 12 === 0 ? 12 : h24 % 12;
+  return mm === 0 ? `${h12}${suffix}` : `${h12}:${String(mm).padStart(2,"0")}${suffix}`;
+}
+const windowLabel = (d, s, e) => `${DAYS[d]} ${clock(s)}–${clock(e)}`;
+
+function humanMinutes(n) {
+  if (n < 60) return `${n} min`;
+  const h = Math.floor(n / 60), r = n % 60;
+  return r === 0 ? `${h} hr` : `${h} hr ${r} min`;
+}
+function humanDistance(km) {
+  if (km < 0.05) return "steps away";
+  if (km < 1) return `${Math.round((km * 1000) / 50) * 50} m`;
+  return `${km.toFixed(1)} km`;
+}
+
+/* ---------------- state ---------------- */
+const TIME_CHOICES = [
+  { id:"now",   label:"Now",         hint:() => "Open right now",
+    at:(n) => n, win:0 },
+  { id:"soon",  label:"Next 2 hrs",  hint:() => "Anything on between now and two hours from now",
+    at:(n) => n, win:120 },
+  { id:"hour",  label:"In an hour",  hint:(d) => `Around ${d.toLocaleTimeString([], {hour:"numeric", minute:"2-digit"})}`,
+    at:(n) => new Date(n.getTime() + 3600e3), win:30 },
+  { id:"seven", label:"7pm",         hint:(d) => `Around ${d.toLocaleTimeString([], {hour:"numeric", minute:"2-digit"})}`,
+    at:(n) => atHour(n, 19), win:60 },
+  { id:"late",  label:"Late night",  hint:(d) => `From ${d.toLocaleTimeString([], {hour:"numeric", minute:"2-digit"})} onwards`,
+    at:(n) => atHour(n, 22), win:180 },
+];
+function atHour(now, hour) {
+  const t = new Date(now);
+  t.setHours(hour, 0, 0, 0);
+  if (t <= now) t.setDate(t.getDate() + 1);
+  return t;
+}
+
+const CATEGORIES = [
+  { id:null, label:"Everything" },
+  { id:"drink", label:"Drinks" },
+  { id:"food", label:"Food" },
+];
+
+const state = {
+  origin: null,
+  usingFallback: true,
+  pannedTo: null,
+  radiusKm: 2,
+  time: TIME_CHOICES[0],
+  category: null,
+  view: "list",
+};
+
+/* ---------------- search ---------------- */
+function search() {
+  if (!state.origin) return [];
+  const at = state.time.at(new Date());
+  const now = localTime(at);
+  const results = [];
+
+  for (const venue of VENUES) {
+    const km = haversineKm(state.origin, venue);
+    if (km > state.radiusKm) continue;
+
+    for (const deal of venue.d) {
+      if (state.category && deal.cat !== state.category && deal.cat !== "both") continue;
+
+      let best = null;
+      for (const day of deal.days) {
+        const hit = matchWindow(day, deal.s, deal.e, now, state.time.win);
+        if (hit && (!best || hit.untilStart < best.untilStart)) best = { ...hit, day };
+      }
+      if (!best) continue;
+      results.push({ venue, deal, km, ...best });
+    }
+  }
+
+  // Partner deals lead — they are the ones we can vouch for. Then whatever is
+  // already open, then nearest.
+  results.sort((a, b) =>
+    (b.deal.partner ? 1 : 0) - (a.deal.partner ? 1 : 0) ||
+    (b.openNow ? 1 : 0) - (a.openNow ? 1 : 0) ||
+    a.km - b.km);
+  return results;
+}
+
+function tone(r) {
+  if (!r.openNow) return { c: "var(--later)", text: `Starts in ${humanMinutes(r.untilStart)}` };
+  if (r.untilEnd <= 45) return { c: "var(--soon)", text: `Ends in ${humanMinutes(r.untilEnd)}` };
+  return { c: "var(--open)", text: `On for ${humanMinutes(r.untilEnd)}` };
+}
+
+function trustNote(deal) {
+  if (deal.partner) return null;
+  const conf = deal.conf ?? 1;
+  if (conf >= 0.75) return null;
+  return conf >= 0.5
+    ? "Times may have changed — worth a quick call"
+    : "Unconfirmed times — call ahead";
+}
+
+/* ---------------- rendering ---------------- */
+const el = (id) => document.getElementById(id);
+const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) =>
+  ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;" }[c]));
+
+let current = [];
+
+function render() {
+  current = search();
+
+  el("count").textContent = current.length === 0
+    ? "No deals"
+    : `${current.length} deal${current.length === 1 ? "" : "s"}`;
+  el("radiusValue").textContent =
+    state.radiusKm < 1 ? `${state.radiusKm * 1000} m` : `${state.radiusKm} km`;
+  el("timeHint").textContent = state.time.hint(state.time.at(new Date()));
+
+  const where = state.pannedTo
+    ? 'Searching the spot you picked · <button type="button" id="resetArea">back to my location</button>'
+    : state.usingFallback
+      ? `Showing ${DEFAULT_ORIGIN.label} · <button type="button" id="retryLoc">use my location</button>`
+      : "Using your current location";
+  el("where").innerHTML = where;
+  const reset = el("resetArea"); if (reset) reset.onclick = () => { state.pannedTo = null; syncOrigin(); };
+  const retry = el("retryLoc"); if (retry) retry.onclick = locate;
+
+  renderRows();
+  renderMap();
+}
+
+function renderRows() {
+  const host = el("rows");
+  if (current.length === 0) {
+    host.innerHTML = `<div class="empty"><h3>Nothing in range</h3>
+      <p>No happy hours within ${state.radiusKm} km at that time.
+      Try a wider radius or a different time.</p></div>`;
+    return;
+  }
+
+  host.innerHTML = current.map((r, i) => {
+    const t = tone(r);
+    return `<button class="row" data-i="${i}" style="animation-delay:${Math.min(i * 24, 240)}ms">
+      <span class="stripe" style="background:${t.c}"></span>
+      <span class="row-main">
+        <span class="venue-line">
+          ${r.deal.partner ? '<span class="flag">PARTNER</span>' : ""}
+          <span class="venue">${esc(r.venue.n)}</span>
+        </span>
+        <span class="deal-title">${esc(r.deal.t)}</span>
+        ${r.deal.p ? `<span class="price">${esc(r.deal.p)}</span>` : ""}
+      </span>
+      <span class="row-meta">
+        <span class="window">${esc(windowLabel(r.day, r.deal.s, r.deal.e))}</span>
+        <span class="countdown" style="color:${t.c}">${esc(t.text)}</span>
+        <span class="dist">${esc(humanDistance(r.km))}</span>
+      </span>
+    </button>`;
+  }).join("");
+
+  host.querySelectorAll(".row").forEach((node) => {
+    node.onclick = () => openSheet(current[Number(node.dataset.i)]);
+  });
+}
+
+/* A schematic map: no tiles, so it works offline and in a sandboxed page.
+   Positions are a local equirectangular projection around the search origin. */
+function renderMap() {
+  const svg = el("map");
+  if (!state.origin) return;
+
+  const SIZE = 360, C = SIZE / 2;
+  // Scale so the radius ring occupies most of the frame.
+  const span = state.radiusKm * 1.25;
+  const kmPerLat = 111.32;
+  const kmPerLon = 111.32 * Math.cos(rad(state.origin.lat));
+  const px = (C - 18) / span;
+
+  const project = (p) => ({
+    x: C + (p.lon - state.origin.lon) * kmPerLon * px,
+    y: C - (p.lat - state.origin.lat) * kmPerLat * px,
+  });
+
+  const grid = [];
+  for (let g = 60; g < SIZE; g += 60) {
+    grid.push(`<line x1="${g}" y1="0" x2="${g}" y2="${SIZE}" stroke="var(--grid)" stroke-width="1"/>`);
+    grid.push(`<line x1="0" y1="${g}" x2="${SIZE}" y2="${g}" stroke="var(--grid)" stroke-width="1"/>`);
+  }
+
+  const pins = current.map((r, i) => {
+    const p = project(r.venue);
+    const colour = r.deal.partner ? "var(--accent)" : r.openNow ? "var(--open)" : "var(--later)";
+    const label = i < 6
+      ? `<text class="pin-label" x="${p.x}" y="${p.y - 12}" text-anchor="middle">${esc(r.venue.n.slice(0, 18))}</text>`
+      : "";
+    return `${label}<circle class="pin" data-i="${i}" cx="${p.x}" cy="${p.y}" r="7"
+      fill="${colour}" stroke="var(--surface)" stroke-width="2" tabindex="0" role="button">
+      <title>${esc(r.venue.n)} — ${esc(r.deal.t)}</title></circle>`;
+  }).join("");
+
+  svg.innerHTML = `
+    <rect width="${SIZE}" height="${SIZE}" fill="var(--surface)"/>
+    ${grid.join("")}
+    <circle cx="${C}" cy="${C}" r="${state.radiusKm * px}" fill="var(--ring-fill)"
+            stroke="var(--ring)" stroke-width="1.5" stroke-dasharray="4 4"/>
+    <circle cx="${C}" cy="${C}" r="5" fill="var(--text)"/>
+    <circle cx="${C}" cy="${C}" r="11" fill="none" stroke="var(--text)" stroke-width="1" opacity=".35"/>
+    <text class="pin-label" x="${C}" y="${C + 24}" text-anchor="middle">YOU</text>
+    ${pins}`;
+
+  svg.querySelectorAll(".pin").forEach((node) => {
+    const open = () => openSheet(current[Number(node.dataset.i)]);
+    node.addEventListener("click", (event) => { event.stopPropagation(); open(); });
+    node.addEventListener("keydown", (event) => {
+      if (event.key === "Enter" || event.key === " ") { event.preventDefault(); open(); }
+    });
+  });
+
+  // Tapping empty map space moves the search there — the "search this area" gesture.
+  svg.onclick = (event) => {
+    const box = svg.getBoundingClientRect();
+    const x = ((event.clientX - box.left) / box.width) * SIZE;
+    const y = ((event.clientY - box.top) / box.height) * SIZE;
+    state.pannedTo = {
+      lat: state.origin.lat - (y - C) / px / kmPerLat,
+      lon: state.origin.lon + (x - C) / px / kmPerLon,
+    };
+    syncOrigin();
+  };
+
+  el("mapCount").textContent = `${current.length} within ${state.radiusKm} km`;
+}
+
+function openSheet(r) {
+  if (!r) return;
+  const t = tone(r);
+  const note = trustNote(r.deal);
+  const maps = `https://maps.google.com/?q=${encodeURIComponent(r.venue.n)}@${r.venue.lat},${r.venue.lon}`;
+
+  el("sheetBody").innerHTML = `
+    <h2>${esc(r.venue.n)}</h2>
+    <p class="addr">${esc([r.venue.a, r.venue.c, "ON"].filter(Boolean).join(", "))}</p>
+    <p class="addr mono">${esc(humanDistance(r.km))} away</p>
+    <div class="rule"></div>
+    ${r.deal.partner ? '<span class="flag">PARTNER DEAL</span>' : ""}
+    <h2 style="font-size:20px;margin-top:8px">${esc(r.deal.t)}</h2>
+    ${r.deal.p ? `<p class="price">${esc(r.deal.p)}</p>` : ""}
+    <p class="countdown" style="color:${t.c};font-size:14px">${esc(t.text)}</p>
+    ${r.deal.desc ? `<p style="color:var(--muted);margin-top:10px">${esc(r.deal.desc)}</p>` : ""}
+    ${r.deal.fine ? `<div class="fine"><strong>Fine print.</strong> ${esc(r.deal.fine)}</div>` : ""}
+    <div class="rule"></div>
+    <span class="label">Full schedule</span>
+    <div class="sched" style="margin-top:8px">
+      ${r.deal.days.map((d) =>
+        `<div class="${d === r.day ? "on" : ""}">${esc(windowLabel(d, r.deal.s, r.deal.e))}</div>`).join("")}
+    </div>
+    ${note ? `<p class="hint" style="margin-top:14px;font-style:italic">${esc(note)}</p>` : ""}
+    <div class="sheet-actions">
+      <a class="primary" href="${maps}" target="_blank" rel="noopener">Directions</a>
+      <a href="tel:${esc(r.venue.tel)}">Call</a>
+      <button type="button" id="closeSheet">Close</button>
+    </div>`;
+
+  el("sheet").showModal();
+  el("closeSheet").onclick = () => el("sheet").close();
+}
+
+/* ---------------- controls ---------------- */
+function buildChips() {
+  el("timeChips").innerHTML = TIME_CHOICES.map((c) =>
+    `<button type="button" class="chip" data-id="${c.id}"
+       aria-pressed="${c.id === state.time.id}">${esc(c.label)}</button>`).join("");
+  el("timeChips").querySelectorAll(".chip").forEach((node) => {
+    node.onclick = () => {
+      state.time = TIME_CHOICES.find((c) => c.id === node.dataset.id);
+      el("timeChips").querySelectorAll(".chip").forEach((other) =>
+        other.setAttribute("aria-pressed", String(other === node)));
+      render();
+    };
+  });
+
+  el("catChips").innerHTML = CATEGORIES.map((c) =>
+    `<button type="button" class="chip" data-id="${c.id ?? ""}"
+       aria-pressed="${c.id === state.category}">${esc(c.label)}</button>`).join("");
+  el("catChips").querySelectorAll(".chip").forEach((node) => {
+    node.onclick = () => {
+      state.category = node.dataset.id || null;
+      el("catChips").querySelectorAll(".chip").forEach((other) =>
+        other.setAttribute("aria-pressed", String(other === node)));
+      render();
+    };
+  });
+}
+
+el("radius").oninput = (event) => {
+  state.radiusKm = Number(event.target.value);
+  el("radiusValue").textContent =
+    state.radiusKm < 1 ? `${state.radiusKm * 1000} m` : `${state.radiusKm} km`;
+};
+el("radius").onchange = render;
+
+function setView(view) {
+  state.view = view;
+  el("listView").hidden = view !== "list";
+  el("mapView").hidden = view !== "map";
+  el("viewList").setAttribute("aria-pressed", String(view === "list"));
+  el("viewMap").setAttribute("aria-pressed", String(view === "map"));
+  if (view === "map") renderMap();
+}
+el("viewList").onclick = () => setView("list");
+el("viewMap").onclick = () => setView("map");
+el("sheet").addEventListener("click", (event) => {
+  if (event.target === el("sheet")) el("sheet").close();
+});
+
+function syncOrigin() {
+  state.origin = state.pannedTo ?? state.deviceOrigin ?? DEFAULT_ORIGIN;
+  render();
+}
+
+function locate() {
+  if (!navigator.geolocation) { syncOrigin(); return; }
+  navigator.geolocation.getCurrentPosition(
+    (position) => {
+      state.deviceOrigin = { lat: position.coords.latitude, lon: position.coords.longitude };
+      state.usingFallback = false;
+      state.pannedTo = null;
+      syncOrigin();
+    },
+    () => {
+      // Declined or unavailable: downtown Toronto keeps the app usable.
+      state.usingFallback = true;
+      syncOrigin();
+    },
+    { enableHighAccuracy: false, timeout: 8000, maximumAge: 60000 },
+  );
+}
+
+buildChips();
+syncOrigin();
+locate();
+</script>

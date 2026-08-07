@@ -12,32 +12,39 @@ import { SafeAreaView } from "react-native";
 
 import type { ApiDeal, DealCategory } from "../api/types";
 import { DealCard } from "../components/DealCard";
+import { DealMap } from "../components/DealMap";
 import { FilterBar } from "../components/FilterBar";
 import { useDeals } from "../hooks/useDeals";
-import { useLocation } from "../hooks/useLocation";
+import { useLocation, type Coordinates } from "../hooks/useLocation";
 import { theme } from "../theme";
 import { DEFAULT_TIME_CHOICE, type TimeChoice } from "../timeChoices";
 import { DealDetailSheet } from "./DealDetailSheet";
 
 /** Used when location is unavailable so the app is still explorable. */
-const FALLBACK_LOCATION = { lat: 47.6142, lon: -122.3283, label: "Downtown Seattle" };
+const FALLBACK_LOCATION = { lat: 43.6487, lon: -79.398, label: "Downtown Toronto" };
 
 export function DealsScreen() {
   const location = useLocation();
-  const [radiusMi, setRadiusMi] = useState(1);
+  const [radiusKm, setRadiusKm] = useState(2);
   const [timeChoice, setTimeChoice] = useState<TimeChoice>(DEFAULT_TIME_CHOICE);
   const [category, setCategory] = useState<DealCategory | null>(null);
   const [selected, setSelected] = useState<ApiDeal | null>(null);
+  const [view, setView] = useState<"list" | "map">("list");
+  /** Set when the user pans the map and asks to search there instead. */
+  const [areaOverride, setAreaOverride] = useState<Coordinates | null>(null);
 
   // Recomputed only when the choice changes, so "now" does not tick every
   // render and retrigger the search on each frame.
   const resolved = useMemo(() => timeChoice.resolve(new Date()), [timeChoice]);
 
-  const query = location.coords
+  // A map "search this area" wins over the device fix until it is cleared.
+  const origin = areaOverride ?? location.coords;
+
+  const query = origin
     ? {
-        lat: location.coords.lat,
-        lon: location.coords.lon,
-        radiusMi,
+        lat: origin.lat,
+        lon: origin.lon,
+        radiusKm,
         at: resolved.at,
         windowMin: resolved.windowMin,
         category: category ?? undefined,
@@ -46,10 +53,68 @@ export function DealsScreen() {
 
   const { deals, loading, refreshing, error, refresh } = useDeals(query);
 
-  if (!location.coords) {
+  if (!origin) {
     return (
       <SafeAreaView style={styles.screen}>
         <LocationGate location={location} />
+      </SafeAreaView>
+    );
+  }
+
+  const header = (
+    <View>
+      <View style={styles.header}>
+        <View style={styles.headerRow}>
+          <View style={styles.headerText}>
+            <Text style={styles.title}>Happy hours</Text>
+            <Text style={styles.subtitle}>
+              {areaOverride
+                ? "Searching the area you picked on the map"
+                : location.usingFallback
+                  ? `Searching around ${FALLBACK_LOCATION.label}`
+                  : "Near you, right now"}
+            </Text>
+          </View>
+          <Pressable
+            onPress={() => setView(view === "list" ? "map" : "list")}
+            accessibilityRole="button"
+            accessibilityLabel={view === "list" ? "Show map" : "Show list"}
+            style={styles.viewToggle}
+          >
+            <Text style={styles.viewToggleText}>{view === "list" ? "Map" : "List"}</Text>
+          </Pressable>
+        </View>
+        {areaOverride ? (
+          <Pressable onPress={() => setAreaOverride(null)} accessibilityRole="button">
+            <Text style={styles.resetArea}>Back to my location</Text>
+          </Pressable>
+        ) : null}
+      </View>
+      <FilterBar
+        radiusKm={radiusKm}
+        onRadiusChange={setRadiusKm}
+        timeChoice={timeChoice}
+        onTimeChange={setTimeChoice}
+        category={category}
+        onCategoryChange={setCategory}
+        resolvedAt={resolved.at}
+      />
+      <ResultSummary count={deals.length} loading={loading} error={error} />
+    </View>
+  );
+
+  if (view === "map") {
+    return (
+      <SafeAreaView style={styles.screen}>
+        {header}
+        <DealMap
+          deals={deals}
+          origin={origin}
+          radiusKm={radiusKm}
+          onSelect={setSelected}
+          onSearchArea={(centre) => setAreaOverride(centre)}
+        />
+        <DealDetailSheet deal={selected} onClose={() => setSelected(null)} />
       </SafeAreaView>
     );
   }
@@ -59,7 +124,11 @@ export function DealsScreen() {
       <FlatList
         data={deals}
         keyExtractor={(deal) => deal.id}
-        renderItem={({ item }) => <DealCard deal={item} onPress={setSelected} />}
+        renderItem={({ item }) => (
+          <View style={styles.cardWrapper}>
+            <DealCard deal={item} onPress={setSelected} />
+          </View>
+        )}
         contentContainerStyle={styles.listContent}
         refreshControl={
           <RefreshControl
@@ -68,30 +137,9 @@ export function DealsScreen() {
             tintColor={theme.color.accent}
           />
         }
-        ListHeaderComponent={
-          <View>
-            <View style={styles.header}>
-              <Text style={styles.title}>Happy hours</Text>
-              <Text style={styles.subtitle}>
-                {location.usingFallback
-                  ? `Searching around ${FALLBACK_LOCATION.label}`
-                  : "Near you, right now"}
-              </Text>
-            </View>
-            <FilterBar
-              radiusMi={radiusMi}
-              onRadiusChange={setRadiusMi}
-              timeChoice={timeChoice}
-              onTimeChange={setTimeChoice}
-              category={category}
-              onCategoryChange={setCategory}
-              resolvedAt={resolved.at}
-            />
-            <ResultSummary count={deals.length} loading={loading} error={error} />
-          </View>
-        }
+        ListHeaderComponent={header}
         ListEmptyComponent={
-          loading ? null : <EmptyState error={error} radiusMi={radiusMi} onRetry={refresh} />
+          loading ? null : <EmptyState error={error} radiusKm={radiusKm} onRetry={refresh} />
         }
       />
 
@@ -125,11 +173,11 @@ function ResultSummary({
 
 function EmptyState({
   error,
-  radiusMi,
+  radiusKm,
   onRetry,
 }: {
   error: string | null;
-  radiusMi: number;
+  radiusKm: number;
   onRetry: () => void;
 }) {
   return (
@@ -137,7 +185,7 @@ function EmptyState({
       <Text style={styles.emptyTitle}>{error ? "Couldn't load deals" : "Nothing nearby"}</Text>
       <Text style={styles.emptyBody}>
         {error ??
-          `No happy hours within ${radiusMi} ${radiusMi === 1 ? "mile" : "miles"} at that time. ` +
+          `No happy hours within ${radiusKm} km at that time. ` +
             "Try widening the distance or picking a different time."}
       </Text>
       {error ? (
@@ -190,12 +238,38 @@ const styles = StyleSheet.create({
     backgroundColor: theme.color.background,
   },
   listContent: {
-    paddingHorizontal: theme.space(4),
     paddingBottom: theme.space(10),
   },
   header: {
     paddingTop: theme.space(4),
     paddingBottom: theme.space(4),
+    paddingHorizontal: theme.space(4),
+  },
+  headerRow: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    justifyContent: "space-between",
+    gap: theme.space(3),
+  },
+  headerText: { flex: 1 },
+  viewToggle: {
+    paddingHorizontal: theme.space(4),
+    paddingVertical: theme.space(2),
+    borderRadius: theme.radius.pill,
+    borderWidth: 1,
+    borderColor: theme.color.border,
+    backgroundColor: theme.color.surface,
+  },
+  viewToggleText: {
+    color: theme.color.text,
+    fontSize: theme.font.small,
+    fontWeight: "700",
+  },
+  resetArea: {
+    color: theme.color.accent,
+    fontSize: theme.font.small,
+    marginTop: theme.space(2),
+    textDecorationLine: "underline",
   },
   title: {
     color: theme.color.text,
@@ -208,10 +282,14 @@ const styles = StyleSheet.create({
     fontSize: theme.font.body,
     marginTop: theme.space(1),
   },
+  cardWrapper: {
+    paddingHorizontal: theme.space(4),
+  },
   summaryRow: {
     minHeight: 28,
     justifyContent: "center",
     marginBottom: theme.space(2),
+    paddingHorizontal: theme.space(4),
   },
   summary: {
     color: theme.color.textFaint,
