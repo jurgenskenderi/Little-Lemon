@@ -80,6 +80,10 @@
   .notice { margin-top:14px; padding:10px 12px; border-radius:10px; background:var(--raised);
             border:1px solid var(--border); color:var(--muted); font-size:12.5px; line-height:1.45; }
   .notice strong { color:var(--text); }
+  .notice.moved { border-color:var(--accent); }
+  .notice .url { display:block; margin:8px 0 6px; font-family:var(--data); font-size:13px;
+    color:var(--accent); -webkit-user-select:all; user-select:all; word-break:break-all; }
+  .notice em { display:block; color:var(--faint); font-size:12px; font-style:normal; }
 
   .controls { margin-top:20px; display:flex; flex-direction:column; gap:16px; }
   .ctl-head { display:flex; justify-content:space-between; align-items:baseline; }
@@ -291,8 +295,18 @@
       <label for="nearSelect" id="nearLabel">I'm near</label>
       <select id="nearSelect"><option value="">choose a neighbourhood…</option></select>
     </div>
+    <div class="notice moved">
+      <strong>This is not the app.</strong> The real one is a normal web page, with real
+      Toronto bars and restaurants on a real map, and a Call button that dials:
+      <span class="url">https://jurgenskenderi.github.io/Little-Lemon/</span>
+      <em>This page is a sandboxed frame, so it can't link you there — select the address
+      and paste it.</em>
+    </div>
     <div class="notice">
-      <strong>Preview build with sample data.</strong> Venue names and deals here are
+      <strong>What this page is for.</strong> It demonstrates the happy-hour deal model —
+      time windows that survive midnight, partner ranking, confidence labelling — against
+      invented venues.
+      <strong>Sample data.</strong> Venue names and deals here are
       invented — real coordinates, fictional businesses — so nothing misrepresents an
       actual restaurant. Pictures here are drawings of the dish or drink, not photos:
       a sandboxed page cannot load a venue's images. The shipping app shows the real
