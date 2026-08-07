@@ -35,7 +35,7 @@ The app finds the API automatically: it reuses the host Expo is already serving
 the bundle from, so a phone on the same Wi-Fi works without editing an IP.
 Override with `EXPO_PUBLIC_API_URL` if your setup differs.
 
-`npm test` runs the server suite (92 tests). `npm run typecheck` covers both
+`npm test` runs the server suite (111 tests). `npm run typecheck` covers both
 workspaces.
 
 ## Partner deals
@@ -108,6 +108,19 @@ the device allows:
 The map draws the accuracy radius as a blue circle when it's large enough to
 matter, so you can see how much to trust it rather than guessing.
 
+**When the browser refuses, the app says why.** There are four ways a fix fails
+and they need four different responses, so the preview reports the real error
+rather than quietly falling back to downtown. The one that catches people: an
+embedded page whose frame lacks `allow="geolocation"` has the API disabled by
+Permissions Policy — no prompt, instant denial, and nothing the page can do from
+the inside. Opening the preview in its own tab fixes it, and the page now says
+so instead of looking broken.
+
+**And there is always a way through.** Pick your neighbourhood from the *I'm
+near* list — the names are the basemap's own, so whatever you choose is drawn on
+the map — or drop a pin. Neither needs the browser's permission, and both are
+remembered.
+
 ## Map search
 
 The map is the second way to browse, and it behaves the way people expect a map
@@ -170,10 +183,75 @@ value is a URL on the venue's host, so every app user currently costs that
 restaurant bandwidth, and the image breaks the moment they reorganise their site.
 Fetching once into your own bucket fixes both.
 
+## Where the venues come from
+
+Two independent sources fill the venues table. Both write the same shape, so
+nothing downstream cares which one you used, and you can run both.
+
+### Google Places
+
+```bash
+GOOGLE_MAPS_API_KEY=... npm run import:toronto              # all 15 strips
+GOOGLE_MAPS_API_KEY=... npm run import:places -- --preset toronto-core
+GOOGLE_MAPS_API_KEY=... npm run import:places -- --lat 43.6487 --lon -79.3980 --radius-km 1.5
+```
+
+Better coverage than OpenStreetMap, especially for chains, phone numbers and
+places without their own website. It needs a Google Cloud project with **Places
+API (New)** enabled, a billing account attached, and a key with no HTTP-referrer
+restriction — referrer-restricted keys reject server-side calls, which is the
+usual cause of a `403`. `--dry-run` reports what it found without writing, but
+it still calls the API: discovery is the billed part.
+
+Two things about this API are worth knowing before you budget for it.
+
+**Nearby Search returns at most 20 places and has no page token.** A 1.2 km
+circle over King West holds far more than 20 bars, so asking once gives you an
+arbitrary 20 of them and no indication that anything is missing. The importer
+ranks by distance, notices a response that came back full, and splits that
+circle into quadrants until the results stop hitting the cap. That is why one
+"area" can cost five or twenty-one requests rather than one.
+
+**Google's terms cap how long you may keep the data.** A place ID may be stored
+indefinitely; every other field — name, address, coordinates, rating — has to be
+refreshed at least every 30 days. Every import stamps `place_refreshed_at`, a
+re-run skips anything still inside the window and re-fetches anything outside
+it, and the CLI tells you how many stored places have gone stale. Two further
+constraints the code cannot enforce for you: Places content may not be shown on
+a non-Google map, which matters because this app uses **Apple Maps on iOS**, and
+wherever you do show it you must display the "Powered by Google" credit — the
+`/api/places` response carries that string so the client renders it only when it
+applies.
+
+### OpenStreetMap
+
+```bash
+npm run scrape -- --preset toronto --dry-run   # discovery only, no crawl
+```
+
+Free, keyless, no terms to work around, and the data is ODbL — attribution
+required, and a derived database inherits the licence. Coverage is thinner and
+more uneven than Google's, and many venues carry no website tag at all. This is
+the path `npm run scrape` uses by default.
+
+## Before the deals exist
+
+A freshly imported city is thousands of real bars and zero known happy hours,
+and an app that only shows deals shows nothing at all in that state — which
+reads as broken rather than as honest. So venues are first-class whether or not
+we know a deal for them:
+
+```
+GET /api/places?lat=&lon=&radiusKm=&withoutDeals=true
+```
+
+On the map they are small hollow dots behind the deal pins; tapping one says
+what we know and admits what we don't. The list view still shows only deals,
+because a list of venues we know nothing about would bury the ones we do.
+
 ## The scraper
 
-Venues come from OpenStreetMap's Overpass API (free, no key). Each venue's
-website is then crawled for deals.
+Once the venues are in, each one's website is crawled for deals.
 
 ```bash
 npm run scrape:toronto                      # all 15 Toronto bar strips
@@ -186,9 +264,10 @@ npm run scrape -- --lat 43.6487 --lon -79.3980 --radius-km 2
 ```
 
 Presets are a set of tight circles over the neighbourhoods that actually have
-bars, rather than one big circle over the city — Overpass returns thousands of
-venues for a 10 km radius over Toronto and most are irrelevant. Venues found in
-overlapping circles are deduplicated by their OpenStreetMap id.
+bars, rather than one big circle over the city — a 10 km radius over Toronto
+returns thousands of venues and most are irrelevant. The same presets drive the
+Places import. Venues found in overlapping circles are deduplicated by their
+source id, so the overlap costs requests but never duplicates a venue.
 
 Every run starts with a connectivity preflight, because a crawl that fails from
 no internet looks identical to one that fails because every venue site is down:
@@ -238,6 +317,7 @@ ambiguous copy gets guessed at, so the app labels anything uncertain
 
 ```
 GET  /api/deals?lat=&lon=&radiusKm=&at=&windowMin=&category=&sort=&minConfidence=
+GET  /api/places?lat=&lon=&radiusKm=&withoutDeals=   # venues, deal or not
 GET  /api/venues/:id
 GET  /api/health
 GET  /admin                    # partner console (HTML)
@@ -308,8 +388,15 @@ Worth knowing before this goes near real users:
   the CLI applies one `--tz` to everything it discovers. Correct for Ontario,
   which is Eastern throughout apart from a small north-western corner around
   Atikokan; a crawl beyond the province needs a real lookup.
-- **No deduplication across sources.** The same bar discovered twice under
-  different OSM ids becomes two venues.
+- **No deduplication across sources.** Each source dedupes within itself, but a
+  bar imported from Google and then discovered again in OpenStreetMap becomes
+  two venues. Matching them needs name-and-distance fuzzy matching that isn't
+  written yet.
+- **The Places import has not been run against the real API from this repo.**
+  It is covered end to end by tests against a local fixture — the 20-result cap
+  and its quadrant split, the cache window, dedup, error handling — and the CLI
+  was smoke-tested against that fixture through to `/api/places`. What has never
+  happened is a call to Google with a real key, because there isn't one here.
 - **Scraped hours go stale.** Nothing re-verifies a deal beyond the refetch
   interval, which is what the confidence labelling compensates for.
 - **The crawler is polite, not invisible.** Sites can still block it. Check a

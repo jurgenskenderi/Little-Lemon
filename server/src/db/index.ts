@@ -39,17 +39,33 @@ export function openDatabase(file: string): DatabaseHandle {
  * Adding a column is checked against the live schema and is safe to re-run.
  */
 function migrate(db: DatabaseHandle): void {
-  const columns = db.prepare(`PRAGMA table_info(deals)`).all() as Array<{ name: string }>;
-  const existing = new Set(columns.map((column) => column.name));
+  const columnsOf = (table: string) =>
+    new Set(
+      (db.prepare(`PRAGMA table_info(${table})`).all() as Array<{ name: string }>).map(
+        (column) => column.name,
+      ),
+    );
 
-  if (!existing.has("partner")) {
+  const deals = columnsOf("deals");
+  if (!deals.has("partner")) {
     db.exec(
       `ALTER TABLE deals ADD COLUMN partner INTEGER NOT NULL DEFAULT 0
          CHECK (partner IN (0, 1))`,
     );
   }
-  if (!existing.has("image_url")) {
+  if (!deals.has("image_url")) {
     db.exec(`ALTER TABLE deals ADD COLUMN image_url TEXT`);
+  }
+
+  const venues = columnsOf("venues");
+  for (const [name, type] of [
+    ["rating", "REAL"],
+    ["rating_count", "INTEGER"],
+    ["price_level", "INTEGER"],
+    ["place_types", "TEXT"],
+    ["place_refreshed_at", "TEXT"],
+  ] as const) {
+    if (!venues.has(name)) db.exec(`ALTER TABLE venues ADD COLUMN ${name} ${type}`);
   }
 }
 
@@ -67,6 +83,11 @@ interface VenueRow {
   phone: string | null;
   source: string;
   source_id: string | null;
+  rating: number | null;
+  rating_count: number | null;
+  price_level: number | null;
+  place_types: string | null;
+  place_refreshed_at: string | null;
 }
 
 interface DealRow {
@@ -107,11 +128,29 @@ function toVenue(row: VenueRow): Venue {
     phone: row.phone,
     source: row.source,
     sourceId: row.source_id,
+    rating: row.rating,
+    ratingCount: row.rating_count,
+    priceLevel: row.price_level,
+    placeTypes: row.place_types ? row.place_types.split(",") : null,
+    placeRefreshedAt: row.place_refreshed_at,
   };
 }
 
-export interface VenueInput extends Omit<Venue, "id"> {
+/**
+ * Discovery metadata is optional on the way in: only a Places import knows a
+ * rating, and requiring every caller to write five nulls would be noise.
+ */
+export interface VenueInput
+  extends Omit<
+    Venue,
+    "id" | "rating" | "ratingCount" | "priceLevel" | "placeTypes" | "placeRefreshedAt"
+  > {
   id?: string;
+  rating?: number | null;
+  ratingCount?: number | null;
+  priceLevel?: number | null;
+  placeTypes?: string[] | null;
+  placeRefreshedAt?: string | null;
 }
 
 export interface DealInput extends Omit<Deal, "id"> {
@@ -132,9 +171,13 @@ export function upsertVenue(db: DatabaseHandle, venue: VenueInput): string {
   const id = venue.id ?? slugId("ven", [venue.name, venue.city ?? ""]);
   db.prepare(
     `INSERT INTO venues (id, name, address, city, region, country, lat, lon,
-                         time_zone, website, phone, source, source_id, updated_at)
+                         time_zone, website, phone, source, source_id,
+                         rating, rating_count, price_level, place_types,
+                         place_refreshed_at, updated_at)
      VALUES (@id, @name, @address, @city, @region, @country, @lat, @lon,
-             @time_zone, @website, @phone, @source, @source_id, datetime('now'))
+             @time_zone, @website, @phone, @source, @source_id,
+             @rating, @rating_count, @price_level, @place_types,
+             @place_refreshed_at, datetime('now'))
      ON CONFLICT (id) DO UPDATE SET
        name = excluded.name,
        address = excluded.address,
@@ -148,6 +191,13 @@ export function upsertVenue(db: DatabaseHandle, venue: VenueInput): string {
        phone = excluded.phone,
        source = excluded.source,
        source_id = excluded.source_id,
+       -- A scrape knows nothing about ratings, so it must not blank what an
+       -- import learned. Only a non-null incoming value overwrites.
+       rating = COALESCE(excluded.rating, venues.rating),
+       rating_count = COALESCE(excluded.rating_count, venues.rating_count),
+       price_level = COALESCE(excluded.price_level, venues.price_level),
+       place_types = COALESCE(excluded.place_types, venues.place_types),
+       place_refreshed_at = COALESCE(excluded.place_refreshed_at, venues.place_refreshed_at),
        updated_at = datetime('now')`,
   ).run({
     id,
@@ -163,6 +213,11 @@ export function upsertVenue(db: DatabaseHandle, venue: VenueInput): string {
     phone: venue.phone,
     source: venue.source,
     source_id: venue.sourceId,
+    rating: venue.rating ?? null,
+    rating_count: venue.ratingCount ?? null,
+    price_level: venue.priceLevel ?? null,
+    place_types: venue.placeTypes?.length ? venue.placeTypes.join(",") : null,
+    place_refreshed_at: venue.placeRefreshedAt ?? null,
   });
   return id;
 }
@@ -457,6 +512,79 @@ export function replaceCrawledDeals(
 
   run();
   return ids;
+}
+
+export interface NearbyVenue {
+  venue: Venue;
+  distanceM: number;
+  /** How many deals we hold for it, at any time of day. */
+  dealCount: number;
+}
+
+/**
+ * Venues near a point, whether or not we know any deals for them.
+ *
+ * The deal search is the product; this is what makes the product usable before
+ * the deals exist. A freshly imported city is thousands of real bars and zero
+ * known happy hours, and a map showing nothing at all reads as a broken app
+ * rather than an empty dataset.
+ *
+ * Same two-stage geography as `searchDeals`: a bounding box in SQL, then exact
+ * haversine in JS, because the box over-selects at the corners.
+ */
+export function searchVenues(
+  db: DatabaseHandle,
+  options: {
+    lat: number;
+    lon: number;
+    radiusM: number;
+    /** Substring match on the name. */
+    q?: string;
+    /** Only venues we have no deals for — the gap an import leaves behind. */
+    withoutDealsOnly?: boolean;
+    limit?: number;
+  },
+): NearbyVenue[] {
+  const box = boundingBox({ lat: options.lat, lon: options.lon }, options.radiusM);
+
+  const conditions = ["v.lat BETWEEN ? AND ?"];
+  const params: unknown[] = [box.minLat, box.maxLat];
+
+  if (crossesAntimeridian(box)) {
+    const minLon = ((((box.minLon + 180) % 360) + 360) % 360) - 180;
+    const maxLon = ((((box.maxLon + 180) % 360) + 360) % 360) - 180;
+    conditions.push("(v.lon >= ? OR v.lon <= ?)");
+    params.push(minLon, maxLon);
+  } else {
+    conditions.push("v.lon BETWEEN ? AND ?");
+    params.push(box.minLon, box.maxLon);
+  }
+
+  if (options.q) {
+    conditions.push("v.name LIKE ?");
+    params.push(`%${options.q}%`);
+  }
+
+  const rows = db
+    .prepare(
+      `SELECT v.*, (SELECT COUNT(*) FROM deals d WHERE d.venue_id = v.id) AS deal_count
+         FROM venues v
+        WHERE ${conditions.join(" AND ")}`,
+    )
+    .all(...params) as Array<VenueRow & { deal_count: number }>;
+
+  const origin = { lat: options.lat, lon: options.lon };
+  const nearby: NearbyVenue[] = [];
+
+  for (const row of rows) {
+    if (options.withoutDealsOnly && row.deal_count > 0) continue;
+    const distanceM = haversineMeters(origin, { lat: row.lat, lon: row.lon });
+    if (distanceM > options.radiusM) continue;
+    nearby.push({ venue: toVenue(row), distanceM, dealCount: row.deal_count });
+  }
+
+  nearby.sort((a, b) => a.distanceM - b.distanceM);
+  return nearby.slice(0, Math.min(options.limit ?? 100, 500));
 }
 
 export function listVenues(

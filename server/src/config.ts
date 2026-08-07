@@ -16,6 +16,9 @@ export const config = {
   adminToken: process.env.ADMIN_TOKEN ?? null,
 
   anthropicApiKey: process.env.ANTHROPIC_API_KEY ?? null,
+  /** Places API (New), for venue discovery. Billed, and its terms limit what
+   *  you may keep on disk — see the README. */
+  googleMapsApiKey: process.env.GOOGLE_MAPS_API_KEY ?? null,
   /** Extraction is routine structured work; low effort keeps it cheap and fast. */
   extractionModel: process.env.EXTRACTION_MODEL ?? "claude-opus-5",
 

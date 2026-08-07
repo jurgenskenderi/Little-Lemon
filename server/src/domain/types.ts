@@ -17,6 +17,14 @@ export interface Venue {
   phone: string | null;
   source: string;
   sourceId: string | null;
+  /** Discovery metadata. Only a Google Places import fills these in. */
+  rating: number | null;
+  ratingCount: number | null;
+  /** 0-4, Google's scale: free through very expensive. */
+  priceLevel: number | null;
+  placeTypes: string[] | null;
+  /** When the provider's copy was last re-read. Their terms cap its age. */
+  placeRefreshedAt: string | null;
 }
 
 export interface Deal {

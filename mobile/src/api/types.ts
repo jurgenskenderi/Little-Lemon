@@ -19,6 +19,24 @@ export interface ApiVenue {
   timeZone: string;
   website: string | null;
   phone: string | null;
+  /** Only a Google Places import fills these in. */
+  rating: number | null;
+  ratingCount: number | null;
+  priceLevel: number | null;
+  placeTypes: string[] | null;
+}
+
+/** A venue near you, with or without a deal attached. */
+export interface ApiPlace extends ApiVenue {
+  distanceM: number;
+  distanceKm: number;
+  dealCount: number;
+}
+
+export interface PlacesResponse {
+  places: ApiPlace[];
+  /** Provider attribution the client must display, or null if none applies. */
+  attribution: string | null;
 }
 
 export interface ApiDeal {

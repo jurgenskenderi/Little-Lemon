@@ -12,7 +12,7 @@ import {
 } from "react-native";
 import MapView, { Circle, Marker, PROVIDER_GOOGLE, type Region } from "react-native-maps";
 
-import type { ApiDeal } from "../api/types";
+import type { ApiDeal, ApiPlace } from "../api/types";
 import { formatDistance, statusLine } from "../format";
 import type { Coordinates } from "../hooks/useLocation";
 import { theme } from "../theme";
@@ -21,6 +21,10 @@ import { DARK_MAP_STYLE } from "./mapStyle";
 
 interface Props {
   deals: ApiDeal[];
+  /** Every venue nearby, deal or not. Drawn behind the deals as plain dots. */
+  places: ApiPlace[];
+  /** Provider credit the API says we must show, if any. */
+  attribution: string | null;
   origin: Coordinates;
   radiusKm: number;
   /** GPS uncertainty in metres, drawn so the user can see how much to trust it. */
@@ -51,13 +55,15 @@ function regionFor(centre: Coordinates, radiusKm: number): Region {
 }
 
 export function DealMap({
-  deals, origin, radiusKm, accuracyM, onOpen, onSearchArea, onRecentre, onSetLocation,
+  deals, places, attribution, origin, radiusKm, accuracyM,
+  onOpen, onSearchArea, onRecentre, onSetLocation,
 }: Props) {
   const mapRef = useRef<MapView>(null);
   const listRef = useRef<FlatList<ApiDeal>>(null);
   const region = useRef<Region>(regionFor(origin, radiusKm));
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [drifted, setDrifted] = useState(false);
+  const [inspected, setInspected] = useState<ApiPlace | null>(null);
 
   // Follow the search origin when it changes, but never fight an active pan.
   useEffect(() => {
@@ -108,7 +114,10 @@ export function DealMap({
         showsCompass
         showsScale
         toolbarEnabled={false}
-        onPress={() => setSelectedId(null)}
+        onPress={() => {
+          setSelectedId(null);
+          setInspected(null);
+        }}
         onLongPress={(event) => {
           const { latitude, longitude } = event.nativeEvent.coordinate;
           onSetLocation({ lat: latitude, lon: longitude });
@@ -144,6 +153,24 @@ export function DealMap({
             strokeWidth={1}
           />
         ) : null}
+
+        {/* Venues we know of but have no deal for. Small, muted, and behind
+            everything else: they are the answer to "what's around me", not to
+            "what's on". Without them a freshly imported city looks empty. */}
+        {places.map((place) =>
+          place.dealCount > 0 ? null : (
+            <Marker
+              key={`place-${place.id}`}
+              coordinate={{ latitude: place.lat, longitude: place.lon }}
+              onPress={() => setInspected(place)}
+              tracksViewChanges={false}
+              anchor={{ x: 0.5, y: 0.5 }}
+              zIndex={0}
+            >
+              <View style={styles.placeDot} />
+            </Marker>
+          ),
+        )}
 
         {deals.map((deal) => {
           const selected = deal.id === selectedId;
@@ -231,6 +258,43 @@ export function DealMap({
           <Text style={styles.fabIcon}>◎</Text>
         </Pressable>
       </View>
+
+      {/* Tapping a plain dot: we know the place, we just don't know a deal
+          there. Saying that outright beats a marker that does nothing. */}
+      {inspected ? (
+        <Pressable style={styles.placeCard} onPress={() => setInspected(null)}>
+          <Text style={styles.placeName} numberOfLines={1}>{inspected.name}</Text>
+          <Text style={styles.placeMeta} numberOfLines={1}>
+            {[
+              inspected.rating ? `★ ${inspected.rating.toFixed(1)}` : null,
+              inspected.address,
+              formatDistance(inspected.distanceKm),
+            ].filter(Boolean).join(" · ")}
+          </Text>
+          <Text style={styles.placeNote}>No happy hour on file yet</Text>
+        </Pressable>
+      ) : null}
+
+      {/* An empty deal list over a map full of dots needs explaining, or it
+          reads as "this app found nothing" rather than "we know these places
+          but haven't learned their deals". */}
+      {deals.length === 0 && places.length > 0 ? (
+        <View style={styles.placeCard}>
+          <Text style={styles.placeName}>
+            {places.length} place{places.length === 1 ? "" : "s"} nearby
+          </Text>
+          <Text style={styles.placeNote}>
+            No happy hours known here yet — run a crawl to read their sites, or add
+            a partner deal by hand.
+          </Text>
+        </View>
+      ) : null}
+
+      {attribution ? (
+        <View style={styles.attribution}>
+          <Text style={styles.attributionText}>{attribution}</Text>
+        </View>
+      ) : null}
 
       {deals.length > 0 ? (
         <FlatList
@@ -325,6 +389,42 @@ const styles = StyleSheet.create({
     maxWidth: 130,
   },
   pillText: { fontSize: theme.font.tiny, fontWeight: "700" },
+
+  placeDot: {
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+    backgroundColor: theme.color.surface,
+    borderWidth: 2,
+    borderColor: theme.color.textMuted,
+  },
+
+  placeCard: {
+    position: "absolute",
+    left: theme.space(2),
+    right: theme.space(2),
+    bottom: theme.space(2),
+    backgroundColor: theme.color.surface,
+    borderColor: theme.color.border,
+    borderWidth: 1,
+    borderRadius: theme.radius.md,
+    padding: theme.space(2),
+    gap: theme.space(0.5),
+  },
+  placeName: { color: theme.color.text, fontSize: theme.font.body, fontWeight: "700" },
+  placeMeta: { color: theme.color.textMuted, fontSize: theme.font.tiny },
+  placeNote: { color: theme.color.textMuted, fontSize: theme.font.tiny, fontStyle: "italic" },
+
+  attribution: {
+    position: "absolute",
+    right: theme.space(1.5),
+    top: theme.space(1.5),
+    backgroundColor: "rgba(0,0,0,0.45)",
+    borderRadius: theme.radius.pill,
+    paddingHorizontal: theme.space(1.5),
+    paddingVertical: theme.space(0.5),
+  },
+  attributionText: { color: "#FFFFFF", fontSize: 10, fontWeight: "600" },
 
   searchArea: {
     position: "absolute",

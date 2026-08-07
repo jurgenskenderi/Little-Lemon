@@ -1,6 +1,6 @@
 import Constants from "expo-constants";
 
-import type { DealCategory, DealsResponse } from "./types";
+import type { DealCategory, DealsResponse, PlacesResponse } from "./types";
 
 /**
  * Resolving the API host is the one piece of dev-time friction worth automating:
@@ -79,4 +79,40 @@ export async function fetchDeals(params: DealSearchParams): Promise<DealsRespons
   }
 
   return (await response.json()) as DealsResponse;
+}
+
+/**
+ * Every venue nearby, deal or no deal.
+ *
+ * A freshly imported city is thousands of real bars and zero known happy hours.
+ * Showing only deals there means showing nothing, which reads as a broken app
+ * rather than an honest "we don't know yet".
+ */
+export async function fetchPlaces(params: {
+  lat: number;
+  lon: number;
+  radiusKm: number;
+  withoutDeals?: boolean;
+  signal?: AbortSignal;
+}): Promise<PlacesResponse> {
+  const query = new URLSearchParams({
+    lat: String(params.lat),
+    lon: String(params.lon),
+    radiusKm: String(params.radiusKm),
+    limit: "200",
+  });
+  if (params.withoutDeals) query.set("withoutDeals", "true");
+
+  let response: Response;
+  try {
+    response = await fetch(`${API_BASE_URL}/api/places?${query.toString()}`, {
+      signal: params.signal,
+    });
+  } catch (error) {
+    if (error instanceof Error && error.name === "AbortError") throw error;
+    throw new ApiError(`Could not reach the Clocktails server at ${API_BASE_URL}.`, 0);
+  }
+
+  if (!response.ok) throw new ApiError(`The server returned ${response.status}.`, response.status);
+  return (await response.json()) as PlacesResponse;
 }

@@ -15,6 +15,7 @@ import { DealCard } from "../components/DealCard";
 import { DealMap } from "../components/DealMap";
 import { FilterBar } from "../components/FilterBar";
 import { useDeals } from "../hooks/useDeals";
+import { usePlaces } from "../hooks/usePlaces";
 import { useLocation, type Coordinates } from "../hooks/useLocation";
 import { theme } from "../theme";
 import { DEFAULT_TIME_CHOICE, type TimeChoice } from "../timeChoices";
@@ -52,6 +53,13 @@ export function DealsScreen() {
     : null;
 
   const { deals, loading, refreshing, error, refresh } = useDeals(query);
+
+  // Only fetched for the map: the list is about deals, and a list of venues we
+  // know nothing about would bury the ones we do.
+  const nearby = usePlaces(
+    origin ? { lat: origin.lat, lon: origin.lon, radiusKm } : null,
+    view === "map",
+  );
 
   if (!origin) {
     return (
@@ -109,6 +117,8 @@ export function DealsScreen() {
         {header}
         <DealMap
           deals={deals}
+          places={nearby.places}
+          attribution={nearby.attribution}
           origin={origin}
           radiusKm={radiusKm}
           accuracyM={areaOverride ? null : location.accuracyM}

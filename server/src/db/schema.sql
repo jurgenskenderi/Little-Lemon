@@ -15,6 +15,16 @@ CREATE TABLE IF NOT EXISTS venues (
   phone       TEXT,
   source      TEXT NOT NULL DEFAULT 'manual',
   source_id   TEXT,
+  -- Discovery metadata. Populated by the Google Places import; null for venues
+  -- from OpenStreetMap or entered by hand.
+  rating      REAL,
+  rating_count INTEGER,
+  price_level INTEGER,
+  place_types TEXT,
+  -- Google's terms let you keep a place ID forever but require every other
+  -- field to be refreshed at least every 30 days. This is what makes that
+  -- checkable rather than aspirational.
+  place_refreshed_at TEXT,
   created_at  TEXT NOT NULL DEFAULT (datetime('now')),
   updated_at  TEXT NOT NULL DEFAULT (datetime('now'))
 );

@@ -187,6 +187,11 @@ function getVenueOrThrow(db: DatabaseHandle, id: string): Venue {
     | undefined;
   if (!row) throw new Error(`fixture venue ${id} missing`);
   return {
+    rating: null,
+    ratingCount: null,
+    priceLevel: null,
+    placeTypes: null,
+    placeRefreshedAt: null,
     id: row["id"] as string,
     name: row["name"] as string,
     address: row["address"] as string | null,

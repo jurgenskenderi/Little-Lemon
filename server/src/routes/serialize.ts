@@ -1,3 +1,4 @@
+import type { NearbyVenue } from "../db/index.ts";
 import { metersToKilometers, metersToMiles } from "../domain/geo.ts";
 import { formatWindow, type DealWindow } from "../domain/time.ts";
 import type { Deal, DealResult, Venue } from "../domain/types.ts";
@@ -15,6 +16,19 @@ export function serializeVenue(venue: Venue) {
     timeZone: venue.timeZone,
     website: venue.website,
     phone: venue.phone,
+    rating: venue.rating,
+    ratingCount: venue.ratingCount,
+    priceLevel: venue.priceLevel,
+    placeTypes: venue.placeTypes,
+  };
+}
+
+export function serializeNearbyVenue(nearby: NearbyVenue) {
+  return {
+    ...serializeVenue(nearby.venue),
+    distanceM: Math.round(nearby.distanceM),
+    distanceKm: Number(metersToKilometers(nearby.distanceM).toFixed(2)),
+    dealCount: nearby.dealCount,
   };
 }
 
