@@ -103,7 +103,10 @@ export function DealMap({
         initialRegion={region.current}
         showsUserLocation
         showsMyLocationButton={false}
-        showsCompass={false}
+        // A compass once you rotate, and a scale bar, so the map reads the way
+        // people expect one to. Our own recentre button replaces the platform's.
+        showsCompass
+        showsScale
         toolbarEnabled={false}
         onPress={() => setSelectedId(null)}
         onLongPress={(event) => {

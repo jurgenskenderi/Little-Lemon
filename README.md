@@ -121,9 +121,28 @@ Tapping the already-selected card opens the full detail sheet. Panning away
 raises **Search this area**, which re-runs the search centred where you moved
 to; the ◎ button returns to your own location.
 
-The preview build draws its own schematic basemap on a canvas — no tile server
-is reachable from a sandboxed page — and adds marker clustering, so a dense
-strip like King West collapses to a count until you zoom in.
+Two details decide whether a map feels like a map:
+
+**It has to draw streets.** No tile server is reachable from a sandboxed page,
+so the preview build carries the geometry itself — the Toronto arterials by
+class, the Lake Ontario shoreline, the Don and Humber, the larger parks, and
+neighbourhood labels, all at real coordinates. Street names are drawn rotated
+along their own line, and every label is claimed against the ones already
+placed so names never stack. It is a generalised network, not a survey; zoom or
+pan past central Toronto and the map says so rather than presenting bare land
+as fact. The shipping app has no such limit — it uses Google and Apple's own
+maps with the full road graph.
+
+**It has to move under your finger.** `touch-action: none` has to sit on the
+canvas element itself. The property is not inherited, so setting it on the
+wrapper — which is what this build did at first — leaves the browser claiming
+every touch for page scrolling, and the map simply does not pan on a phone.
+Drag pans, pinch and wheel zoom, double-tap zooms in, arrow keys and `+`/`−`
+do the same from the keyboard.
+
+You are a blue dot with an accuracy halo, venues are teardrop pins carrying the
+glyph for what's on offer, and dense strips like King West collapse into a
+count until you zoom in.
 
 iOS uses Apple Maps and needs no key. **Android needs a Google Maps API key**, or
 the map renders blank — that is the usual cause of "the map is grey". Supply it

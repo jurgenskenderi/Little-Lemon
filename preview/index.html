@@ -5,7 +5,9 @@
     --text:#E9F1EE; --muted:#93A6A5; --faint:#6B7E80;
     --accent:#E8A33D; --on-accent:#1B1206;
     --open:#4FB477; --soon:#E5654B; --later:#7E9394;
-    --map-bg:#101A1E; --map-land:#152227; --map-road:#233238; --map-road-major:#2C3F46;
+    --map-bg:#101A1E; --map-water:#0B1E2B; --map-park:#132720; --map-minor:#1A272C;
+    --map-road:#26353B; --map-arterial:#33474F; --map-highway:#4C6672; --map-casing:#0A1215;
+    --map-label:#9DB1B4; --map-park-label:#6C9179; --map-place:#C4D2D0;
     --ring:rgba(232,163,61,.5); --ring-fill:rgba(232,163,61,.06);
 
     --display:"Avenir Next Condensed","Helvetica Neue Condensed","Arial Narrow",sans-serif;
@@ -18,7 +20,9 @@
       --text:#17211F; --muted:#5C6B69; --faint:#85918F;
       --accent:#B4741B; --on-accent:#FFF8EC;
       --open:#2F8F5B; --soon:#C4462C; --later:#7B8886;
-      --map-bg:#EFEAE0; --map-land:#F6F2EA; --map-road:#E2DACB; --map-road-major:#D3C8B4;
+      --map-bg:#F2EEE6; --map-water:#B4D3E7; --map-park:#D6E7CE; --map-minor:#E7E0D2;
+      --map-road:#FFFFFF; --map-arterial:#FFFFFF; --map-highway:#F3D38B; --map-casing:#DAD1C0;
+      --map-label:#6A6255; --map-park-label:#5B7B53; --map-place:#3A3A34;
       --ring:rgba(180,116,27,.45); --ring-fill:rgba(180,116,27,.07);
     }
   }
@@ -27,7 +31,9 @@
     --text:#17211F; --muted:#5C6B69; --faint:#85918F;
     --accent:#B4741B; --on-accent:#FFF8EC;
     --open:#2F8F5B; --soon:#C4462C; --later:#7B8886;
-    --map-bg:#EFEAE0; --map-land:#F6F2EA; --map-road:#E2DACB; --map-road-major:#D3C8B4;
+    --map-bg:#F2EEE6; --map-water:#B4D3E7; --map-park:#D6E7CE; --map-minor:#E7E0D2;
+    --map-road:#FFFFFF; --map-arterial:#FFFFFF; --map-highway:#F3D38B; --map-casing:#DAD1C0;
+    --map-label:#6A6255; --map-park-label:#5B7B53; --map-place:#3A3A34;
     --ring:rgba(180,116,27,.45); --ring-fill:rgba(180,116,27,.07);
   }
   :root[data-theme="dark"] {
@@ -35,7 +41,9 @@
     --text:#E9F1EE; --muted:#93A6A5; --faint:#6B7E80;
     --accent:#E8A33D; --on-accent:#1B1206;
     --open:#4FB477; --soon:#E5654B; --later:#7E9394;
-    --map-bg:#101A1E; --map-land:#152227; --map-road:#233238; --map-road-major:#2C3F46;
+    --map-bg:#101A1E; --map-water:#0B1E2B; --map-park:#132720; --map-minor:#1A272C;
+    --map-road:#26353B; --map-arterial:#33474F; --map-highway:#4C6672; --map-casing:#0A1215;
+    --map-label:#9DB1B4; --map-park-label:#6C9179; --map-place:#C4D2D0;
     --ring:rgba(232,163,61,.5); --ring-fill:rgba(232,163,61,.06);
   }
 
@@ -130,11 +138,21 @@
   .empty { padding:40px 8px; text-align:center; color:var(--muted); }
   .empty h3 { font-family:var(--display); font-size:20px; margin:0 0 6px; color:var(--text); }
 
-  /* ---------- map ---------- */
+  /* ---------- map ----------
+     `display:flex` on an overlay beats the UA's `[hidden] { display:none }`,
+     so the hidden attribute silently stops working — which is how the "tap
+     where you actually are" banner ended up permanently on screen. */
+  .map-shell [hidden] { display:none; }
+
   .map-shell { position:relative; border-radius:14px; overflow:hidden;
                border:1px solid var(--border); background:var(--map-bg);
                height:min(62vh,460px); touch-action:none; }
-  .map-shell canvas { display:block; width:100%; height:100%; cursor:grab; }
+  /* `touch-action` is NOT inherited, so it has to sit on the canvas itself.
+     On the wrapper alone the browser still claims every touch for page
+     scrolling and the map never pans — which is exactly how a map stops
+     feeling like a map. */
+  .map-shell canvas { display:block; width:100%; height:100%; cursor:grab;
+                      touch-action:none; -webkit-user-select:none; user-select:none; }
   .map-shell canvas.dragging { cursor:grabbing; }
   .map-shell canvas:focus-visible { outline:2px solid var(--accent); outline-offset:-3px; }
 
@@ -172,6 +190,18 @@
     white-space:nowrap; }
   .placing button { border:0; background:rgba(0,0,0,.18); color:inherit; font:inherit;
     font-size:12px; padding:4px 10px; border-radius:999px; cursor:pointer; }
+
+  /* An empty map reads as a broken map, so say why it's empty. Pointer events
+     pass through: the map underneath stays pannable while this shows. */
+  .map-empty { position:absolute; inset:auto 12px 56px; pointer-events:none;
+    display:flex; justify-content:center; }
+  .map-empty span { pointer-events:auto; max-width:290px; text-align:center;
+    padding:10px 14px; border-radius:12px; font-size:12.5px; line-height:1.45;
+    color:var(--text); border:1px solid var(--border);
+    background:color-mix(in srgb, var(--surface) 90%, transparent);
+    backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px);
+    box-shadow:0 6px 18px rgba(0,0,0,.22); }
+  .map-empty b { color:var(--accent); }
   .scalebar { position:absolute; left:12px; bottom:14px; display:flex; align-items:center;
               gap:6px; pointer-events:none; }
   .scalebar .bar { height:3px; background:var(--muted); opacity:.65; border-radius:2px; }
@@ -267,12 +297,14 @@
   <div id="mapView" hidden>
     <div class="map-shell" id="mapShell">
       <canvas id="map" tabindex="0" role="application"
-              aria-label="Map of nearby deals. Drag to pan, pinch or scroll to zoom."></canvas>
+              aria-label="Street map of nearby deals. Drag to pan, pinch or scroll to zoom,
+                          double-tap to zoom in. Arrow keys pan and +/− zoom."></canvas>
       <button type="button" class="search-area" id="searchArea" hidden>Search this area</button>
       <div class="placing" id="placingBanner" hidden>
         Tap where you actually are
         <button type="button" id="cancelPlacing">Cancel</button>
       </div>
+      <div class="map-empty" id="mapEmpty" hidden><span></span></div>
       <div class="scalebar"><div class="bar" id="scaleBar"></div><span id="scaleText"></span></div>
       <div class="fabs">
         <div class="zoom-stack">
@@ -289,9 +321,9 @@
       <span class="key"><i style="background:var(--later)"></i>Later</span>
       <span class="key" style="margin-left:auto" id="mapCount"></span>
     </div>
-    <p class="map-tip">Drag to pan, pinch or scroll to zoom. Tap a pin or swipe the cards.
-      If the blue circle is nowhere near you, use <em>set it on the map</em> above to pin
-      your real spot.</p>
+    <p class="map-tip">Drag to pan, pinch or scroll to zoom, double-tap to zoom in. Tap a pin
+      or swipe the cards. The blue dot is you — if it's nowhere near you, use
+      <em>set it on the map</em> above to pin your real spot.</p>
   </div>
 
   <footer>
@@ -538,6 +570,12 @@ function artKey(deal) {
   return deal.cat === "food" ? "plate" : "cocktail";
 }
 
+/** The same nine categories as a single character, for the head of a map pin. */
+const PIN_GLYPH = {
+  beer:"🍺", cocktail:"🍸", wine:"🍷", fizz:"🥂", oyster:"🦪",
+  taco:"🌮", burger:"🍔", plate:"🍽", whisky:"🥃",
+};
+
 function artHtml(deal, size) {
   const key = artKey(deal);
   const light = document.documentElement.dataset.theme === "light" ||
@@ -550,22 +588,144 @@ function artHtml(deal, size) {
 
 let current = [];
 
+/* ------------------------------------------------------------------ *
+ * Basemap geometry for central Toronto.
+ *
+ * A sandboxed page cannot reach a tile server, so the streets are baked in:
+ * simplified polylines for the arterials, the Lake Ontario shoreline, the Don
+ * and Humber valleys, and the larger parks, all at real coordinates. It is a
+ * generalised network, not a survey — good enough to recognise where you are
+ * and which street a bar is on, which is what this view is for. The shipping
+ * app uses Google/Apple maps with the full road graph.
+ * ------------------------------------------------------------------ */
+
+// Road classes drive width and label priority, the way a real basemap does.
+const ROAD = { HIGHWAY: 3, ARTERIAL: 2, MAJOR: 1 };
+
+/** [name, class, [[lat, lon], …]] */
+const ROADS = [
+  // ---- expressways
+  ["Gardiner Expwy", ROAD.HIGHWAY, [[43.6320,-79.4750],[43.6335,-79.4500],[43.6360,-79.4230],[43.6386,-79.4020],[43.6400,-79.3860],[43.6410,-79.3700],[43.6440,-79.3560],[43.6500,-79.3480]]],
+  ["Don Valley Pkwy", ROAD.HIGHWAY, [[43.6500,-79.3480],[43.6600,-79.3540],[43.6720,-79.3560],[43.6840,-79.3520],[43.7000,-79.3400],[43.7150,-79.3320]]],
+  ["Lake Shore Blvd", ROAD.ARTERIAL, [[43.6300,-79.4800],[43.6330,-79.4500],[43.6355,-79.4230],[43.6380,-79.4020],[43.6395,-79.3830],[43.6408,-79.3660],[43.6455,-79.3520]]],
+
+  // ---- east-west arterials, south to north
+  ["Front St", ROAD.MAJOR, [[43.6425,-79.4030],[43.6440,-79.3900],[43.6452,-79.3800],[43.6462,-79.3700],[43.6500,-79.3590]]],
+  ["King St", ROAD.ARTERIAL, [[43.6395,-79.4290],[43.6430,-79.4110],[43.6450,-79.4000],[43.6478,-79.3880],[43.6495,-79.3760],[43.6525,-79.3640],[43.6560,-79.3530]]],
+  ["Adelaide St", ROAD.MAJOR, [[43.6455,-79.4020],[43.6478,-79.3900],[43.6495,-79.3790],[43.6510,-79.3700]]],
+  ["Richmond St", ROAD.MAJOR, [[43.6462,-79.4030],[43.6485,-79.3900],[43.6500,-79.3790],[43.6516,-79.3700]]],
+  ["Queen St W", ROAD.ARTERIAL, [[43.6390,-79.4640],[43.6420,-79.4470],[43.6448,-79.4290],[43.6470,-79.4160],[43.6479,-79.4030],[43.6510,-79.3880],[43.6525,-79.3790]]],
+  ["Queen St E", ROAD.ARTERIAL, [[43.6525,-79.3790],[43.6545,-79.3680],[43.6560,-79.3560],[43.6590,-79.3480],[43.6620,-79.3380],[43.6660,-79.3260],[43.6690,-79.3150]]],
+  ["Dundas St W", ROAD.ARTERIAL, [[43.6560,-79.4700],[43.6552,-79.4500],[43.6530,-79.4330],[43.6501,-79.4180],[43.6520,-79.4020],[43.6545,-79.3900],[43.6560,-79.3800]]],
+  ["Dundas St E", ROAD.ARTERIAL, [[43.6560,-79.3800],[43.6580,-79.3700],[43.6600,-79.3600],[43.6625,-79.3490],[43.6650,-79.3400],[43.6670,-79.3300]]],
+  ["Gerrard St", ROAD.MAJOR, [[43.6580,-79.3880],[43.6600,-79.3760],[43.6620,-79.3650],[43.6650,-79.3520],[43.6680,-79.3400],[43.6700,-79.3280]]],
+  ["College St", ROAD.ARTERIAL, [[43.6555,-79.4400],[43.6551,-79.4230],[43.6551,-79.4090],[43.6570,-79.3980],[43.6590,-79.3880],[43.6605,-79.3800]]],
+  ["Carlton St", ROAD.MAJOR, [[43.6605,-79.3800],[43.6615,-79.3720],[43.6625,-79.3660]]],
+  ["Harbord St", ROAD.MAJOR, [[43.6600,-79.4180],[43.6615,-79.4060],[43.6628,-79.3970]]],
+  ["Wellesley St", ROAD.MAJOR, [[43.6650,-79.3900],[43.6660,-79.3800],[43.6668,-79.3720]]],
+  ["Bloor St W", ROAD.ARTERIAL, [[43.6560,-79.4840],[43.6590,-79.4640],[43.6620,-79.4470],[43.6640,-79.4300],[43.6655,-79.4120],[43.6670,-79.3980],[43.6690,-79.3880]]],
+  ["Bloor St E", ROAD.ARTERIAL, [[43.6690,-79.3880],[43.6710,-79.3760],[43.6725,-79.3660],[43.6740,-79.3570]]],
+  ["Danforth Ave", ROAD.ARTERIAL, [[43.6760,-79.3560],[43.6775,-79.3480],[43.6790,-79.3400],[43.6810,-79.3300],[43.6830,-79.3180],[43.6850,-79.3080]]],
+  ["Dupont St", ROAD.MAJOR, [[43.6710,-79.4380],[43.6730,-79.4200],[43.6745,-79.4060],[43.6752,-79.3960]]],
+  ["Davenport Rd", ROAD.MAJOR, [[43.6740,-79.4300],[43.6760,-79.4130],[43.6775,-79.4000],[43.6760,-79.3900]]],
+  ["St Clair Ave W", ROAD.ARTERIAL, [[43.6800,-79.4700],[43.6820,-79.4500],[43.6845,-79.4300],[43.6862,-79.4120],[43.6875,-79.3960],[43.6885,-79.3850]]],
+  ["Eglinton Ave W", ROAD.ARTERIAL, [[43.6950,-79.4700],[43.6985,-79.4480],[43.7020,-79.4250],[43.7045,-79.4050],[43.7060,-79.3900]]],
+  ["Queens Quay", ROAD.MAJOR, [[43.6370,-79.4000],[43.6385,-79.3860],[43.6395,-79.3730],[43.6420,-79.3620]]],
+
+  // ---- north-south arterials, west to east
+  ["Roncesvalles Ave", ROAD.MAJOR, [[43.6390,-79.4490],[43.6450,-79.4500],[43.6520,-79.4490],[43.6560,-79.4470]]],
+  ["Lansdowne Ave", ROAD.MAJOR, [[43.6390,-79.4430],[43.6500,-79.4440],[43.6620,-79.4450],[43.6740,-79.4460]]],
+  ["Dufferin St", ROAD.ARTERIAL, [[43.6360,-79.4300],[43.6480,-79.4330],[43.6600,-79.4350],[43.6720,-79.4370],[43.6860,-79.4390]]],
+  ["Ossington Ave", ROAD.MAJOR, [[43.6420,-79.4200],[43.6500,-79.4200],[43.6600,-79.4205],[43.6690,-79.4210]]],
+  ["Christie St", ROAD.MAJOR, [[43.6560,-79.4200],[43.6650,-79.4205],[43.6740,-79.4210]]],
+  ["Bathurst St", ROAD.ARTERIAL, [[43.6360,-79.4030],[43.6470,-79.4060],[43.6570,-79.4090],[43.6670,-79.4115],[43.6800,-79.4140],[43.6950,-79.4170]]],
+  ["Spadina Ave", ROAD.ARTERIAL, [[43.6380,-79.3930],[43.6450,-79.3950],[43.6520,-79.3970],[43.6600,-79.3990],[43.6670,-79.4010]]],
+  ["Bay St", ROAD.ARTERIAL, [[43.6420,-79.3790],[43.6500,-79.3810],[43.6580,-79.3835],[43.6660,-79.3860],[43.6720,-79.3880]]],
+  ["University Ave", ROAD.ARTERIAL, [[43.6440,-79.3830],[43.6510,-79.3855],[43.6580,-79.3880],[43.6640,-79.3900]]],
+  ["Yonge St", ROAD.ARTERIAL, [[43.6410,-79.3760],[43.6500,-79.3785],[43.6600,-79.3810],[43.6700,-79.3835],[43.6820,-79.3865],[43.6960,-79.3900],[43.7120,-79.3940]]],
+  ["Church St", ROAD.MAJOR, [[43.6470,-79.3740],[43.6560,-79.3765],[43.6650,-79.3790],[43.6710,-79.3805]]],
+  ["Jarvis St", ROAD.MAJOR, [[43.6480,-79.3710],[43.6570,-79.3730],[43.6660,-79.3755],[43.6720,-79.3770]]],
+  ["Sherbourne St", ROAD.MAJOR, [[43.6490,-79.3690],[43.6580,-79.3710],[43.6670,-79.3730],[43.6740,-79.3745]]],
+  ["Parliament St", ROAD.MAJOR, [[43.6520,-79.3620],[43.6610,-79.3645],[43.6700,-79.3665],[43.6760,-79.3680]]],
+  ["Broadview Ave", ROAD.ARTERIAL, [[43.6560,-79.3500],[43.6650,-79.3520],[43.6760,-79.3555],[43.6860,-79.3575]]],
+  ["Pape Ave", ROAD.MAJOR, [[43.6620,-79.3400],[43.6720,-79.3425],[43.6800,-79.3445],[43.6900,-79.3465]]],
+  ["Carlaw Ave", ROAD.MAJOR, [[43.6600,-79.3440],[43.6700,-79.3460],[43.6790,-79.3478]]],
+  ["Greenwood Ave", ROAD.MAJOR, [[43.6650,-79.3300],[43.6760,-79.3320],[43.6860,-79.3340]]],
+  ["Coxwell Ave", ROAD.ARTERIAL, [[43.6660,-79.3180],[43.6780,-79.3205],[43.6900,-79.3230]]],
+  ["Keele St", ROAD.ARTERIAL, [[43.6480,-79.4650],[43.6600,-79.4665],[43.6740,-79.4680],[43.6880,-79.4700]]],
+];
+
+/** Filled water. First ring is the lake; the rest are rivers, drawn as areas. */
+const WATER = [
+  // Lake Ontario. The shoreline is traced; the other three sides run well past
+  // the street data so a zoomed-out view shows a lake, not a rectangle of blue.
+  [[43.5900,-79.8000],[43.6130,-79.5750],[43.6230,-79.5350],[43.6300,-79.5100],
+   [43.6330,-79.4900],[43.6355,-79.4600],[43.6372,-79.4300],[43.6382,-79.4020],[43.6390,-79.3840],
+   [43.6402,-79.3690],[43.6440,-79.3540],[43.6510,-79.3400],[43.6560,-79.3180],[43.6600,-79.2950],
+   [43.6700,-79.2500],[43.6800,-79.2000],[43.6900,-79.1000],
+   [43.3000,-79.1000],[43.3000,-79.8000]],
+  // Toronto Islands sit inside the lake polygon, drawn back in as land.
+];
+
+const ISLANDS = [
+  [[43.6285,-79.3480],[43.6300,-79.3560],[43.6265,-79.3690],[43.6215,-79.3790],[43.6180,-79.3880],
+   [43.6215,-79.3930],[43.6265,-79.3830],[43.6310,-79.3700],[43.6330,-79.3560],[43.6320,-79.3460]],
+];
+
+const RIVERS = [
+  ["Don River", [[43.6480,-79.3510],[43.6600,-79.3560],[43.6720,-79.3580],[43.6850,-79.3540],[43.7000,-79.3430]]],
+  ["Humber River", [[43.6320,-79.4720],[43.6450,-79.4820],[43.6580,-79.4900],[43.6720,-79.4960]]],
+];
+
+/** [name, [[lat, lon], …]] — the parks big enough to help you orient. */
+const PARKS = [
+  ["High Park", [[43.6440,-79.4700],[43.6560,-79.4700],[43.6560,-79.4560],[43.6440,-79.4560]]],
+  ["Trinity Bellwoods", [[43.6462,-79.4180],[43.6528,-79.4180],[43.6528,-79.4110],[43.6462,-79.4110]]],
+  ["Christie Pits", [[43.6635,-79.4230],[43.6675,-79.4230],[43.6675,-79.4175],[43.6635,-79.4175]]],
+  ["Queen's Park", [[43.6620,-79.3945],[43.6690,-79.3945],[43.6690,-79.3880],[43.6620,-79.3880]]],
+  ["Allan Gardens", [[43.6602,-79.3775],[43.6632,-79.3775],[43.6632,-79.3720],[43.6602,-79.3720]]],
+  ["Riverdale Park", [[43.6650,-79.3590],[43.6740,-79.3590],[43.6740,-79.3500],[43.6650,-79.3500]]],
+  ["Withrow Park", [[43.6740,-79.3420],[43.6790,-79.3420],[43.6790,-79.3350],[43.6740,-79.3350]]],
+  ["Grange Park", [[43.6520,-79.3940],[43.6545,-79.3940],[43.6545,-79.3900],[43.6520,-79.3900]]],
+];
+
+/** Neighbourhood labels, shown when zoomed out far enough to need them. */
+const PLACES = [
+  ["Queen West", 43.6479, -79.4030], ["King West", 43.6444, -79.4005],
+  ["Kensington Mkt", 43.6547, -79.4005], ["Distillery", 43.6503, -79.3595],
+  ["Liberty Village", 43.6380, -79.4207], ["Yorkville", 43.6708, -79.3934],
+  ["The Annex", 43.6690, -79.4050], ["Little Italy", 43.6551, -79.4139],
+  ["Leslieville", 43.6626, -79.3327], ["The Danforth", 43.6779, -79.3496],
+  ["Roncesvalles", 43.6465, -79.4494], ["The Junction", 43.6655, -79.4692],
+  ["Financial Dist", 43.6487, -79.3800], ["Parkdale", 43.6395, -79.4370],
+  ["Corktown", 43.6540, -79.3630], ["Riverside", 43.6588, -79.3490],
+];
+
+/** True when the viewport overlaps the area we have street data for. */
+const COVERAGE = { minLat: 43.58, maxLat: 43.73, minLon: -79.52, maxLon: -79.27 };
+
 /* ================================================================== *
  * The map.
  *
- * No tile server is reachable from a sandboxed page, so this draws its
- * own schematic basemap on a canvas: an adaptive grid standing in for
- * street structure, the search radius, and the venues. Canvas keeps
- * pan and pinch smooth, and makes clustering cheap at low zoom.
+ * Draws a real, if generalised, street map of central Toronto on a canvas:
+ * arterials by class, the lake and rivers, parks, neighbourhood labels, and
+ * street names rotated along their line. A sandboxed page cannot fetch tiles,
+ * so the geometry is baked in — see basemap data above.
+ *
+ * Gestures are handled with pointer events: drag to pan, pinch or wheel to
+ * zoom, double-tap to zoom in, arrow keys and +/- for keyboard. The canvas
+ * carries `touch-action: none` itself — setting it on the wrapper does nothing,
+ * because the property is not inherited, and the browser then eats every touch
+ * for page scrolling.
  * ================================================================== */
 const MapView = (() => {
   const canvas = el("map");
   const ctx = canvas.getContext("2d");
 
   // World space is kilometres east/south of an anchor, so panning never
-  // accumulates projection drift the way re-projecting per frame would.
+  // accumulates the projection drift that re-projecting per frame would.
   let anchor = { lat: 43.6487, lon: -79.3980 };
-  let centre = { x: 0, y: 0 };   // km from anchor
+  let centre = { x: 0, y: 0 };
   let pxPerKm = 90;
   let width = 0, height = 0;
   let clusters = [];
@@ -577,130 +737,301 @@ const MapView = (() => {
   const toLatLon = (w) => ({ lat: anchor.lat - w.y/111.32, lon: anchor.lon + w.x/kmPerLon() });
   const toScreen = (w) => ({ x:(w.x-centre.x)*pxPerKm + width/2, y:(w.y-centre.y)*pxPerKm + height/2 });
   const fromScreen = (s) => ({ x:(s.x-width/2)/pxPerKm + centre.x, y:(s.y-height/2)/pxPerKm + centre.y });
+  const project = (lat, lon) => toScreen(toWorld({ lat, lon }));
 
   const css = (name) => getComputedStyle(document.documentElement).getPropertyValue(name).trim();
-  const reduceMotion = matchMedia("(prefers-reduced-motion: reduce)").matches;
 
   function resize() {
     const rect = canvas.getBoundingClientRect();
     const dpr = Math.min(window.devicePixelRatio || 1, 2.5);
     width = rect.width; height = rect.height;
+    if (!width || !height) return;
     canvas.width = Math.round(width * dpr);
     canvas.height = Math.round(height * dpr);
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     draw();
   }
 
-  /** Fit the search circle, with a little air around it. */
   function frameRadius() {
     if (!state.origin) return;
     anchor = { lat: state.origin.lat, lon: state.origin.lon };
     centre = { x: 0, y: 0 };
-    pxPerKm = Math.min(width, height) / (state.radiusKm * 2.5);
-    draw();
+    pxPerKm = Math.min(width, height) / (state.radiusKm * 2.5) || 90;
+    scheduleDraw();
   }
 
   function zoomBy(factor, focus) {
     const before = focus ? fromScreen(focus) : centre;
-    pxPerKm = Math.max(6, Math.min(4000, pxPerKm * factor));
+    pxPerKm = Math.max(4, Math.min(6000, pxPerKm * factor));
     if (focus) {
       const after = fromScreen(focus);
       centre.x += before.x - after.x;
       centre.y += before.y - after.y;
     }
     scheduleDraw();
+    updateSearchArea();
   }
 
-  /* Grid step picked so lines stay roughly 60-120px apart at any zoom. */
-  function gridStepKm() {
-    const target = 90 / pxPerKm;
-    const steps = [0.05,0.1,0.2,0.5,1,2,5,10,20,50,100];
-    return steps.find((s) => s >= target) ?? 100;
+  /* ---------------- basemap drawing ---------------- */
+
+  function drawPolygon(ring, fill, stroke) {
+    ctx.beginPath();
+    ring.forEach(([lat, lon], i) => {
+      const p = project(lat, lon);
+      i === 0 ? ctx.moveTo(p.x, p.y) : ctx.lineTo(p.x, p.y);
+    });
+    ctx.closePath();
+    if (fill) { ctx.fillStyle = fill; ctx.fill(); }
+    if (stroke) { ctx.strokeStyle = stroke; ctx.lineWidth = 1; ctx.stroke(); }
   }
+
+  /** Road width in pixels, by class, tapering as you zoom out. */
+  function roadWidth(cls) {
+    // A floor, not just a ratio: zoomed right out an arterial still has to be
+    // visible as a line rather than fading to a hairline.
+    const scale = Math.max(0.55, Math.min(1.6, pxPerKm / 120));
+    if (cls === 3) return 6.5 * scale;
+    if (cls === 2) return 4.2 * scale;
+    return 2.4 * scale;
+  }
+
+  function drawRoadPath(points) {
+    ctx.beginPath();
+    points.forEach(([lat, lon], i) => {
+      const p = project(lat, lon);
+      i === 0 ? ctx.moveTo(p.x, p.y) : ctx.lineTo(p.x, p.y);
+    });
+    ctx.stroke();
+  }
+
+  /**
+   * Label a road along its own line, the way a street map does — the longest
+   * on-screen segment, rotated to match, flipped so text is never upside down.
+   */
+  function labelRoad(name, points) {
+    let best = null, bestLength = 0;
+    for (let i = 0; i < points.length - 1; i++) {
+      const a = project(points[i][0], points[i][1]);
+      const b = project(points[i+1][0], points[i+1][1]);
+      const midX = (a.x + b.x) / 2, midY = (a.y + b.y) / 2;
+      if (midX < 40 || midX > width - 40 || midY < 20 || midY > height - 20) continue;
+      const length = Math.hypot(b.x - a.x, b.y - a.y);
+      if (length > bestLength) { bestLength = length; best = { a, b, midX, midY }; }
+    }
+    if (!best) return;
+
+    ctx.font = `600 10.5px ${bodyFont}`;
+    const textWidth = ctx.measureText(name).width;
+    if (bestLength < textWidth + 24) return;
+
+    let angle = Math.atan2(best.b.y - best.a.y, best.b.x - best.a.x);
+    if (angle > Math.PI/2 || angle < -Math.PI/2) angle += Math.PI;
+
+    // Reserve the rotated text's bounding box before committing to it.
+    const cos = Math.abs(Math.cos(angle)), sin = Math.abs(Math.sin(angle));
+    if (!claimLabel(best.midX, best.midY,
+                    textWidth*cos + 12*sin, textWidth*sin + 12*cos)) return;
+
+    ctx.save();
+    ctx.translate(best.midX, best.midY);
+    ctx.rotate(angle);
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    // Halo first, so the name stays readable over the road casing.
+    ctx.strokeStyle = css("--map-bg");
+    ctx.lineWidth = 3.5;
+    ctx.lineJoin = "round";
+    ctx.strokeText(name, 0, 0);
+    ctx.fillStyle = css("--map-label");
+    ctx.fillText(name, 0, 0);
+    ctx.restore();
+  }
+
+  let bodyFont = "sans-serif";
+
+  /**
+   * Labels are claimed against a list of boxes already placed this frame, so a
+   * street name and a neighbourhood never sit on top of each other. First
+   * claimant wins, and drawing order is priority order: streets, parks, places.
+   */
+  let labelBoxes = [];
+  function claimLabel(x, y, w, h) {
+    const pad = 3;
+    const box = { x0:x-w/2-pad, x1:x+w/2+pad, y0:y-h/2-pad, y1:y+h/2+pad };
+    for (const b of labelBoxes) {
+      if (box.x0 < b.x1 && box.x1 > b.x0 && box.y0 < b.y1 && box.y1 > b.y0) return false;
+    }
+    labelBoxes.push(box);
+    return true;
+  }
+
+  function drawBasemap() {
+    labelBoxes = [];
+    const bg = css("--map-bg");
+    ctx.fillStyle = bg;
+    ctx.fillRect(0, 0, width, height);
+
+    // Minor streets: a faint block grid standing in for the residential
+    // network we do not carry. Only at close zoom, where blocks read as blocks,
+    // and under the water and parks — nobody lays out blocks across a lake.
+    if (pxPerKm > 200) {
+      const step = 0.14 * pxPerKm; // ~140 m, a typical downtown block
+      const o = project(anchor.lat, anchor.lon);
+      ctx.strokeStyle = css("--map-minor");
+      ctx.lineWidth = 1;
+      const firstX = o.x - Math.ceil(o.x / step) * step;
+      const firstY = o.y - Math.ceil(o.y / step) * step;
+      ctx.beginPath();
+      for (let x = firstX; x < width + step; x += step) {
+        ctx.moveTo(Math.round(x) + .5, 0); ctx.lineTo(Math.round(x) + .5, height);
+      }
+      for (let y = firstY; y < height + step; y += step) {
+        ctx.moveTo(0, Math.round(y) + .5); ctx.lineTo(width, Math.round(y) + .5);
+      }
+      ctx.stroke();
+    }
+
+    // Water and parks sit over the grid and under the roads.
+    for (const ring of WATER) drawPolygon(ring, css("--map-water"), null);
+    for (const ring of ISLANDS) drawPolygon(ring, bg, null);
+
+    ctx.lineCap = "round";
+    ctx.lineJoin = "round";
+    ctx.strokeStyle = css("--map-water");
+    for (const [, points] of RIVERS) {
+      ctx.lineWidth = Math.max(2, roadWidth(2));
+      drawRoadPath(points);
+    }
+
+    for (const [, ring] of PARKS) drawPolygon(ring, css("--map-park"), null);
+
+    // Roads in two passes so junctions look joined: dark casing, then fill.
+    const visible = ROADS.filter(([, cls]) => cls >= (pxPerKm < 45 ? 2 : 1));
+
+    ctx.strokeStyle = css("--map-casing");
+    for (const [, cls, points] of visible) {
+      ctx.lineWidth = roadWidth(cls) + 2;
+      drawRoadPath(points);
+    }
+    for (const [, cls, points] of visible) {
+      ctx.strokeStyle = cls === 3 ? css("--map-highway")
+        : cls === 2 ? css("--map-arterial") : css("--map-road");
+      ctx.lineWidth = roadWidth(cls);
+      drawRoadPath(points);
+    }
+
+    // Street names once there is room for them.
+    if (pxPerKm > 55) {
+      for (const [name, cls, points] of visible) {
+        if (pxPerKm < 110 && cls < 2) continue;
+        labelRoad(name, points);
+      }
+    }
+
+    // Park names, then neighbourhoods.
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    if (pxPerKm > 90) {
+      ctx.font = `600 10px ${bodyFont}`;
+      ctx.fillStyle = css("--map-park-label");
+      for (const [name, ring] of PARKS) {
+        const lat = ring.reduce((s, p) => s + p[0], 0) / ring.length;
+        const lon = ring.reduce((s, p) => s + p[1], 0) / ring.length;
+        const p = project(lat, lon);
+        if (p.x < 0 || p.x > width || p.y < 0 || p.y > height) continue;
+        if (!claimLabel(p.x, p.y, ctx.measureText(name).width, 12)) continue;
+        ctx.fillText(name, p.x, p.y);
+      }
+    }
+    if (pxPerKm > 30 && pxPerKm < 260) {
+      ctx.font = `700 11px ${bodyFont}`;
+      for (const [name, lat, lon] of PLACES) {
+        const p = project(lat, lon);
+        if (p.x < 30 || p.x > width - 30 || p.y < 16 || p.y > height - 16) continue;
+        if (!claimLabel(p.x, p.y, ctx.measureText(name).width, 13)) continue;
+        ctx.strokeStyle = css("--map-bg"); ctx.lineWidth = 3; ctx.lineJoin = "round";
+        ctx.strokeText(name, p.x, p.y);
+        ctx.fillStyle = css("--map-place"); ctx.fillText(name, p.x, p.y);
+      }
+    }
+  }
+
+  /* ---------------- markers ---------------- */
 
   function buildClusters() {
-    // Grid-bucket in screen space: two pins closer than a pin's width merge.
-    const cell = 46;
+    const cell = 52;
     const buckets = new Map();
     for (const r of current) {
-      const s = toScreen(toWorld(r.venue));
-      if (s.x < -60 || s.x > width+60 || s.y < -60 || s.y > height+60) continue;
+      const s = project(r.venue.lat, r.venue.lon);
+      if (s.x < -80 || s.x > width + 80 || s.y < -80 || s.y > height + 80) continue;
       const key = `${Math.floor(s.x/cell)}:${Math.floor(s.y/cell)}`;
       const bucket = buckets.get(key);
       if (bucket) { bucket.items.push(r); bucket.x += s.x; bucket.y += s.y; }
       else buckets.set(key, { items:[r], x:s.x, y:s.y });
     }
     clusters = [...buckets.values()].map((b) => ({
-      items: b.items,
-      x: b.x / b.items.length,
-      y: b.y / b.items.length,
+      items: b.items, x: b.x / b.items.length, y: b.y / b.items.length,
     }));
-    // Selected pin draws last so it is never hidden under a neighbour.
     clusters.sort((a, b) =>
-      (a.items.some(isSelected)?1:0) - (b.items.some(isSelected)?1:0));
+      (a.items.some(isSelected) ? 1 : 0) - (b.items.some(isSelected) ? 1 : 0));
   }
 
   const isSelected = (r) => state.selected != null && r.id === state.selected;
+  const colourFor = (r) =>
+    r.deal.partner ? css("--accent") : r.openNow ? css("--open") : css("--later");
 
-  function colourFor(r) {
-    if (r.deal.partner) return css("--accent");
-    return r.openNow ? css("--open") : css("--later");
+  /** A teardrop pin, so markers read as places rather than dots. */
+  function drawPin(x, y, colour, scale, glyph) {
+    const r = 13 * scale;
+    ctx.save();
+    ctx.translate(x, y);
+    ctx.beginPath();
+    ctx.arc(0, -r, r, Math.PI * 0.85, Math.PI * 0.15, false);
+    ctx.quadraticCurveTo(r * 0.55, r * 0.35, 0, r * 0.85);
+    ctx.quadraticCurveTo(-r * 0.55, r * 0.35, -r * 0.93, -r * 0.5);
+    ctx.closePath();
+    ctx.fillStyle = colour;
+    ctx.shadowColor = "rgba(0,0,0,.35)";
+    ctx.shadowBlur = 6 * scale;
+    ctx.shadowOffsetY = 2 * scale;
+    ctx.fill();
+    ctx.shadowColor = "transparent";
+    ctx.lineWidth = 2 * scale;
+    ctx.strokeStyle = css("--map-bg");
+    ctx.stroke();
+
+    ctx.beginPath();
+    ctx.arc(0, -r, r * 0.62, 0, Math.PI * 2);
+    ctx.fillStyle = css("--map-bg");
+    ctx.fill();
+
+    if (glyph) {
+      ctx.font = `${(r * 0.86).toFixed(1)}px ${bodyFont}`;
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.fillText(glyph, 0, -r + r * 0.04);
+    }
+    ctx.restore();
   }
 
-  function draw() {
-    if (!width || !height) return;
-    const bg = css("--map-bg"), land = css("--map-land");
-    const road = css("--map-road"), major = css("--map-road-major");
-    const text = css("--text"), muted = css("--muted"), surface = css("--surface");
-
-    ctx.clearRect(0, 0, width, height);
-    ctx.fillStyle = bg;
-    ctx.fillRect(0, 0, width, height);
-
-    // Schematic street grid. Every fifth line is heavier, which reads as
-    // arterial roads and gives a sense of scale while zooming.
-    const step = gridStepKm();
-    const stepPx = step * pxPerKm;
-    const originX = toScreen({ x:0, y:0 }).x, originY = toScreen({ x:0, y:0 }).y;
-    const firstX = originX - Math.ceil(originX / stepPx) * stepPx;
-    const firstY = originY - Math.ceil(originY / stepPx) * stepPx;
-
-    ctx.lineWidth = 1;
-    for (let i = 0, x = firstX; x < width + stepPx; x += stepPx, i++) {
-      const index = Math.round((x - originX) / stepPx);
-      ctx.strokeStyle = index % 5 === 0 ? major : road;
-      ctx.beginPath(); ctx.moveTo(Math.round(x)+.5, 0); ctx.lineTo(Math.round(x)+.5, height); ctx.stroke();
-    }
-    for (let y = firstY; y < height + stepPx; y += stepPx) {
-      const index = Math.round((y - originY) / stepPx);
-      ctx.strokeStyle = index % 5 === 0 ? major : road;
-      ctx.beginPath(); ctx.moveTo(0, Math.round(y)+.5); ctx.lineTo(width, Math.round(y)+.5); ctx.stroke();
-    }
-
-    if (!state.origin) return;
-
-    // Search radius, drawn in world space so it scales with zoom.
-    const home = toScreen(toWorld(state.origin));
-    const ringPx = state.radiusKm * pxPerKm;
-    ctx.save();
-    ctx.beginPath(); ctx.arc(home.x, home.y, ringPx, 0, Math.PI*2);
-    ctx.fillStyle = css("--ring-fill"); ctx.fill();
-    ctx.setLineDash([6, 6]); ctx.lineWidth = 1.5; ctx.strokeStyle = css("--ring"); ctx.stroke();
-    ctx.restore();
-
+  function drawMarkers() {
     buildClusters();
 
     for (const cluster of clusters) {
       if (cluster.items.length > 1) {
-        const anySelected = cluster.items.some(isSelected);
-        const size = Math.min(15 + cluster.items.length * 1.6, 26);
-        ctx.beginPath(); ctx.arc(cluster.x, cluster.y, size, 0, Math.PI*2);
-        ctx.fillStyle = surface; ctx.fill();
-        ctx.lineWidth = anySelected ? 3 : 2;
+        const size = Math.min(15 + cluster.items.length * 1.7, 27);
+        ctx.beginPath();
+        ctx.arc(cluster.x, cluster.y, size, 0, Math.PI*2);
+        ctx.fillStyle = cluster.items.some((r) => r.deal.partner) ? css("--accent") : css("--open");
+        ctx.globalAlpha = .22; ctx.fill(); ctx.globalAlpha = 1;
+        ctx.beginPath();
+        ctx.arc(cluster.x, cluster.y, size - 5, 0, Math.PI*2);
+        ctx.fillStyle = css("--surface"); ctx.fill();
+        ctx.lineWidth = 2;
         ctx.strokeStyle = cluster.items.some((r) => r.deal.partner) ? css("--accent") : css("--open");
         ctx.stroke();
-        ctx.fillStyle = text;
-        ctx.font = `600 ${Math.round(size*0.78)}px ${getComputedStyle(document.body).fontFamily}`;
+        ctx.fillStyle = css("--text");
+        ctx.font = `700 ${Math.round(size*0.68)}px ${bodyFont}`;
         ctx.textAlign = "center"; ctx.textBaseline = "middle";
         ctx.fillText(String(cluster.items.length), cluster.x, cluster.y);
         continue;
@@ -708,52 +1039,99 @@ const MapView = (() => {
 
       const r = cluster.items[0];
       const selected = isSelected(r);
-      const colour = colourFor(r);
-      const radius = selected ? 11 : 7.5;
+      drawPin(cluster.x, cluster.y, colourFor(r), selected ? 1.35 : 1, PIN_GLYPH[artKey(r.deal)]);
 
-      if (selected && !reduceMotion) {
-        ctx.beginPath(); ctx.arc(cluster.x, cluster.y, radius + 9, 0, Math.PI*2);
-        ctx.fillStyle = colour; ctx.globalAlpha = .18; ctx.fill(); ctx.globalAlpha = 1;
-      }
-      ctx.beginPath(); ctx.arc(cluster.x, cluster.y, radius, 0, Math.PI*2);
-      ctx.fillStyle = colour; ctx.fill();
-      ctx.lineWidth = selected ? 3 : 2; ctx.strokeStyle = surface; ctx.stroke();
-
-      // Labels only once there is room for them, and only for the pins the
-      // user is most likely to be reading — otherwise it turns to soup.
-      if (selected || (pxPerKm > 140 && hovered === r)) {
-        const name = r.venue.n;
-        ctx.font = `600 11px ${getComputedStyle(document.body).fontFamily}`;
-        const w = ctx.measureText(name).width + 14;
-        const boxY = cluster.y - radius - 26;
+      // Price label beside the pin, the way a map labels a place.
+      const label = r.deal.p ?? r.deal.t;
+      if (selected || pxPerKm > 150 || hovered === r) {
+        ctx.font = `700 11px ${bodyFont}`;
+        const w = ctx.measureText(label).width + 14;
+        const boxY = cluster.y - (selected ? 50 : 42);
         ctx.beginPath();
         ctx.roundRect(cluster.x - w/2, boxY, w, 20, 6);
-        ctx.fillStyle = surface; ctx.fill();
-        ctx.strokeStyle = colour; ctx.lineWidth = 1; ctx.stroke();
-        ctx.fillStyle = text; ctx.textAlign = "center"; ctx.textBaseline = "middle";
-        ctx.fillText(name, cluster.x, boxY + 10);
+        ctx.fillStyle = css("--surface"); ctx.fill();
+        ctx.strokeStyle = colourFor(r); ctx.lineWidth = 1.2; ctx.stroke();
+        ctx.fillStyle = css("--text");
+        ctx.textAlign = "center"; ctx.textBaseline = "middle";
+        ctx.fillText(label, cluster.x, boxY + 10);
       }
     }
+  }
 
-    // How sure the browser is. Only drawn when the uncertainty is big enough
-    // to matter, so a good fix does not show a distracting blob.
+  /** The familiar blue dot: accuracy halo, white collar, blue core. */
+  function drawMe() {
+    const home = project(state.origin.lat, state.origin.lon);
+
     if (state.accuracyM && state.accuracyM > 40) {
       const accuracyPx = (state.accuracyM / 1000) * pxPerKm;
-      if (accuracyPx > 6) {
-        ctx.beginPath(); ctx.arc(home.x, home.y, accuracyPx, 0, Math.PI*2);
-        ctx.fillStyle = "rgba(120,160,255,.13)"; ctx.fill();
-        ctx.lineWidth = 1; ctx.strokeStyle = "rgba(120,160,255,.55)"; ctx.stroke();
+      if (accuracyPx > 8) {
+        ctx.beginPath();
+        ctx.arc(home.x, home.y, accuracyPx, 0, Math.PI*2);
+        ctx.fillStyle = "rgba(66,133,244,.15)"; ctx.fill();
+        ctx.strokeStyle = "rgba(66,133,244,.45)"; ctx.lineWidth = 1; ctx.stroke();
       }
     }
 
-    // You, on top of everything.
-    ctx.beginPath(); ctx.arc(home.x, home.y, 16, 0, Math.PI*2);
-    ctx.fillStyle = css("--accent"); ctx.globalAlpha = .16; ctx.fill(); ctx.globalAlpha = 1;
-    ctx.beginPath(); ctx.arc(home.x, home.y, 6, 0, Math.PI*2);
-    ctx.fillStyle = text; ctx.fill();
-    ctx.lineWidth = 2.5; ctx.strokeStyle = bg; ctx.stroke();
+    ctx.beginPath();
+    ctx.arc(home.x, home.y, 11, 0, Math.PI*2);
+    ctx.fillStyle = "#FFFFFF";
+    ctx.shadowColor = "rgba(0,0,0,.4)"; ctx.shadowBlur = 5; ctx.shadowOffsetY = 1;
+    ctx.fill();
+    ctx.shadowColor = "transparent";
+    ctx.beginPath();
+    ctx.arc(home.x, home.y, 7.5, 0, Math.PI*2);
+    ctx.fillStyle = state.manualHome ? css("--accent") : "#4285F4";
+    ctx.fill();
+  }
 
-    updateScale(step, stepPx);
+  function drawSearchRing() {
+    const home = project(state.origin.lat, state.origin.lon);
+    ctx.save();
+    ctx.beginPath();
+    ctx.arc(home.x, home.y, state.radiusKm * pxPerKm, 0, Math.PI*2);
+    ctx.fillStyle = css("--ring-fill"); ctx.fill();
+    ctx.setLineDash([6, 6]); ctx.lineWidth = 1.5;
+    ctx.strokeStyle = css("--ring"); ctx.stroke();
+    ctx.restore();
+  }
+
+  /**
+   * True when the whole viewport sits inside the streets we carry. Overlap is
+   * not enough — zoom out past central Toronto and most of the view is bare
+   * land, which should say so rather than pass itself off as the map.
+   */
+  function fullyCovered() {
+    const nw = toLatLon(fromScreen({ x: 0, y: 0 }));
+    const se = toLatLon(fromScreen({ x: width, y: height }));
+    return nw.lat < COVERAGE.maxLat && se.lat > COVERAGE.minLat &&
+           nw.lon > COVERAGE.minLon && se.lon < COVERAGE.maxLon;
+  }
+
+  function drawCoverageNote() {
+    const text = "Street detail: central Toronto only";
+    ctx.font = `600 11px ${bodyFont}`;
+    const w = ctx.measureText(text).width + 20;
+    ctx.beginPath();
+    ctx.roundRect(12, 12, w, 24, 8);
+    ctx.fillStyle = css("--surface");
+    ctx.globalAlpha = .92; ctx.fill(); ctx.globalAlpha = 1;
+    ctx.strokeStyle = css("--border"); ctx.lineWidth = 1; ctx.stroke();
+    ctx.fillStyle = css("--muted");
+    ctx.textAlign = "left"; ctx.textBaseline = "middle";
+    ctx.fillText(text, 22, 25);
+  }
+
+  function draw() {
+    if (!width || !height) return;
+    bodyFont = getComputedStyle(document.body).fontFamily;
+    drawBasemap();
+    if (state.origin) {
+      drawSearchRing();
+      drawMarkers();
+      drawMe();
+      updateScale();
+      if (!fullyCovered()) drawCoverageNote();
+    }
   }
 
   function scheduleDraw() {
@@ -761,26 +1139,36 @@ const MapView = (() => {
     raf = requestAnimationFrame(() => { raf = null; draw(); });
   }
 
-  function updateScale(step, stepPx) {
-    el("scaleBar").style.width = `${Math.round(stepPx)}px`;
-    el("scaleText").textContent = step < 1 ? `${step*1000} m` : `${step} km`;
+  /** A scale bar with a round number of metres, like every map has. */
+  function updateScale() {
+    const targetPx = 78;
+    const steps = [0.05,0.1,0.2,0.5,1,2,5,10,20,50];
+    const km = steps.find((s) => s * pxPerKm >= targetPx) ?? 50;
+    el("scaleBar").style.width = `${Math.round(km * pxPerKm)}px`;
+    el("scaleText").textContent = km < 1 ? `${Math.round(km*1000)} m` : `${km} km`;
   }
 
-  /* ---- hit testing ---- */
+  /* ---------------- interaction ---------------- */
+
   function pick(x, y) {
     for (let i = clusters.length - 1; i >= 0; i--) {
       const c = clusters[i];
-      const size = c.items.length > 1 ? Math.min(15 + c.items.length*1.6, 26) : 13;
-      if ((x-c.x)**2 + (y-c.y)**2 <= size*size) return c;
+      if (c.items.length > 1) {
+        const size = Math.min(15 + c.items.length*1.7, 27);
+        if ((x-c.x)**2 + (y-c.y)**2 <= size*size) return c;
+      } else {
+        // The pin's body sits above its anchor point, so the hit box does too.
+        if (x > c.x - 16 && x < c.x + 16 && y > c.y - 34 && y < c.y + 10) return c;
+      }
     }
     return null;
   }
 
-  /* ---- gestures ---- */
   const pointers = new Map();
-  let dragged = false, lastPinch = 0;
+  let dragged = false, lastPinch = 0, lastTap = 0;
 
   canvas.addEventListener("pointerdown", (event) => {
+    event.preventDefault();
     canvas.setPointerCapture(event.pointerId);
     pointers.set(event.pointerId, { x: event.clientX, y: event.clientY });
     dragged = false;
@@ -793,13 +1181,15 @@ const MapView = (() => {
     const previous = pointers.get(event.pointerId);
 
     if (!previous) {
-      // Hover only matters for the label affordance on a mouse.
+      if (event.pointerType !== "mouse") return;
       const next = pick(event.clientX - rect.left, event.clientY - rect.top);
       const item = next && next.items.length === 1 ? next.items[0] : null;
+      canvas.style.cursor = next ? "pointer" : "grab";
       if (item !== hovered) { hovered = item; scheduleDraw(); }
       return;
     }
 
+    event.preventDefault();
     pointers.set(event.pointerId, { x: event.clientX, y: event.clientY });
 
     if (pointers.size === 2) {
@@ -814,7 +1204,7 @@ const MapView = (() => {
     }
 
     const dx = event.clientX - previous.x, dy = event.clientY - previous.y;
-    if (Math.abs(dx) + Math.abs(dy) > 2) dragged = true;
+    if (Math.abs(dx) + Math.abs(dy) > 3) dragged = true;
     centre.x -= dx / pxPerKm;
     centre.y -= dy / pxPerKm;
     scheduleDraw();
@@ -826,27 +1216,39 @@ const MapView = (() => {
     if (pointers.size < 2) lastPinch = 0;
     if (pointers.size === 0) canvas.classList.remove("dragging");
   }
+
   canvas.addEventListener("pointerup", (event) => {
     const rect = canvas.getBoundingClientRect();
     const wasDrag = dragged;
     endPointer(event);
     if (wasDrag) return;
 
+    const x = event.clientX - rect.left, y = event.clientY - rect.top;
+
+    // Double-tap to zoom, since touch has no dblclick worth relying on.
+    const now = Date.now();
+    if (now - lastTap < 300) {
+      lastTap = 0;
+      zoomBy(1.8, { x, y });
+      return;
+    }
+    lastTap = now;
+
     if (state.placing) {
-      const point = toLatLon(fromScreen({
-        x: event.clientX - rect.left, y: event.clientY - rect.top,
-      }));
       el("placingBanner").hidden = true;
-      setHome(point);
+      setHome(toLatLon(fromScreen({ x, y })));
       return;
     }
 
-    const hit = pick(event.clientX - rect.left, event.clientY - rect.top);
-    if (!hit) return;
+    const hit = pick(x, y);
+    if (!hit) {
+      state.selected = null;
+      document.querySelectorAll(".card").forEach((card) => { card.dataset.active = "false"; });
+      scheduleDraw();
+      return;
+    }
     if (hit.items.length > 1) {
-      // Zoom into a cluster rather than guessing which pin was meant.
-      const world = fromScreen({ x: hit.x, y: hit.y });
-      centre = { ...world };
+      centre = { ...fromScreen({ x: hit.x, y: hit.y }) };
       zoomBy(2.2);
       return;
     }
@@ -859,22 +1261,14 @@ const MapView = (() => {
     const rect = canvas.getBoundingClientRect();
     zoomBy(Math.exp(-event.deltaY * 0.0015),
            { x: event.clientX - rect.left, y: event.clientY - rect.top });
-    updateSearchArea();
   }, { passive: false });
 
-  canvas.addEventListener("dblclick", (event) => {
-    const rect = canvas.getBoundingClientRect();
-    zoomBy(1.8, { x: event.clientX - rect.left, y: event.clientY - rect.top });
-  });
-
-  // Keyboard equivalents, so the map is not mouse-only.
   canvas.addEventListener("keydown", (event) => {
-    const stepPx = 60;
     const moves = { ArrowLeft:[-1,0], ArrowRight:[1,0], ArrowUp:[0,-1], ArrowDown:[0,1] };
     if (moves[event.key]) {
       event.preventDefault();
-      centre.x += moves[event.key][0] * stepPx / pxPerKm;
-      centre.y += moves[event.key][1] * stepPx / pxPerKm;
+      centre.x += moves[event.key][0] * 60 / pxPerKm;
+      centre.y += moves[event.key][1] * 60 / pxPerKm;
       scheduleDraw(); updateSearchArea();
     } else if (event.key === "+" || event.key === "=") { event.preventDefault(); zoomBy(1.3); }
     else if (event.key === "-") { event.preventDefault(); zoomBy(1/1.3); }
@@ -889,12 +1283,11 @@ const MapView = (() => {
     return { x:(a.x+b.x)/2, y:(a.y+b.y)/2 };
   }
 
-  /** Offer to re-search once the view has drifted meaningfully off centre. */
   function updateSearchArea() {
     if (!state.origin || state.placing) return;
-    const home = toScreen(toWorld(state.origin));
+    const home = project(state.origin.lat, state.origin.lon);
     const drift = Math.hypot(home.x - width/2, home.y - height/2);
-    el("searchArea").hidden = drift < Math.min(width, height) * 0.22;
+    el("searchArea").hidden = drift < Math.min(width, height) * 0.2;
   }
 
   function centreOn(point, { zoom } = {}) {
@@ -908,14 +1301,13 @@ const MapView = (() => {
   const centreLatLon = () => toLatLon(centre);
 
   new ResizeObserver(resize).observe(canvas);
-  matchMedia("(prefers-color-scheme: dark)").addEventListener("change", () => scheduleDraw());
-  new MutationObserver(() => scheduleDraw())
+  matchMedia("(prefers-color-scheme: dark)").addEventListener("change", scheduleDraw);
+  new MutationObserver(scheduleDraw)
     .observe(document.documentElement, { attributes:true, attributeFilter:["data-theme"] });
 
   return { resize, draw: scheduleDraw, frameRadius, zoomBy, centreOn, centreLatLon,
            updateSearchArea, toLatLon, fromScreen };
 })();
-
 /* ---------------- selection, shared by map and carousel ---------------- */
 function selectDeal(id, { pan = true, scrollCard = true } = {}) {
   state.selected = id;
@@ -951,6 +1343,11 @@ function render() {
   renderRows();
   renderCarousel();
   el("mapCount").textContent = `${current.length} within ${state.radiusKm} km`;
+  el("mapEmpty").hidden = current.length > 0;
+  el("mapEmpty").firstElementChild.innerHTML =
+    `Nothing on within <b>${el("radiusValue").textContent}</b> ` +
+    (state.time.id === "now" ? "right now" : `for <b>${esc(state.time.label)}</b>`) +
+    `. Widen the radius or change the time — the map still pans.`;
   MapView.draw();
 }
 
