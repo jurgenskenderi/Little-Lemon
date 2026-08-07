@@ -111,8 +111,9 @@ export function DealsScreen() {
           deals={deals}
           origin={origin}
           radiusKm={radiusKm}
-          onSelect={setSelected}
+          onOpen={setSelected}
           onSearchArea={(centre) => setAreaOverride(centre)}
+          onRecentre={() => setAreaOverride(null)}
         />
         <DealDetailSheet deal={selected} onClose={() => setSelected(null)} />
       </SafeAreaView>
@@ -211,7 +212,7 @@ function LocationGate({ location }: { location: ReturnType<typeof useLocation> }
       ) : (
         <>
           <Text style={styles.emptyBody}>
-            {location.error ?? "Little Lemon needs a starting point to search from."}
+            {location.error ?? "Clocktails needs a starting point to search from."}
           </Text>
           <Pressable
             onPress={() => void location.request()}

@@ -1,4 +1,4 @@
-# Little Lemon
+# Clocktails
 
 Find happy hour deals near you, filtered by how far you'll walk and when you
 actually want to go out. Launching in **Ontario, Canada** — distances in
@@ -35,7 +35,7 @@ The app finds the API automatically: it reuses the host Expo is already serving
 the bundle from, so a phone on the same Wi-Fi works without editing an IP.
 Override with `EXPO_PUBLIC_API_URL` if your setup differs.
 
-`npm test` runs the server suite (78 tests). `npm run typecheck` covers both
+`npm test` runs the server suite (82 tests). `npm run typecheck` covers both
 workspaces.
 
 ## Partner deals
@@ -90,11 +90,20 @@ across daylight saving.
 
 ## Map search
 
-The map shows every result as a pin, coloured by state (partner / on now /
-later), inside a ring showing your chosen radius. Pan it and a **Search this
-area** button appears, which re-runs the search centred on where you moved to —
-useful for checking a neighbourhood before you head over. "Back to my location"
-returns to your device fix.
+The map is the second way to browse, and it behaves the way people expect a map
+to: drag to pan, pinch or scroll to zoom, tap a pin to select it. Venues render
+as price pills rather than generic markers, so the offer is readable without
+tapping. Pins are coloured by state — partner, on now, later.
+
+Under the pins is a card strip synced to the map both ways: swiping the cards
+flies the map to that venue, and tapping a pin scrolls its card into view.
+Tapping the already-selected card opens the full detail sheet. Panning away
+raises **Search this area**, which re-runs the search centred where you moved
+to; the ◎ button returns to your own location.
+
+The preview build draws its own schematic basemap on a canvas — no tile server
+is reachable from a sandboxed page — and adds marker clustering, so a dense
+strip like King West collapses to a count until you zoom in.
 
 iOS uses Apple Maps and needs no key. **Android needs a Google Maps API key**, or
 the map renders blank — that is the usual cause of "the map is grey". Supply it
@@ -110,12 +119,24 @@ Venues come from OpenStreetMap's Overpass API (free, no key). Each venue's
 website is then crawled for deals.
 
 ```bash
-# Discover and crawl restaurants near Queen & Spadina, Toronto
-npm run scrape -- --lat 43.6487 --lon -79.3980 --radius-km 3 --limit 25
+npm run scrape:toronto                      # all 15 Toronto bar strips
+npm run scrape -- --preset toronto-core     # downtown only, quicker first run
+npm run scrape -- --preset ottawa           # or hamilton
+npm run scrape -- --preset toronto --dry-run   # list venues, fetch nothing
 
-# See what would be crawled without fetching anything
-npm run scrape -- --lat 43.6487 --lon -79.3980 --dry-run
+# Or a single point
+npm run scrape -- --lat 43.6487 --lon -79.3980 --radius-km 2
 ```
+
+Presets are a set of tight circles over the neighbourhoods that actually have
+bars, rather than one big circle over the city — Overpass returns thousands of
+venues for a 10 km radius over Toronto and most are irrelevant. Venues found in
+overlapping circles are deduplicated by their OpenStreetMap id.
+
+Every run starts with a connectivity preflight, because a crawl that fails from
+no internet looks identical to one that fails because every venue site is down:
+a pile of timeouts and an empty database. The check names the difference,
+including the case where a proxy answers `403` on the host's behalf.
 
 **It's built to be a good citizen**, because it's hitting sites we don't own:
 robots.txt is fetched and honoured per host (including `Allow` exceptions,
@@ -193,9 +214,10 @@ host for the API — the app currently points at a dev machine on your LAN.
 
 ## Sample data
 
-`server/src/seed/venues.json` holds twelve venues at real Toronto, Hamilton, and
-Ottawa coordinates with **invented names and invented deals**, one flagged as a
-partner deal so you can see the ranking. They are fictional on purpose:
+`server/src/seed/venues.json` holds twenty-four venues at real Toronto,
+Hamilton, and Ottawa coordinates with **invented names and invented deals**,
+three flagged as partner deals so you can see the ranking and the map
+clustering. They are fictional on purpose:
 publishing made-up happy hour times attributed to real businesses would
 misinform customers and misrepresent those businesses. Replace it with crawled
 data and your own partner deals before launch.
@@ -207,8 +229,10 @@ Worth knowing before this goes near real users:
 - **The crawler has not been run against live sites from this repo yet.** It is
   covered end to end by a test that serves a fixture restaurant site over
   loopback — robots.txt, link following, extraction, storage — but the machine
-  it was built on has no outbound internet access. Run the `npm run scrape`
-  command above locally to point it at real Toronto sites.
+  it was built on has outbound HTTPS blocked at the network policy, so every
+  host including `example.com` returns 403 at the gateway. Run
+  `npm run scrape:toronto` from your own machine for real data; the preflight
+  will confirm connectivity before it starts.
 - **Timezones are per-crawl, not per-venue.** Overpass returns no timezone, so
   the CLI applies one `--tz` to everything it discovers. Correct for Ontario,
   which is Eastern throughout apart from a small north-western corner around

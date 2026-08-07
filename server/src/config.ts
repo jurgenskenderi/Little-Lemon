@@ -10,7 +10,7 @@ function intFromEnv(name: string, fallback: number): number {
 export const config = {
   port: intFromEnv("PORT", 8787),
   host: process.env.HOST ?? "0.0.0.0",
-  databaseFile: process.env.DATABASE_FILE ?? join(process.cwd(), "data", "little-lemon.db"),
+  databaseFile: process.env.DATABASE_FILE ?? join(process.cwd(), "data", "clocktails.db"),
 
   /** Guards the scrape trigger endpoint. Unset means the endpoint is disabled. */
   adminToken: process.env.ADMIN_TOKEN ?? null,
@@ -29,7 +29,7 @@ export const config = {
   scraper: {
     userAgent:
       process.env.SCRAPER_USER_AGENT ??
-      "LittleLemonBot/0.1 (+https://github.com/jurgenskenderi/Little-Lemon; happy-hour aggregator)",
+      "ClocktailsBot/0.1 (+https://github.com/jurgenskenderi/Little-Lemon; happy-hour aggregator)",
     /** Floor on the gap between requests to one host, in ms. */
     minHostDelayMs: intFromEnv("SCRAPER_MIN_HOST_DELAY_MS", 2000),
     requestTimeoutMs: intFromEnv("SCRAPER_TIMEOUT_MS", 15_000),

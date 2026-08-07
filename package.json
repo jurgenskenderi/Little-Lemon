@@ -1,5 +1,5 @@
 {
-  "name": "little-lemon",
+  "name": "clocktails",
   "private": true,
   "version": "0.1.0",
   "description": "Find happy hour deals near you, filtered by distance and by when you actually want to go out.",
@@ -13,7 +13,8 @@
     "typecheck": "npm run typecheck --workspace server && npm run typecheck --workspace mobile",
     "seed": "npm run seed --workspace server",
     "scrape": "npm run scrape --workspace server",
-    "mobile": "npm run start --workspace mobile"
+    "mobile": "npm run start --workspace mobile",
+    "scrape:toronto": "npm run scrape:toronto --workspace server"
   },
   "engines": {
     "node": ">=20"

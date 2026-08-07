@@ -69,7 +69,7 @@ export async function fetchDeals(params: DealSearchParams): Promise<DealsRespons
     // A network failure here is almost always the dev server being unreachable,
     // so name that rather than surfacing "Network request failed".
     throw new ApiError(
-      `Could not reach the Little Lemon server at ${API_BASE_URL}. Is it running?`,
+      `Could not reach the Clocktails server at ${API_BASE_URL}. Is it running?`,
       0,
     );
   }

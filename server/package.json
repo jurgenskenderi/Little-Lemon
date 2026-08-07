@@ -1,5 +1,5 @@
 {
-  "name": "@little-lemon/server",
+  "name": "@clocktails/server",
   "private": true,
   "version": "0.1.0",
   "type": "module",
@@ -9,7 +9,8 @@
     "seed": "node --experimental-strip-types src/seed/seed.ts",
     "scrape": "node --experimental-strip-types src/scraper/cli.ts",
     "test": "node --experimental-strip-types --test test/*.test.ts",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "scrape:toronto": "node --experimental-strip-types src/scraper/cli.ts --preset toronto"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.115.0",

@@ -1,245 +1,216 @@
-<title>Little Lemon — Happy hours in Ontario</title>
+<title>Clocktails — Happy hours in Ontario</title>
 <style>
   :root {
-    --ink:        #0E1518;
-    --surface:    #172126;
-    --raised:     #1F2C32;
-    --border:     #2B3A41;
-    --text:       #E9F1EE;
-    --muted:      #93A6A5;
-    --faint:      #6B7E80;
-    --accent:     #E8A33D;
-    --on-accent:  #1B1206;
-    --open:       #4FB477;
-    --soon:       #E5654B;
-    --later:      #7E9394;
-    --ring:       rgba(232,163,61,.45);
-    --ring-fill:  rgba(232,163,61,.07);
-    --grid:       rgba(147,166,165,.10);
+    --ink:#0E1518; --surface:#172126; --raised:#1F2C32; --border:#2B3A41;
+    --text:#E9F1EE; --muted:#93A6A5; --faint:#6B7E80;
+    --accent:#E8A33D; --on-accent:#1B1206;
+    --open:#4FB477; --soon:#E5654B; --later:#7E9394;
+    --map-bg:#101A1E; --map-land:#152227; --map-road:#233238; --map-road-major:#2C3F46;
+    --ring:rgba(232,163,61,.5); --ring-fill:rgba(232,163,61,.06);
 
-    --display: "Avenir Next Condensed", "Helvetica Neue Condensed", "Arial Narrow", sans-serif;
-    --body: "Avenir Next", Avenir, "Segoe UI", Roboto, system-ui, sans-serif;
-    --data: ui-monospace, Menlo, Consolas, "DejaVu Sans Mono", monospace;
+    --display:"Avenir Next Condensed","Helvetica Neue Condensed","Arial Narrow",sans-serif;
+    --body:"Avenir Next",Avenir,"Segoe UI",Roboto,system-ui,sans-serif;
+    --data:ui-monospace,Menlo,Consolas,"DejaVu Sans Mono",monospace;
   }
-
-  /* Daytime. Same amber, warm paper ground — not an inversion. */
   @media (prefers-color-scheme: light) {
     :root {
-      --ink: #F3EFE7; --surface: #FFFFFF; --raised: #F7F3EC; --border: #DCD4C6;
-      --text: #17211F; --muted: #5C6B69; --faint: #85918F;
-      --accent: #B4741B; --on-accent: #FFF8EC;
-      --open: #2F8F5B; --soon: #C4462C; --later: #7B8886;
-      --ring: rgba(180,116,27,.40); --ring-fill: rgba(180,116,27,.07);
-      --grid: rgba(23,33,31,.09);
+      --ink:#F3EFE7; --surface:#FFF; --raised:#F7F3EC; --border:#DCD4C6;
+      --text:#17211F; --muted:#5C6B69; --faint:#85918F;
+      --accent:#B4741B; --on-accent:#FFF8EC;
+      --open:#2F8F5B; --soon:#C4462C; --later:#7B8886;
+      --map-bg:#EFEAE0; --map-land:#F6F2EA; --map-road:#E2DACB; --map-road-major:#D3C8B4;
+      --ring:rgba(180,116,27,.45); --ring-fill:rgba(180,116,27,.07);
     }
   }
   :root[data-theme="light"] {
-    --ink: #F3EFE7; --surface: #FFFFFF; --raised: #F7F3EC; --border: #DCD4C6;
-    --text: #17211F; --muted: #5C6B69; --faint: #85918F;
-    --accent: #B4741B; --on-accent: #FFF8EC;
-    --open: #2F8F5B; --soon: #C4462C; --later: #7B8886;
-    --ring: rgba(180,116,27,.40); --ring-fill: rgba(180,116,27,.07);
-    --grid: rgba(23,33,31,.09);
+    --ink:#F3EFE7; --surface:#FFF; --raised:#F7F3EC; --border:#DCD4C6;
+    --text:#17211F; --muted:#5C6B69; --faint:#85918F;
+    --accent:#B4741B; --on-accent:#FFF8EC;
+    --open:#2F8F5B; --soon:#C4462C; --later:#7B8886;
+    --map-bg:#EFEAE0; --map-land:#F6F2EA; --map-road:#E2DACB; --map-road-major:#D3C8B4;
+    --ring:rgba(180,116,27,.45); --ring-fill:rgba(180,116,27,.07);
   }
   :root[data-theme="dark"] {
-    --ink: #0E1518; --surface: #172126; --raised: #1F2C32; --border: #2B3A41;
-    --text: #E9F1EE; --muted: #93A6A5; --faint: #6B7E80;
-    --accent: #E8A33D; --on-accent: #1B1206;
-    --open: #4FB477; --soon: #E5654B; --later: #7E9394;
-    --ring: rgba(232,163,61,.45); --ring-fill: rgba(232,163,61,.07);
-    --grid: rgba(147,166,165,.10);
+    --ink:#0E1518; --surface:#172126; --raised:#1F2C32; --border:#2B3A41;
+    --text:#E9F1EE; --muted:#93A6A5; --faint:#6B7E80;
+    --accent:#E8A33D; --on-accent:#1B1206;
+    --open:#4FB477; --soon:#E5654B; --later:#7E9394;
+    --map-bg:#101A1E; --map-land:#152227; --map-road:#233238; --map-road-major:#2C3F46;
+    --ring:rgba(232,163,61,.5); --ring-fill:rgba(232,163,61,.06);
   }
 
-  body {
-    margin: 0; background: var(--ink); color: var(--text);
-    font-family: var(--body); font-size: 15px; line-height: 1.5;
-    -webkit-font-smoothing: antialiased;
-  }
-  .wrap { max-width: 560px; margin: 0 auto; padding: 0 16px 64px; }
+  body { margin:0; background:var(--ink); color:var(--text);
+         font-family:var(--body); font-size:15px; line-height:1.5;
+         -webkit-font-smoothing:antialiased; }
+  .wrap { max-width:560px; margin:0 auto; padding:0 16px 56px; }
+  .label { font-family:var(--display); text-transform:uppercase; letter-spacing:.12em;
+           font-size:12px; color:var(--muted); font-weight:600; }
 
-  .label {
-    font-family: var(--display); text-transform: uppercase; letter-spacing: .12em;
-    font-size: 12px; color: var(--muted); font-weight: 600;
-  }
-  .mono { font-family: var(--data); font-variant-numeric: tabular-nums; }
+  header { padding:24px 0 12px; }
+  .wordmark { font-family:var(--display); text-transform:uppercase; letter-spacing:.18em;
+              font-size:13px; color:var(--accent); font-weight:700; margin:0 0 6px; }
+  h1 { font-family:var(--display); font-size:38px; line-height:1.02; margin:0;
+       letter-spacing:-.005em; text-wrap:balance; font-weight:700; }
+  .where { color:var(--muted); font-size:14px; margin:8px 0 0; }
+  .where button { background:none; border:0; color:var(--accent); font:inherit;
+                  text-decoration:underline; cursor:pointer; padding:0; }
+  .notice { margin-top:14px; padding:10px 12px; border-radius:10px; background:var(--raised);
+            border:1px solid var(--border); color:var(--muted); font-size:12.5px; line-height:1.45; }
+  .notice strong { color:var(--text); }
 
-  /* ---------- masthead ---------- */
-  header { padding: 24px 0 12px; }
-  .wordmark {
-    font-family: var(--display); text-transform: uppercase; letter-spacing: .16em;
-    font-size: 13px; color: var(--accent); font-weight: 700; margin: 0 0 6px;
-  }
-  h1 {
-    font-family: var(--display); font-size: 38px; line-height: 1.02; margin: 0;
-    letter-spacing: -0.005em; text-wrap: balance; font-weight: 700;
-  }
-  .where { color: var(--muted); font-size: 14px; margin: 8px 0 0; }
-  .where button {
-    background: none; border: 0; color: var(--accent); font: inherit;
-    text-decoration: underline; cursor: pointer; padding: 0;
-  }
+  .controls { margin-top:20px; display:flex; flex-direction:column; gap:16px; }
+  .ctl-head { display:flex; justify-content:space-between; align-items:baseline; }
+  .ctl-value { font-family:var(--data); color:var(--accent); font-weight:700; font-size:15px; }
+  input[type=range] { -webkit-appearance:none; appearance:none; width:100%; height:24px;
+                      background:transparent; cursor:pointer; margin:4px 0 0; }
+  input[type=range]::-webkit-slider-runnable-track { height:3px; background:var(--border); border-radius:2px; }
+  input[type=range]::-moz-range-track { height:3px; background:var(--border); border-radius:2px; }
+  input[type=range]::-webkit-slider-thumb { -webkit-appearance:none; appearance:none; width:20px;
+    height:20px; margin-top:-8.5px; border-radius:50%; background:var(--accent); border:0; }
+  input[type=range]::-moz-range-thumb { width:20px; height:20px; border-radius:50%;
+    background:var(--accent); border:0; }
+  input[type=range]:focus-visible { outline:2px solid var(--accent); outline-offset:4px; }
 
-  .notice {
-    margin-top: 14px; padding: 10px 12px; border-radius: 10px;
-    background: var(--raised); border: 1px solid var(--border);
-    color: var(--muted); font-size: 12.5px; line-height: 1.45;
-  }
-  .notice strong { color: var(--text); }
+  .chips { display:flex; gap:8px; overflow-x:auto; padding-bottom:2px; scrollbar-width:none; }
+  .chips::-webkit-scrollbar { display:none; }
+  .chip { flex:0 0 auto; padding:8px 14px; border-radius:999px; border:1px solid var(--border);
+          background:var(--surface); color:var(--muted); font:inherit; font-size:13px;
+          font-weight:600; cursor:pointer; transition:background .15s,color .15s,border-color .15s; }
+  .chip[aria-pressed="true"] { background:var(--accent); border-color:var(--accent); color:var(--on-accent); }
+  .chip:focus-visible { outline:2px solid var(--accent); outline-offset:2px; }
+  .hint { color:var(--faint); font-size:12px; margin:6px 0 0; }
 
-  /* ---------- controls ---------- */
-  .controls { margin-top: 20px; display: flex; flex-direction: column; gap: 16px; }
-  .ctl-head { display: flex; justify-content: space-between; align-items: baseline; }
-  .ctl-value { font-family: var(--data); color: var(--accent); font-weight: 700; font-size: 15px; }
+  .board-head { display:flex; justify-content:space-between; align-items:center;
+                margin:26px 0 10px; padding-bottom:8px; border-bottom:1px solid var(--border); }
+  .toggle { display:flex; border:1px solid var(--border); border-radius:999px; overflow:hidden; }
+  .toggle button { padding:6px 14px; background:transparent; border:0; color:var(--muted);
+    font-family:var(--display); text-transform:uppercase; letter-spacing:.1em; font-size:11px;
+    font-weight:700; cursor:pointer; }
+  .toggle button[aria-pressed="true"] { background:var(--accent); color:var(--on-accent); }
+  .toggle button:focus-visible { outline:2px solid var(--accent); outline-offset:-2px; }
 
-  input[type=range] {
-    -webkit-appearance: none; appearance: none; width: 100%; height: 24px;
-    background: transparent; cursor: pointer; margin: 4px 0 0;
-  }
-  input[type=range]::-webkit-slider-runnable-track {
-    height: 3px; background: var(--border); border-radius: 2px;
-  }
-  input[type=range]::-moz-range-track { height: 3px; background: var(--border); border-radius: 2px; }
-  input[type=range]::-webkit-slider-thumb {
-    -webkit-appearance: none; appearance: none; width: 20px; height: 20px; margin-top: -8.5px;
-    border-radius: 50%; background: var(--accent); border: 0;
-  }
-  input[type=range]::-moz-range-thumb {
-    width: 20px; height: 20px; border-radius: 50%; background: var(--accent); border: 0;
-  }
-  input[type=range]:focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; }
-
-  .chips { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 2px; scrollbar-width: none; }
-  .chips::-webkit-scrollbar { display: none; }
-  .chip {
-    flex: 0 0 auto; padding: 8px 14px; border-radius: 999px;
-    border: 1px solid var(--border); background: var(--surface); color: var(--muted);
-    font: inherit; font-size: 13px; font-weight: 600; cursor: pointer;
-    transition: background .15s, color .15s, border-color .15s;
-  }
-  .chip[aria-pressed="true"] {
-    background: var(--accent); border-color: var(--accent); color: var(--on-accent);
-  }
-  .chip:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
-  .hint { color: var(--faint); font-size: 12px; margin: 6px 0 0; }
-
-  /* ---------- results ---------- */
-  .board-head {
-    display: flex; justify-content: space-between; align-items: center;
-    margin: 26px 0 10px; padding-bottom: 8px; border-bottom: 1px solid var(--border);
-  }
-  .toggle { display: flex; border: 1px solid var(--border); border-radius: 999px; overflow: hidden; }
-  .toggle button {
-    padding: 6px 14px; background: transparent; border: 0; color: var(--muted);
-    font-family: var(--display); text-transform: uppercase; letter-spacing: .1em;
-    font-size: 11px; font-weight: 700; cursor: pointer;
-  }
-  .toggle button[aria-pressed="true"] { background: var(--accent); color: var(--on-accent); }
-  .toggle button:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
-
-  .rows { display: flex; flex-direction: column; gap: 1px; }
-  .row {
-    display: grid; grid-template-columns: 3px 1fr auto; gap: 14px; align-items: center;
-    width: 100%; text-align: left; padding: 14px 12px 14px 0;
-    background: var(--surface); border: 0; border-radius: 10px;
-    color: inherit; font: inherit; cursor: pointer;
-    animation: rise .28s ease both;
-  }
-  .row:hover { background: var(--raised); }
-  .row:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
-  @keyframes rise { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
-  @media (prefers-reduced-motion: reduce) { .row { animation: none; } }
-
-  .stripe { align-self: stretch; border-radius: 10px 0 0 10px; }
-  .row-main { min-width: 0; padding-left: 11px; }
-  .venue-line { display: flex; align-items: center; gap: 7px; }
-  .venue {
-    font-family: var(--display); text-transform: uppercase; letter-spacing: .09em;
-    font-size: 12px; color: var(--muted); font-weight: 600;
-    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-  }
-  .flag {
-    flex: 0 0 auto; font-family: var(--display); font-size: 9.5px; font-weight: 700;
-    letter-spacing: .1em; padding: 2px 5px; border-radius: 3px;
-    background: var(--accent); color: var(--on-accent);
-  }
-  .deal-title {
-    font-size: 16px; font-weight: 600; margin-top: 2px;
-    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-  }
-  .price { color: var(--accent); font-size: 13.5px; margin-top: 1px; }
-  .row-meta { text-align: right; display: flex; flex-direction: column; gap: 3px; padding-right: 2px; }
-  .window { font-family: var(--data); font-size: 12.5px; color: var(--muted); white-space: nowrap; }
-  .countdown { font-family: var(--data); font-size: 12px; font-weight: 600; white-space: nowrap; }
-  .dist { font-family: var(--data); font-size: 11.5px; color: var(--faint); }
-
-  .empty { padding: 40px 8px; text-align: center; color: var(--muted); }
-  .empty h3 { font-family: var(--display); font-size: 20px; margin: 0 0 6px; color: var(--text); }
+  /* ---------- list ---------- */
+  .rows { display:flex; flex-direction:column; gap:1px; }
+  .row { display:grid; grid-template-columns:3px 1fr auto; gap:14px; align-items:center;
+         width:100%; text-align:left; padding:14px 12px 14px 0; background:var(--surface);
+         border:0; border-radius:10px; color:inherit; font:inherit; cursor:pointer;
+         animation:rise .28s ease both; }
+  .row:hover { background:var(--raised); }
+  .row:focus-visible { outline:2px solid var(--accent); outline-offset:-2px; }
+  @keyframes rise { from{opacity:0;transform:translateY(4px)} to{opacity:1;transform:none} }
+  @media (prefers-reduced-motion:reduce){ .row{animation:none} }
+  .stripe { align-self:stretch; border-radius:10px 0 0 10px; }
+  .row-main { min-width:0; padding-left:11px; }
+  .venue-line { display:flex; align-items:center; gap:7px; }
+  .venue { font-family:var(--display); text-transform:uppercase; letter-spacing:.09em;
+           font-size:12px; color:var(--muted); font-weight:600; white-space:nowrap;
+           overflow:hidden; text-overflow:ellipsis; }
+  .flag { flex:0 0 auto; font-family:var(--display); font-size:9.5px; font-weight:700;
+          letter-spacing:.1em; padding:2px 5px; border-radius:3px;
+          background:var(--accent); color:var(--on-accent); }
+  .deal-title { font-size:16px; font-weight:600; margin-top:2px; white-space:nowrap;
+                overflow:hidden; text-overflow:ellipsis; }
+  .price { color:var(--accent); font-size:13.5px; margin-top:1px; }
+  .row-meta { text-align:right; display:flex; flex-direction:column; gap:3px; padding-right:2px; }
+  .window { font-family:var(--data); font-size:12.5px; color:var(--muted); white-space:nowrap; }
+  .countdown { font-family:var(--data); font-size:12px; font-weight:600; white-space:nowrap; }
+  .dist { font-family:var(--data); font-size:11.5px; color:var(--faint); }
+  .empty { padding:40px 8px; text-align:center; color:var(--muted); }
+  .empty h3 { font-family:var(--display); font-size:20px; margin:0 0 6px; color:var(--text); }
 
   /* ---------- map ---------- */
-  .map-shell {
-    position: relative; background: var(--surface); border: 1px solid var(--border);
-    border-radius: 12px; overflow: hidden;
-  }
-  .map-shell svg { display: block; width: 100%; height: auto; touch-action: manipulation; }
-  .pin { cursor: pointer; }
-  .pin:focus-visible { outline: 2px solid var(--accent); }
-  .pin-label {
-    font-family: var(--display); text-transform: uppercase; letter-spacing: .07em;
-    font-size: 8.5px; fill: var(--muted); pointer-events: none;
-  }
-  .map-foot {
-    display: flex; gap: 14px; align-items: center; flex-wrap: wrap;
-    padding: 10px 12px; border-top: 1px solid var(--border); font-size: 11.5px; color: var(--muted);
-  }
-  .key { display: flex; align-items: center; gap: 5px; }
-  .key i { width: 8px; height: 8px; border-radius: 50%; display: block; }
-  .map-tip { color: var(--faint); margin: 8px 2px 0; font-size: 12px; }
-  .recentre {
-    position: absolute; top: 10px; left: 50%; transform: translateX(-50%);
-    padding: 8px 16px; border-radius: 999px; border: 0; background: var(--accent);
-    color: var(--on-accent); font: inherit; font-size: 12.5px; font-weight: 700; cursor: pointer;
-  }
+  .map-shell { position:relative; border-radius:14px; overflow:hidden;
+               border:1px solid var(--border); background:var(--map-bg);
+               height:min(62vh,460px); touch-action:none; }
+  .map-shell canvas { display:block; width:100%; height:100%; cursor:grab; }
+  .map-shell canvas.dragging { cursor:grabbing; }
+  .map-shell canvas:focus-visible { outline:2px solid var(--accent); outline-offset:-3px; }
+
+  .fabs { position:absolute; right:10px; bottom:10px; display:flex; flex-direction:column; gap:8px; }
+  .fab { width:40px; height:40px; border-radius:12px; border:1px solid var(--border);
+         background:color-mix(in srgb, var(--surface) 88%, transparent);
+         backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px);
+         color:var(--text); font-size:18px; font-weight:600; cursor:pointer;
+         display:grid; place-items:center; padding:0; line-height:1; }
+  .fab:hover { background:var(--raised); }
+  .fab:focus-visible { outline:2px solid var(--accent); outline-offset:2px; }
+  .fab.zoom-group { height:auto; flex-direction:column; }
+  .zoom-stack { display:flex; flex-direction:column; border-radius:12px; overflow:hidden;
+                border:1px solid var(--border); }
+  .zoom-stack button { width:40px; height:38px; border:0; border-bottom:1px solid var(--border);
+    background:color-mix(in srgb, var(--surface) 88%, transparent);
+    backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px);
+    color:var(--text); font-size:19px; cursor:pointer; display:grid; place-items:center; }
+  .zoom-stack button:last-child { border-bottom:0; }
+  .zoom-stack button:hover { background:var(--raised); }
+  .zoom-stack button:focus-visible { outline:2px solid var(--accent); outline-offset:-2px; }
+
+  .search-area { position:absolute; top:10px; left:50%; transform:translateX(-50%);
+    padding:9px 18px; border-radius:999px; border:0; background:var(--accent);
+    color:var(--on-accent); font:inherit; font-size:13px; font-weight:700; cursor:pointer;
+    box-shadow:0 4px 14px rgba(0,0,0,.28); white-space:nowrap;
+    animation:drop .22s ease both; }
+  @keyframes drop { from{opacity:0;transform:translate(-50%,-8px)} to{opacity:1;transform:translate(-50%,0)} }
+  @media (prefers-reduced-motion:reduce){ .search-area{animation:none} }
+
+  .scalebar { position:absolute; left:12px; bottom:14px; display:flex; align-items:center;
+              gap:6px; pointer-events:none; }
+  .scalebar .bar { height:3px; background:var(--muted); opacity:.65; border-radius:2px; }
+  .scalebar span { font-family:var(--data); font-size:10.5px; color:var(--muted); opacity:.85; }
+
+  /* card carousel under the map, synced with the pins */
+  .carousel { display:flex; gap:10px; overflow-x:auto; scroll-snap-type:x mandatory;
+              padding:12px 2px 4px; scrollbar-width:none; }
+  .carousel::-webkit-scrollbar { display:none; }
+  .card { scroll-snap-align:center; flex:0 0 82%; max-width:300px; text-align:left;
+          background:var(--surface); border:1px solid var(--border); border-radius:12px;
+          padding:13px 14px; cursor:pointer; color:inherit; font:inherit;
+          transition:border-color .18s, transform .18s; }
+  .card[data-active="true"] { border-color:var(--accent); transform:translateY(-2px); }
+  .card:focus-visible { outline:2px solid var(--accent); outline-offset:2px; }
+  .card .venue { font-size:11px; }
+  .card .deal-title { font-size:15px; }
+  .card-foot { display:flex; justify-content:space-between; align-items:baseline;
+               margin-top:8px; gap:10px; }
+  .map-legend { display:flex; gap:14px; align-items:center; flex-wrap:wrap;
+                margin-top:6px; font-size:11.5px; color:var(--muted); }
+  .key { display:flex; align-items:center; gap:5px; }
+  .key i { width:8px; height:8px; border-radius:50%; display:block; }
+  .map-tip { color:var(--faint); margin:8px 2px 0; font-size:12px; }
 
   /* ---------- detail ---------- */
-  dialog {
-    border: 0; padding: 0; background: transparent; max-width: 520px; width: calc(100% - 24px);
-  }
-  dialog::backdrop { background: rgba(0,0,0,.62); }
-  .sheet {
-    background: var(--surface); border: 1px solid var(--border); border-radius: 14px;
-    padding: 22px; color: var(--text);
-  }
-  .sheet h2 { font-family: var(--display); font-size: 26px; margin: 0; letter-spacing: -0.005em; }
-  .sheet .addr { color: var(--muted); font-size: 14px; margin: 6px 0 0; }
-  .rule { height: 1px; background: var(--border); margin: 18px 0; }
-  .sched { display: flex; flex-direction: column; gap: 4px; }
-  .sched div { font-family: var(--data); font-size: 13px; color: var(--muted); }
-  .sched div.on { color: var(--accent); font-weight: 700; }
-  .fine {
-    margin-top: 14px; padding: 10px 12px; background: var(--ink);
-    border-radius: 8px; font-size: 13px; color: var(--muted);
-  }
-  .sheet-actions { display: flex; gap: 8px; margin-top: 20px; }
-  .sheet-actions a, .sheet-actions button {
-    flex: 1; text-align: center; padding: 11px; border-radius: 10px;
-    border: 1px solid var(--border); background: transparent; color: var(--text);
-    font: inherit; font-size: 14px; font-weight: 600; cursor: pointer; text-decoration: none;
-  }
-  .sheet-actions .primary { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
+  dialog { border:0; padding:0; background:transparent; max-width:520px; width:calc(100% - 24px); }
+  dialog::backdrop { background:rgba(0,0,0,.62); }
+  .sheet { background:var(--surface); border:1px solid var(--border); border-radius:14px;
+           padding:22px; color:var(--text); }
+  .sheet h2 { font-family:var(--display); font-size:26px; margin:0; letter-spacing:-.005em; }
+  .sheet .addr { color:var(--muted); font-size:14px; margin:6px 0 0; }
+  .rule { height:1px; background:var(--border); margin:18px 0; }
+  .sched { display:flex; flex-direction:column; gap:4px; }
+  .sched div { font-family:var(--data); font-size:13px; color:var(--muted); }
+  .sched div.on { color:var(--accent); font-weight:700; }
+  .fine { margin-top:14px; padding:10px 12px; background:var(--ink); border-radius:8px;
+          font-size:13px; color:var(--muted); }
+  .sheet-actions { display:flex; gap:8px; margin-top:20px; }
+  .sheet-actions a, .sheet-actions button { flex:1; text-align:center; padding:11px;
+    border-radius:10px; border:1px solid var(--border); background:transparent; color:var(--text);
+    font:inherit; font-size:14px; font-weight:600; cursor:pointer; text-decoration:none; }
+  .sheet-actions .primary { background:var(--accent); border-color:var(--accent); color:var(--on-accent); }
 
-  footer { margin-top: 34px; padding-top: 18px; border-top: 1px solid var(--border);
-           color: var(--faint); font-size: 12px; line-height: 1.6; }
+  footer { margin-top:34px; padding-top:18px; border-top:1px solid var(--border);
+           color:var(--faint); font-size:12px; line-height:1.6; }
 </style>
 
 <div class="wrap">
   <header>
-    <p class="wordmark">Little Lemon · Ontario</p>
+    <p class="wordmark">Clocktails · Ontario</p>
     <h1>Happy hours near you</h1>
     <p class="where" id="where">Locating…</p>
     <div class="notice">
       <strong>Preview build with sample data.</strong> Venue names and deals here are
-      invented — real coordinates, fictional businesses — so nothing misrepresents an actual
-      restaurant. The live app reads the same API, filled by the crawler and your partner deals.
+      invented — real coordinates, fictional businesses — so nothing misrepresents an
+      actual restaurant. The live app reads the same API, filled by the crawler and
+      your partner deals.
     </div>
   </header>
 
@@ -252,13 +223,11 @@
       <input type="range" id="radius" min="0.5" max="15" step="0.5" value="2"
              aria-label="Search radius in kilometres">
     </div>
-
     <div>
       <span class="label">When</span>
       <div class="chips" id="timeChips" role="group" aria-label="When are you going out"></div>
       <p class="hint" id="timeHint"></p>
     </div>
-
     <div>
       <span class="label">What</span>
       <div class="chips" id="catChips" role="group" aria-label="Deal type"></div>
@@ -276,17 +245,27 @@
   <div id="listView"><div class="rows" id="rows"></div></div>
 
   <div id="mapView" hidden>
-    <div class="map-shell">
-      <svg id="map" viewBox="0 0 360 360" role="img" aria-label="Map of nearby deals"></svg>
-      <button type="button" class="recentre" id="recentre" hidden>Search this area</button>
+    <div class="map-shell" id="mapShell">
+      <canvas id="map" tabindex="0" role="application"
+              aria-label="Map of nearby deals. Drag to pan, pinch or scroll to zoom."></canvas>
+      <button type="button" class="search-area" id="searchArea" hidden>Search this area</button>
+      <div class="scalebar"><div class="bar" id="scaleBar"></div><span id="scaleText"></span></div>
+      <div class="fabs">
+        <div class="zoom-stack">
+          <button type="button" id="zoomIn" aria-label="Zoom in">+</button>
+          <button type="button" id="zoomOut" aria-label="Zoom out">−</button>
+        </div>
+        <button type="button" class="fab" id="recentre" aria-label="Centre on my location">◎</button>
+      </div>
     </div>
-    <div class="map-foot">
+    <div class="carousel" id="carousel"></div>
+    <div class="map-legend">
       <span class="key"><i style="background:var(--accent)"></i>Partner</span>
       <span class="key"><i style="background:var(--open)"></i>On now</span>
       <span class="key"><i style="background:var(--later)"></i>Later</span>
       <span class="key" style="margin-left:auto" id="mapCount"></span>
     </div>
-    <p class="map-tip">Tap a pin for details, or tap anywhere else on the map to search that spot.</p>
+    <p class="map-tip">Drag to pan, pinch or scroll to zoom. Tap a pin or swipe the cards.</p>
   </div>
 
   <footer>
@@ -303,59 +282,85 @@
 /* ------------------------------------------------------------------ *
  * Sample Ontario dataset. Real coordinates, invented venues and deals.
  * Windows are minutes from local midnight; an end past 1440 runs into
- * the next morning, which is how "10pm–2am" stays a single window.
+ * the next morning, which keeps "10pm–2am" a single window.
  * ------------------------------------------------------------------ */
 const TZ = "America/Toronto";
+const V = (n,a,c,lat,lon,tel,d) => ({ n,a,c,lat,lon,tel,d });
+const D = (t,p,cat,days,s,e,desc,opts={}) =>
+  ({ t,p,cat,days,s,e,desc, fine:opts.fine??null, partner:opts.partner??false, conf:opts.conf??1 });
+
 const VENUES = [
-  { n:"The Alder & Oak", a:"412 Queen St W", c:"Toronto", lat:43.6479, lon:-79.3968, tel:"+14165550118",
-    d:[{t:"Happy Hour", p:"$6 pints", cat:"both", partner:true, desc:"$6 local pints, $9 house cocktails, half off shared plates.", fine:"Bar and patio only.", days:[1,2,3,4,5], s:960, e:1140},
-       {t:"Late Night Menu", p:"$6 pints", cat:"both", conf:0.78, desc:"The full happy hour list comes back after 10pm.", days:[4,5,6], s:1320, e:1560}]},
-  { n:"The Ossington Room", a:"77 Ossington Ave", c:"Toronto", lat:43.6472, lon:-79.4203, tel:"+14165550190",
-    d:[{t:"Negotiated Late Night", p:"$4 pints", cat:"drink", partner:true, desc:"House drafts $4 until close.", fine:"Bar only.", days:[5,6], s:1320, e:1560}]},
-  { n:"Foundry Social", a:"620 King St W", c:"Toronto", lat:43.6444, lon:-79.4005, tel:"+14165550142",
-    d:[{t:"After Work", p:"$1.50 oysters", cat:"both", conf:0.88, desc:"$8 wine by the glass and $1.50 oysters.", fine:"While supplies last.", days:[2,3,4,5], s:960, e:1110}]},
-  { n:"Cantina Verde", a:"180 Augusta Ave", c:"Toronto", lat:43.6547, lon:-79.4025, tel:"+14165550167",
-    d:[{t:"Taco Tuesday", p:"$3 tacos", cat:"both", conf:0.94, desc:"$3 tacos all night, $7 margaritas.", days:[2], s:960, e:1320},
-       {t:"Weekend Brunch", p:"$12 cocktails", cat:"both", conf:0.8, desc:"$12 brunch cocktails, bottomless chips and salsa.", fine:"Two hour limit.", days:[0,6], s:600, e:870}]},
-  { n:"The Copper Cellar", a:"55 Mill St", c:"Toronto", lat:43.6503, lon:-79.3595, tel:"+14165550193",
-    d:[{t:"Cellar Hour", p:"$20 off bottles", cat:"drink", conf:0.83, desc:"$20 off every bottle, complimentary bar snacks.", fine:"Excludes reserve list.", days:[3,4], s:1020, e:1170}]},
-  { n:"Marigold Bar", a:"88 Ossington Ave", c:"Toronto", lat:43.6470, lon:-79.4200, tel:"+14165550121",
-    d:[{t:"Industry Night", p:"25% off", cat:"both", conf:0.71, desc:"25% off the full menu for service industry staff.", fine:"Industry ID required.", days:[1], s:1200, e:1500},
-       {t:"Happy Hour", p:"$7 cocktails", cat:"drink", conf:0.9, desc:"$7 house cocktails and $5 draught.", days:[2,3,4,5], s:1020, e:1140}]},
-  { n:"Liberty Works Taproom", a:"125 Atlantic Ave", c:"Toronto", lat:43.6380, lon:-79.4207, tel:"+14165550155",
-    d:[{t:"Taproom Happy Hour", p:"$5 pints", cat:"drink", conf:0.87, desc:"$5 pints of anything brewed on site.", days:[1,2,3,4,5], s:900, e:1080}]},
-  { n:"Olive Street Taverna", a:"410 Danforth Ave", c:"Toronto", lat:43.6779, lon:-79.3496, tel:"+14165550176",
-    d:[{t:"Meze Hour", p:"Half price meze", cat:"both", conf:0.82, desc:"Half price meze plates and $8 ouzo flights.", fine:"Dine-in only.", days:[0,1,2,3,4], s:990, e:1140}]},
-  { n:"Eastside Counter", a:"1042 Queen St E", c:"Toronto", lat:43.6626, lon:-79.3327, tel:"+14165550188",
-    d:[{t:"Early Bird Prix Fixe", p:"$39 prix fixe", cat:"food", conf:0.76, desc:"Three courses for $39 before 6pm.", fine:"Seated by 5:45pm.", days:[0,1,2,3,4], s:990, e:1080}]},
-  { n:"The Glasshouse Lounge", a:"120 Cumberland St", c:"Toronto", lat:43.6708, lon:-79.3934, tel:"+14165550134",
-    d:[{t:"Aperitivo", p:"$10 spritzes", cat:"both", conf:0.85, desc:"$10 spritzes with complimentary snacks.", days:[2,3,4,5,6], s:960, e:1110}]},
-  { n:"Bay & Wellington Public House", a:"150 Bay St", c:"Toronto", lat:43.6487, lon:-79.3781, tel:"+14165550109",
-    d:[{t:"Trading Floor Happy Hour", p:"$5 pints", cat:"both", conf:0.89, desc:"$5 domestic pints and $9 wing platters.", days:[1,2,3,4,5], s:930, e:1080}]},
-  { n:"James North Beer Hall", a:"220 James St N", c:"Hamilton", lat:43.2611, lon:-79.8656, tel:"+19055550144",
-    d:[{t:"Steel City Happy Hour", p:"$4 pints", cat:"both", conf:0.86, desc:"$4 pints and half off pretzels.", days:[1,2,3,4,5], s:960, e:1110}]},
-  { n:"Byward Cellar", a:"55 York St", c:"Ottawa", lat:45.4285, lon:-75.6924, tel:"+16135550177",
-    d:[{t:"Market Happy Hour", p:"$2 oysters", cat:"both", conf:0.84, desc:"$6 local drafts and $2 oysters.", fine:"Bar seating only.", days:[2,3,4,5,6], s:960, e:1140}]},
+  V("The Alder & Oak","412 Queen St W","Toronto",43.6479,-79.3968,"+14165550118",[
+    D("Happy Hour","$6 pints","both",[1,2,3,4,5],960,1140,"$6 local pints, $9 house cocktails, half off shared plates.",{partner:true,fine:"Bar and patio only."}),
+    D("Late Night Menu","$6 pints","both",[4,5,6],1320,1560,"The full happy hour list comes back after 10pm.",{conf:.78})]),
+  V("The Ossington Room","77 Ossington Ave","Toronto",43.6472,-79.4203,"+14165550190",[
+    D("Negotiated Late Night","$4 pints","drink",[5,6],1320,1560,"House drafts $4 until close.",{partner:true,fine:"Bar only."})]),
+  V("Market Street Oyster Bar","93 Front St E","Toronto",43.6487,-79.3716,"+14165550277",[
+    D("Oyster Hour","$1.75 oysters","both",[1,2,3,4,5],960,1110,"$1.75 oysters and $9 sparkling.",{partner:true,fine:"While supplies last."})]),
+  V("Foundry Social","620 King St W","Toronto",43.6444,-79.4005,"+14165550142",[
+    D("After Work","$1.50 oysters","both",[2,3,4,5],960,1110,"$8 wine by the glass and $1.50 oysters.",{conf:.88,fine:"While supplies last."})]),
+  V("Cantina Verde","180 Augusta Ave","Toronto",43.6547,-79.4025,"+14165550167",[
+    D("Taco Tuesday","$3 tacos","both",[2],960,1320,"$3 tacos all night, $7 margaritas.",{conf:.94}),
+    D("Weekend Brunch","$12 cocktails","both",[0,6],600,870,"$12 brunch cocktails, bottomless chips and salsa.",{conf:.8,fine:"Two hour limit."})]),
+  V("The Copper Cellar","55 Mill St","Toronto",43.6503,-79.3595,"+14165550193",[
+    D("Cellar Hour","$20 off bottles","drink",[3,4],1020,1170,"$20 off every bottle, complimentary bar snacks.",{conf:.83,fine:"Excludes reserve list."})]),
+  V("Marigold Bar","88 Ossington Ave","Toronto",43.6470,-79.4200,"+14165550121",[
+    D("Industry Night","25% off","both",[1],1200,1500,"25% off the full menu for service industry staff.",{conf:.71,fine:"Industry ID required."}),
+    D("Happy Hour","$7 cocktails","drink",[2,3,4,5],1020,1140,"$7 house cocktails and $5 draught.",{conf:.9})]),
+  V("Liberty Works Taproom","125 Atlantic Ave","Toronto",43.6380,-79.4207,"+14165550155",[
+    D("Taproom Happy Hour","$5 pints","drink",[1,2,3,4,5],900,1080,"$5 pints of anything brewed on site.",{conf:.87})]),
+  V("Olive Street Taverna","410 Danforth Ave","Toronto",43.6779,-79.3496,"+14165550176",[
+    D("Meze Hour","Half price meze","both",[0,1,2,3,4],990,1140,"Half price meze plates and $8 ouzo flights.",{conf:.82,fine:"Dine-in only."})]),
+  V("Eastside Counter","1042 Queen St E","Toronto",43.6626,-79.3327,"+14165550188",[
+    D("Early Bird Prix Fixe","$39 prix fixe","food",[0,1,2,3,4],990,1080,"Three courses for $39 before 6pm.",{conf:.76,fine:"Seated by 5:45pm."})]),
+  V("The Glasshouse Lounge","120 Cumberland St","Toronto",43.6708,-79.3934,"+14165550134",[
+    D("Aperitivo","$10 spritzes","both",[2,3,4,5,6],960,1110,"$10 spritzes with complimentary snacks.",{conf:.85})]),
+  V("Bay & Wellington Public House","150 Bay St","Toronto",43.6487,-79.3781,"+14165550109",[
+    D("Trading Floor Happy Hour","$5 pints","both",[1,2,3,4,5],930,1080,"$5 domestic pints and $9 wing platters.",{conf:.89})]),
+  V("Bar Sorrento","602 College St","Toronto",43.6551,-79.4139,"+14165550231",[
+    D("Aperitivo Hour","$8 negronis","drink",[1,2,3,4,5],960,1110,"$8 negronis and free focaccia.",{conf:.86,fine:"Bar only."})]),
+  V("The Roncy Local","380 Roncesvalles Ave","Toronto",43.6465,-79.4494,"+14165550245",[
+    D("Neighbourhood Hour","$5 pints","both",[1,2,3,4],960,1140,"$5 pints and $8 burgers.",{conf:.91})]),
+  V("Junction Craft Room","2960 Dundas St W","Toronto",43.6655,-79.4692,"+14165550259",[
+    D("Taproom Special","$4 half pints","drink",[2,3,4,5,6],900,1080,"Half pints $4 all afternoon.",{conf:.79})]),
+  V("Riverside Social","720 Queen St E","Toronto",43.6588,-79.3490,"+14165550263",[
+    D("Patio Hour","Half off wine","both",[3,4,5],1020,1170,"Half off wine by the glass, $6 snacks.",{conf:.88,fine:"Patio only."})]),
+  V("The Village Tap","488 Church St","Toronto",43.6650,-79.3810,"+14165550281",[
+    D("Drag Brunch Deal","$14 mimosa jugs","both",[0,6],660,900,"$14 mimosa jugs with brunch.",{conf:.83}),
+    D("Late Hour","$6 highballs","drink",[4,5,6],1320,1500,"$6 highballs after 10pm.",{conf:.66})]),
+  V("Bloor & Bathurst Public House","730 Bloor St W","Toronto",43.6656,-79.4118,"+14165550295",[
+    D("Student Hour","$4.50 pints","both",[1,2,3,4],900,1080,"$4.50 pints, $7 nachos.",{conf:.9,fine:"Student ID required."})]),
+  V("Corktown Cider House","215 King St E","Toronto",43.6522,-79.3672,"+14165550308",[
+    D("Cider Hour","$6 ciders","drink",[2,3,4,5],1020,1140,"House ciders $6.",{conf:.84})]),
+  V("Bellwoods Bottle Shop","1010 Dundas St W","Toronto",43.6501,-79.4142,"+14165550312",[
+    D("Bottle Night","$15 off bottles","drink",[1],1020,1320,"$15 off any bottle to stay.",{conf:.72})]),
+  V("Parkdale Supper Club","1462 Queen St W","Toronto",43.6395,-79.4370,"+14165550326",[
+    D("Early Supper","$32 prix fixe","food",[0,1,2,3,4],1020,1110,"Two courses for $32 before 6:30pm.",{conf:.77,fine:"Seated by 6:15pm."})]),
+  V("The Duncan Room","124 Duncan St","Toronto",43.6478,-79.3897,"+14165550330",[
+    D("Pre-Show Hour","$9 cocktails","both",[2,3,4,5,6],960,1140,"$9 cocktails and $6 bar bites before curtain.",{conf:.87})]),
+  V("Sheppard & Yonge Tap","4841 Yonge St","Toronto",43.7615,-79.4110,"+14165550344",[
+    D("Commuter Hour","$5 drafts","both",[1,2,3,4,5],960,1140,"$5 drafts and half-price wings.",{conf:.85})]),
+  V("James North Beer Hall","220 James St N","Hamilton",43.2611,-79.8656,"+19055550144",[
+    D("Steel City Happy Hour","$4 pints","both",[1,2,3,4,5],960,1110,"$4 pints and half off pretzels.",{conf:.86})]),
+  V("Byward Cellar","55 York St","Ottawa",45.4285,-75.6924,"+16135550177",[
+    D("Market Happy Hour","$2 oysters","both",[2,3,4,5,6],960,1140,"$6 local drafts and $2 oysters.",{conf:.84,fine:"Bar seating only."})]),
 ];
 
 const DEFAULT_ORIGIN = { lat: 43.6487, lon: -79.3980, label: "downtown Toronto" };
 
-/* ---------------- geometry + time, mirroring the server ---------------- */
+/* ---------------- geometry + time ---------------- */
 const R = 6371008.8;
 const rad = (d) => (d * Math.PI) / 180;
-
 function haversineKm(a, b) {
   const dLat = rad(b.lat - a.lat), dLon = rad(b.lon - a.lon);
-  const h = Math.sin(dLat/2)**2 + Math.cos(rad(a.lat)) * Math.cos(rad(b.lat)) * Math.sin(dLon/2)**2;
+  const h = Math.sin(dLat/2)**2 + Math.cos(rad(a.lat))*Math.cos(rad(b.lat))*Math.sin(dLon/2)**2;
   return (2 * R * Math.asin(Math.min(1, Math.sqrt(h)))) / 1000;
 }
 
-const WEEK = { Sun:0, Mon:1, Tue:2, Wed:3, Thu:4, Fri:5, Sat:6 };
-const fmt = new Intl.DateTimeFormat("en-US", {
-  timeZone: TZ, weekday: "short", hour: "2-digit", minute: "2-digit", hourCycle: "h23",
-});
+const WEEK = { Sun:0,Mon:1,Tue:2,Wed:3,Thu:4,Fri:5,Sat:6 };
+const fmt = new Intl.DateTimeFormat("en-US",
+  { timeZone:TZ, weekday:"short", hour:"2-digit", minute:"2-digit", hourCycle:"h23" });
 
-/** Wall-clock day and minute at `date`, as seen in Ontario. */
 function localTime(date) {
   let day = 0, hour = 0, minute = 0;
   for (const part of fmt.formatToParts(date)) {
@@ -366,25 +371,17 @@ function localTime(date) {
   return { day, min: hour * 60 + minute };
 }
 
-/**
- * Project a window onto an axis anchored at the query day's midnight, so a
- * window belonging to yesterday or tomorrow can be compared arithmetically.
- * This is what makes a Friday 10pm–2am deal match at 00:30 on Saturday.
- */
+/** Project a window onto an axis anchored at the query day's midnight, so a
+    window belonging to yesterday or tomorrow compares arithmetically. */
 function matchWindow(dayOfWeek, s, e, now, durationMin) {
   for (const offset of [-1, 0, 1]) {
     const day = (((now.day + offset) % 7) + 7) % 7;
     if (day !== dayOfWeek) continue;
-    const shift = offset * 1440;
-    const start = s + shift, end = e + shift;
+    const shift = offset * 1440, start = s + shift, end = e + shift;
     const qs = now.min, qe = now.min + durationMin;
     const hit = durationMin === 0 ? start <= qs && qs < end : start < qe && qs < end;
     if (!hit) return null;
-    return {
-      untilStart: Math.max(0, start - qs),
-      untilEnd: end - qs,
-      openNow: start <= qs && qs < end,
-    };
+    return { untilStart: Math.max(0, start - qs), untilEnd: end - qs, openNow: start <= qs && qs < end };
   }
   return null;
 }
@@ -392,136 +389,462 @@ function matchWindow(dayOfWeek, s, e, now, durationMin) {
 const DAYS = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
 function clock(min) {
   const m = ((min % 1440) + 1440) % 1440;
-  const h24 = Math.floor(m / 60), mm = m % 60;
+  const h24 = Math.floor(m/60), mm = m % 60;
   const suffix = h24 < 12 ? "am" : "pm";
   const h12 = h24 % 12 === 0 ? 12 : h24 % 12;
   return mm === 0 ? `${h12}${suffix}` : `${h12}:${String(mm).padStart(2,"0")}${suffix}`;
 }
-const windowLabel = (d, s, e) => `${DAYS[d]} ${clock(s)}–${clock(e)}`;
-
-function humanMinutes(n) {
-  if (n < 60) return `${n} min`;
-  const h = Math.floor(n / 60), r = n % 60;
-  return r === 0 ? `${h} hr` : `${h} hr ${r} min`;
-}
-function humanDistance(km) {
-  if (km < 0.05) return "steps away";
-  if (km < 1) return `${Math.round((km * 1000) / 50) * 50} m`;
-  return `${km.toFixed(1)} km`;
-}
+const windowLabel = (d,s,e) => `${DAYS[d]} ${clock(s)}–${clock(e)}`;
+const humanMinutes = (n) => n < 60 ? `${n} min`
+  : (n % 60 === 0 ? `${Math.floor(n/60)} hr` : `${Math.floor(n/60)} hr ${n%60} min`);
+const humanDistance = (km) => km < 0.05 ? "steps away"
+  : km < 1 ? `${Math.round(km*1000/50)*50} m` : `${km.toFixed(1)} km`;
 
 /* ---------------- state ---------------- */
 const TIME_CHOICES = [
-  { id:"now",   label:"Now",         hint:() => "Open right now",
-    at:(n) => n, win:0 },
-  { id:"soon",  label:"Next 2 hrs",  hint:() => "Anything on between now and two hours from now",
-    at:(n) => n, win:120 },
-  { id:"hour",  label:"In an hour",  hint:(d) => `Around ${d.toLocaleTimeString([], {hour:"numeric", minute:"2-digit"})}`,
-    at:(n) => new Date(n.getTime() + 3600e3), win:30 },
-  { id:"seven", label:"7pm",         hint:(d) => `Around ${d.toLocaleTimeString([], {hour:"numeric", minute:"2-digit"})}`,
-    at:(n) => atHour(n, 19), win:60 },
-  { id:"late",  label:"Late night",  hint:(d) => `From ${d.toLocaleTimeString([], {hour:"numeric", minute:"2-digit"})} onwards`,
-    at:(n) => atHour(n, 22), win:180 },
+  { id:"now",  label:"Now",        hint:()=>"Open right now",                    at:(n)=>n, win:0 },
+  { id:"soon", label:"Next 2 hrs", hint:()=>"Anything on between now and two hours from now", at:(n)=>n, win:120 },
+  { id:"hour", label:"In an hour", hint:(d)=>`Around ${t(d)}`, at:(n)=>new Date(n.getTime()+3600e3), win:30 },
+  { id:"seven",label:"7pm",        hint:(d)=>`Around ${t(d)}`, at:(n)=>atHour(n,19), win:60 },
+  { id:"late", label:"Late night", hint:(d)=>`From ${t(d)} onwards`, at:(n)=>atHour(n,22), win:180 },
 ];
+const t = (d) => d.toLocaleTimeString([], { hour:"numeric", minute:"2-digit" });
 function atHour(now, hour) {
-  const t = new Date(now);
-  t.setHours(hour, 0, 0, 0);
-  if (t <= now) t.setDate(t.getDate() + 1);
-  return t;
+  const x = new Date(now); x.setHours(hour,0,0,0);
+  if (x <= now) x.setDate(x.getDate()+1);
+  return x;
 }
-
 const CATEGORIES = [
-  { id:null, label:"Everything" },
-  { id:"drink", label:"Drinks" },
-  { id:"food", label:"Food" },
+  { id:null, label:"Everything" }, { id:"drink", label:"Drinks" }, { id:"food", label:"Food" },
 ];
 
 const state = {
-  origin: null,
-  usingFallback: true,
-  pannedTo: null,
-  radiusKm: 2,
-  time: TIME_CHOICES[0],
-  category: null,
-  view: "list",
+  origin:null, deviceOrigin:null, pannedTo:null, usingFallback:true,
+  radiusKm:2, time:TIME_CHOICES[0], category:null, view:"list", selected:null,
 };
 
 /* ---------------- search ---------------- */
 function search() {
   if (!state.origin) return [];
-  const at = state.time.at(new Date());
-  const now = localTime(at);
-  const results = [];
-
+  const now = localTime(state.time.at(new Date()));
+  const out = [];
   for (const venue of VENUES) {
     const km = haversineKm(state.origin, venue);
     if (km > state.radiusKm) continue;
-
     for (const deal of venue.d) {
       if (state.category && deal.cat !== state.category && deal.cat !== "both") continue;
-
       let best = null;
       for (const day of deal.days) {
         const hit = matchWindow(day, deal.s, deal.e, now, state.time.win);
         if (hit && (!best || hit.untilStart < best.untilStart)) best = { ...hit, day };
       }
-      if (!best) continue;
-      results.push({ venue, deal, km, ...best });
+      if (best) out.push({ id:`${venue.n}|${deal.t}`, venue, deal, km, ...best });
     }
   }
-
-  // Partner deals lead — they are the ones we can vouch for. Then whatever is
-  // already open, then nearest.
-  results.sort((a, b) =>
-    (b.deal.partner ? 1 : 0) - (a.deal.partner ? 1 : 0) ||
-    (b.openNow ? 1 : 0) - (a.openNow ? 1 : 0) ||
-    a.km - b.km);
-  return results;
+  out.sort((a,b) =>
+    (b.deal.partner?1:0)-(a.deal.partner?1:0) ||
+    (b.openNow?1:0)-(a.openNow?1:0) || a.km-b.km);
+  return out;
 }
 
 function tone(r) {
-  if (!r.openNow) return { c: "var(--later)", text: `Starts in ${humanMinutes(r.untilStart)}` };
-  if (r.untilEnd <= 45) return { c: "var(--soon)", text: `Ends in ${humanMinutes(r.untilEnd)}` };
-  return { c: "var(--open)", text: `On for ${humanMinutes(r.untilEnd)}` };
+  if (!r.openNow) return { c:"var(--later)", key:"later", text:`Starts in ${humanMinutes(r.untilStart)}` };
+  if (r.untilEnd <= 45) return { c:"var(--soon)", key:"soon", text:`Ends in ${humanMinutes(r.untilEnd)}` };
+  return { c:"var(--open)", key:"open", text:`On for ${humanMinutes(r.untilEnd)}` };
 }
-
 function trustNote(deal) {
   if (deal.partner) return null;
-  const conf = deal.conf ?? 1;
-  if (conf >= 0.75) return null;
-  return conf >= 0.5
-    ? "Times may have changed — worth a quick call"
-    : "Unconfirmed times — call ahead";
+  if (deal.conf >= .75) return null;
+  return deal.conf >= .5 ? "Times may have changed — worth a quick call" : "Unconfirmed times — call ahead";
 }
 
-/* ---------------- rendering ---------------- */
 const el = (id) => document.getElementById(id);
-const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) =>
-  ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;" }[c]));
+const esc = (s) => String(s ?? "").replace(/[&<>"']/g,(c)=>
+  ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 
 let current = [];
 
+/* ================================================================== *
+ * The map.
+ *
+ * No tile server is reachable from a sandboxed page, so this draws its
+ * own schematic basemap on a canvas: an adaptive grid standing in for
+ * street structure, the search radius, and the venues. Canvas keeps
+ * pan and pinch smooth, and makes clustering cheap at low zoom.
+ * ================================================================== */
+const MapView = (() => {
+  const canvas = el("map");
+  const ctx = canvas.getContext("2d");
+
+  // World space is kilometres east/south of an anchor, so panning never
+  // accumulates projection drift the way re-projecting per frame would.
+  let anchor = { lat: 43.6487, lon: -79.3980 };
+  let centre = { x: 0, y: 0 };   // km from anchor
+  let pxPerKm = 90;
+  let width = 0, height = 0;
+  let clusters = [];
+  let hovered = null;
+  let raf = null;
+
+  const kmPerLon = () => 111.32 * Math.cos(rad(anchor.lat));
+  const toWorld = (p) => ({ x:(p.lon-anchor.lon)*kmPerLon(), y:-(p.lat-anchor.lat)*111.32 });
+  const toLatLon = (w) => ({ lat: anchor.lat - w.y/111.32, lon: anchor.lon + w.x/kmPerLon() });
+  const toScreen = (w) => ({ x:(w.x-centre.x)*pxPerKm + width/2, y:(w.y-centre.y)*pxPerKm + height/2 });
+  const fromScreen = (s) => ({ x:(s.x-width/2)/pxPerKm + centre.x, y:(s.y-height/2)/pxPerKm + centre.y });
+
+  const css = (name) => getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+  const reduceMotion = matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  function resize() {
+    const rect = canvas.getBoundingClientRect();
+    const dpr = Math.min(window.devicePixelRatio || 1, 2.5);
+    width = rect.width; height = rect.height;
+    canvas.width = Math.round(width * dpr);
+    canvas.height = Math.round(height * dpr);
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    draw();
+  }
+
+  /** Fit the search circle, with a little air around it. */
+  function frameRadius() {
+    if (!state.origin) return;
+    anchor = { lat: state.origin.lat, lon: state.origin.lon };
+    centre = { x: 0, y: 0 };
+    pxPerKm = Math.min(width, height) / (state.radiusKm * 2.5);
+    draw();
+  }
+
+  function zoomBy(factor, focus) {
+    const before = focus ? fromScreen(focus) : centre;
+    pxPerKm = Math.max(6, Math.min(4000, pxPerKm * factor));
+    if (focus) {
+      const after = fromScreen(focus);
+      centre.x += before.x - after.x;
+      centre.y += before.y - after.y;
+    }
+    scheduleDraw();
+  }
+
+  /* Grid step picked so lines stay roughly 60-120px apart at any zoom. */
+  function gridStepKm() {
+    const target = 90 / pxPerKm;
+    const steps = [0.05,0.1,0.2,0.5,1,2,5,10,20,50,100];
+    return steps.find((s) => s >= target) ?? 100;
+  }
+
+  function buildClusters() {
+    // Grid-bucket in screen space: two pins closer than a pin's width merge.
+    const cell = 46;
+    const buckets = new Map();
+    for (const r of current) {
+      const s = toScreen(toWorld(r.venue));
+      if (s.x < -60 || s.x > width+60 || s.y < -60 || s.y > height+60) continue;
+      const key = `${Math.floor(s.x/cell)}:${Math.floor(s.y/cell)}`;
+      const bucket = buckets.get(key);
+      if (bucket) { bucket.items.push(r); bucket.x += s.x; bucket.y += s.y; }
+      else buckets.set(key, { items:[r], x:s.x, y:s.y });
+    }
+    clusters = [...buckets.values()].map((b) => ({
+      items: b.items,
+      x: b.x / b.items.length,
+      y: b.y / b.items.length,
+    }));
+    // Selected pin draws last so it is never hidden under a neighbour.
+    clusters.sort((a, b) =>
+      (a.items.some(isSelected)?1:0) - (b.items.some(isSelected)?1:0));
+  }
+
+  const isSelected = (r) => state.selected != null && r.id === state.selected;
+
+  function colourFor(r) {
+    if (r.deal.partner) return css("--accent");
+    return r.openNow ? css("--open") : css("--later");
+  }
+
+  function draw() {
+    if (!width || !height) return;
+    const bg = css("--map-bg"), land = css("--map-land");
+    const road = css("--map-road"), major = css("--map-road-major");
+    const text = css("--text"), muted = css("--muted"), surface = css("--surface");
+
+    ctx.clearRect(0, 0, width, height);
+    ctx.fillStyle = bg;
+    ctx.fillRect(0, 0, width, height);
+
+    // Schematic street grid. Every fifth line is heavier, which reads as
+    // arterial roads and gives a sense of scale while zooming.
+    const step = gridStepKm();
+    const stepPx = step * pxPerKm;
+    const originX = toScreen({ x:0, y:0 }).x, originY = toScreen({ x:0, y:0 }).y;
+    const firstX = originX - Math.ceil(originX / stepPx) * stepPx;
+    const firstY = originY - Math.ceil(originY / stepPx) * stepPx;
+
+    ctx.lineWidth = 1;
+    for (let i = 0, x = firstX; x < width + stepPx; x += stepPx, i++) {
+      const index = Math.round((x - originX) / stepPx);
+      ctx.strokeStyle = index % 5 === 0 ? major : road;
+      ctx.beginPath(); ctx.moveTo(Math.round(x)+.5, 0); ctx.lineTo(Math.round(x)+.5, height); ctx.stroke();
+    }
+    for (let y = firstY; y < height + stepPx; y += stepPx) {
+      const index = Math.round((y - originY) / stepPx);
+      ctx.strokeStyle = index % 5 === 0 ? major : road;
+      ctx.beginPath(); ctx.moveTo(0, Math.round(y)+.5); ctx.lineTo(width, Math.round(y)+.5); ctx.stroke();
+    }
+
+    if (!state.origin) return;
+
+    // Search radius, drawn in world space so it scales with zoom.
+    const home = toScreen(toWorld(state.origin));
+    const ringPx = state.radiusKm * pxPerKm;
+    ctx.save();
+    ctx.beginPath(); ctx.arc(home.x, home.y, ringPx, 0, Math.PI*2);
+    ctx.fillStyle = css("--ring-fill"); ctx.fill();
+    ctx.setLineDash([6, 6]); ctx.lineWidth = 1.5; ctx.strokeStyle = css("--ring"); ctx.stroke();
+    ctx.restore();
+
+    buildClusters();
+
+    for (const cluster of clusters) {
+      if (cluster.items.length > 1) {
+        const anySelected = cluster.items.some(isSelected);
+        const size = Math.min(15 + cluster.items.length * 1.6, 26);
+        ctx.beginPath(); ctx.arc(cluster.x, cluster.y, size, 0, Math.PI*2);
+        ctx.fillStyle = surface; ctx.fill();
+        ctx.lineWidth = anySelected ? 3 : 2;
+        ctx.strokeStyle = cluster.items.some((r) => r.deal.partner) ? css("--accent") : css("--open");
+        ctx.stroke();
+        ctx.fillStyle = text;
+        ctx.font = `600 ${Math.round(size*0.78)}px ${getComputedStyle(document.body).fontFamily}`;
+        ctx.textAlign = "center"; ctx.textBaseline = "middle";
+        ctx.fillText(String(cluster.items.length), cluster.x, cluster.y);
+        continue;
+      }
+
+      const r = cluster.items[0];
+      const selected = isSelected(r);
+      const colour = colourFor(r);
+      const radius = selected ? 11 : 7.5;
+
+      if (selected && !reduceMotion) {
+        ctx.beginPath(); ctx.arc(cluster.x, cluster.y, radius + 9, 0, Math.PI*2);
+        ctx.fillStyle = colour; ctx.globalAlpha = .18; ctx.fill(); ctx.globalAlpha = 1;
+      }
+      ctx.beginPath(); ctx.arc(cluster.x, cluster.y, radius, 0, Math.PI*2);
+      ctx.fillStyle = colour; ctx.fill();
+      ctx.lineWidth = selected ? 3 : 2; ctx.strokeStyle = surface; ctx.stroke();
+
+      // Labels only once there is room for them, and only for the pins the
+      // user is most likely to be reading — otherwise it turns to soup.
+      if (selected || (pxPerKm > 140 && hovered === r)) {
+        const name = r.venue.n;
+        ctx.font = `600 11px ${getComputedStyle(document.body).fontFamily}`;
+        const w = ctx.measureText(name).width + 14;
+        const boxY = cluster.y - radius - 26;
+        ctx.beginPath();
+        ctx.roundRect(cluster.x - w/2, boxY, w, 20, 6);
+        ctx.fillStyle = surface; ctx.fill();
+        ctx.strokeStyle = colour; ctx.lineWidth = 1; ctx.stroke();
+        ctx.fillStyle = text; ctx.textAlign = "center"; ctx.textBaseline = "middle";
+        ctx.fillText(name, cluster.x, boxY + 10);
+      }
+    }
+
+    // You, on top of everything.
+    ctx.beginPath(); ctx.arc(home.x, home.y, 16, 0, Math.PI*2);
+    ctx.fillStyle = css("--accent"); ctx.globalAlpha = .16; ctx.fill(); ctx.globalAlpha = 1;
+    ctx.beginPath(); ctx.arc(home.x, home.y, 6, 0, Math.PI*2);
+    ctx.fillStyle = text; ctx.fill();
+    ctx.lineWidth = 2.5; ctx.strokeStyle = bg; ctx.stroke();
+
+    updateScale(step, stepPx);
+  }
+
+  function scheduleDraw() {
+    if (raf) return;
+    raf = requestAnimationFrame(() => { raf = null; draw(); });
+  }
+
+  function updateScale(step, stepPx) {
+    el("scaleBar").style.width = `${Math.round(stepPx)}px`;
+    el("scaleText").textContent = step < 1 ? `${step*1000} m` : `${step} km`;
+  }
+
+  /* ---- hit testing ---- */
+  function pick(x, y) {
+    for (let i = clusters.length - 1; i >= 0; i--) {
+      const c = clusters[i];
+      const size = c.items.length > 1 ? Math.min(15 + c.items.length*1.6, 26) : 13;
+      if ((x-c.x)**2 + (y-c.y)**2 <= size*size) return c;
+    }
+    return null;
+  }
+
+  /* ---- gestures ---- */
+  const pointers = new Map();
+  let dragged = false, lastPinch = 0;
+
+  canvas.addEventListener("pointerdown", (event) => {
+    canvas.setPointerCapture(event.pointerId);
+    pointers.set(event.pointerId, { x: event.clientX, y: event.clientY });
+    dragged = false;
+    if (pointers.size === 2) lastPinch = pinchDistance();
+    canvas.classList.add("dragging");
+  });
+
+  canvas.addEventListener("pointermove", (event) => {
+    const rect = canvas.getBoundingClientRect();
+    const previous = pointers.get(event.pointerId);
+
+    if (!previous) {
+      // Hover only matters for the label affordance on a mouse.
+      const next = pick(event.clientX - rect.left, event.clientY - rect.top);
+      const item = next && next.items.length === 1 ? next.items[0] : null;
+      if (item !== hovered) { hovered = item; scheduleDraw(); }
+      return;
+    }
+
+    pointers.set(event.pointerId, { x: event.clientX, y: event.clientY });
+
+    if (pointers.size === 2) {
+      const distance = pinchDistance();
+      if (lastPinch > 0 && distance > 0) {
+        const mid = pinchMidpoint();
+        zoomBy(distance / lastPinch, { x: mid.x - rect.left, y: mid.y - rect.top });
+      }
+      lastPinch = distance;
+      dragged = true;
+      return;
+    }
+
+    const dx = event.clientX - previous.x, dy = event.clientY - previous.y;
+    if (Math.abs(dx) + Math.abs(dy) > 2) dragged = true;
+    centre.x -= dx / pxPerKm;
+    centre.y -= dy / pxPerKm;
+    scheduleDraw();
+    updateSearchArea();
+  });
+
+  function endPointer(event) {
+    pointers.delete(event.pointerId);
+    if (pointers.size < 2) lastPinch = 0;
+    if (pointers.size === 0) canvas.classList.remove("dragging");
+  }
+  canvas.addEventListener("pointerup", (event) => {
+    const rect = canvas.getBoundingClientRect();
+    const wasDrag = dragged;
+    endPointer(event);
+    if (wasDrag) return;
+
+    const hit = pick(event.clientX - rect.left, event.clientY - rect.top);
+    if (!hit) return;
+    if (hit.items.length > 1) {
+      // Zoom into a cluster rather than guessing which pin was meant.
+      const world = fromScreen({ x: hit.x, y: hit.y });
+      centre = { ...world };
+      zoomBy(2.2);
+      return;
+    }
+    selectDeal(hit.items[0].id, { pan:false, scrollCard:true });
+  });
+  canvas.addEventListener("pointercancel", endPointer);
+
+  canvas.addEventListener("wheel", (event) => {
+    event.preventDefault();
+    const rect = canvas.getBoundingClientRect();
+    zoomBy(Math.exp(-event.deltaY * 0.0015),
+           { x: event.clientX - rect.left, y: event.clientY - rect.top });
+    updateSearchArea();
+  }, { passive: false });
+
+  canvas.addEventListener("dblclick", (event) => {
+    const rect = canvas.getBoundingClientRect();
+    zoomBy(1.8, { x: event.clientX - rect.left, y: event.clientY - rect.top });
+  });
+
+  // Keyboard equivalents, so the map is not mouse-only.
+  canvas.addEventListener("keydown", (event) => {
+    const stepPx = 60;
+    const moves = { ArrowLeft:[-1,0], ArrowRight:[1,0], ArrowUp:[0,-1], ArrowDown:[0,1] };
+    if (moves[event.key]) {
+      event.preventDefault();
+      centre.x += moves[event.key][0] * stepPx / pxPerKm;
+      centre.y += moves[event.key][1] * stepPx / pxPerKm;
+      scheduleDraw(); updateSearchArea();
+    } else if (event.key === "+" || event.key === "=") { event.preventDefault(); zoomBy(1.3); }
+    else if (event.key === "-") { event.preventDefault(); zoomBy(1/1.3); }
+  });
+
+  function pinchDistance() {
+    const [a, b] = [...pointers.values()];
+    return Math.hypot(a.x-b.x, a.y-b.y);
+  }
+  function pinchMidpoint() {
+    const [a, b] = [...pointers.values()];
+    return { x:(a.x+b.x)/2, y:(a.y+b.y)/2 };
+  }
+
+  /** Offer to re-search once the view has drifted meaningfully off centre. */
+  function updateSearchArea() {
+    if (!state.origin) return;
+    const home = toScreen(toWorld(state.origin));
+    const drift = Math.hypot(home.x - width/2, home.y - height/2);
+    el("searchArea").hidden = drift < Math.min(width, height) * 0.22;
+  }
+
+  function centreOn(point, { zoom } = {}) {
+    const world = toWorld(point);
+    centre = { x: world.x, y: world.y };
+    if (zoom) pxPerKm = zoom;
+    scheduleDraw();
+    updateSearchArea();
+  }
+
+  const centreLatLon = () => toLatLon(centre);
+
+  new ResizeObserver(resize).observe(canvas);
+  matchMedia("(prefers-color-scheme: dark)").addEventListener("change", () => scheduleDraw());
+  new MutationObserver(() => scheduleDraw())
+    .observe(document.documentElement, { attributes:true, attributeFilter:["data-theme"] });
+
+  return { resize, draw: scheduleDraw, frameRadius, zoomBy, centreOn, centreLatLon, updateSearchArea };
+})();
+
+/* ---------------- selection, shared by map and carousel ---------------- */
+function selectDeal(id, { pan = true, scrollCard = true } = {}) {
+  state.selected = id;
+  const target = current.find((r) => r.id === id);
+  if (target && pan) MapView.centreOn(target.venue);
+  MapView.draw();
+
+  document.querySelectorAll(".card").forEach((card) => {
+    const active = card.dataset.id === id;
+    card.dataset.active = String(active);
+    if (active && scrollCard) card.scrollIntoView({ behavior:"smooth", block:"nearest", inline:"center" });
+  });
+}
+
+/* ---------------- rendering ---------------- */
 function render() {
   current = search();
+  state.selected = current.some((r) => r.id === state.selected) ? state.selected : null;
 
   el("count").textContent = current.length === 0
-    ? "No deals"
-    : `${current.length} deal${current.length === 1 ? "" : "s"}`;
-  el("radiusValue").textContent =
-    state.radiusKm < 1 ? `${state.radiusKm * 1000} m` : `${state.radiusKm} km`;
+    ? "No deals" : `${current.length} deal${current.length === 1 ? "" : "s"}`;
+  el("radiusValue").textContent = state.radiusKm < 1 ? `${state.radiusKm*1000} m` : `${state.radiusKm} km`;
   el("timeHint").textContent = state.time.hint(state.time.at(new Date()));
 
-  const where = state.pannedTo
-    ? 'Searching the spot you picked · <button type="button" id="resetArea">back to my location</button>'
+  el("where").innerHTML = state.pannedTo
+    ? 'Searching the area you picked · <button type="button" id="resetArea">back to my location</button>'
     : state.usingFallback
       ? `Showing ${DEFAULT_ORIGIN.label} · <button type="button" id="retryLoc">use my location</button>`
       : "Using your current location";
-  el("where").innerHTML = where;
-  const reset = el("resetArea"); if (reset) reset.onclick = () => { state.pannedTo = null; syncOrigin(); };
+  const reset = el("resetArea"); if (reset) reset.onclick = () => { state.pannedTo = null; syncOrigin(true); };
   const retry = el("retryLoc"); if (retry) retry.onclick = locate;
 
   renderRows();
-  renderMap();
+  renderCarousel();
+  el("mapCount").textContent = `${current.length} within ${state.radiusKm} km`;
+  MapView.draw();
 }
 
 function renderRows() {
@@ -532,106 +855,73 @@ function renderRows() {
       Try a wider radius or a different time.</p></div>`;
     return;
   }
-
   host.innerHTML = current.map((r, i) => {
-    const t = tone(r);
-    return `<button class="row" data-i="${i}" style="animation-delay:${Math.min(i * 24, 240)}ms">
-      <span class="stripe" style="background:${t.c}"></span>
+    const s = tone(r);
+    return `<button class="row" data-id="${esc(r.id)}" style="animation-delay:${Math.min(i*24,240)}ms">
+      <span class="stripe" style="background:${s.c}"></span>
       <span class="row-main">
-        <span class="venue-line">
-          ${r.deal.partner ? '<span class="flag">PARTNER</span>' : ""}
-          <span class="venue">${esc(r.venue.n)}</span>
-        </span>
+        <span class="venue-line">${r.deal.partner ? '<span class="flag">PARTNER</span>' : ""}
+          <span class="venue">${esc(r.venue.n)}</span></span>
         <span class="deal-title">${esc(r.deal.t)}</span>
         ${r.deal.p ? `<span class="price">${esc(r.deal.p)}</span>` : ""}
       </span>
       <span class="row-meta">
         <span class="window">${esc(windowLabel(r.day, r.deal.s, r.deal.e))}</span>
-        <span class="countdown" style="color:${t.c}">${esc(t.text)}</span>
+        <span class="countdown" style="color:${s.c}">${esc(s.text)}</span>
         <span class="dist">${esc(humanDistance(r.km))}</span>
-      </span>
-    </button>`;
+      </span></button>`;
   }).join("");
-
   host.querySelectorAll(".row").forEach((node) => {
-    node.onclick = () => openSheet(current[Number(node.dataset.i)]);
+    node.onclick = () => openSheet(current.find((r) => r.id === node.dataset.id));
   });
 }
 
-/* A schematic map: no tiles, so it works offline and in a sandboxed page.
-   Positions are a local equirectangular projection around the search origin. */
-function renderMap() {
-  const svg = el("map");
-  if (!state.origin) return;
-
-  const SIZE = 360, C = SIZE / 2;
-  // Scale so the radius ring occupies most of the frame.
-  const span = state.radiusKm * 1.25;
-  const kmPerLat = 111.32;
-  const kmPerLon = 111.32 * Math.cos(rad(state.origin.lat));
-  const px = (C - 18) / span;
-
-  const project = (p) => ({
-    x: C + (p.lon - state.origin.lon) * kmPerLon * px,
-    y: C - (p.lat - state.origin.lat) * kmPerLat * px,
-  });
-
-  const grid = [];
-  for (let g = 60; g < SIZE; g += 60) {
-    grid.push(`<line x1="${g}" y1="0" x2="${g}" y2="${SIZE}" stroke="var(--grid)" stroke-width="1"/>`);
-    grid.push(`<line x1="0" y1="${g}" x2="${SIZE}" y2="${g}" stroke="var(--grid)" stroke-width="1"/>`);
-  }
-
-  const pins = current.map((r, i) => {
-    const p = project(r.venue);
-    const colour = r.deal.partner ? "var(--accent)" : r.openNow ? "var(--open)" : "var(--later)";
-    const label = i < 6
-      ? `<text class="pin-label" x="${p.x}" y="${p.y - 12}" text-anchor="middle">${esc(r.venue.n.slice(0, 18))}</text>`
-      : "";
-    return `${label}<circle class="pin" data-i="${i}" cx="${p.x}" cy="${p.y}" r="7"
-      fill="${colour}" stroke="var(--surface)" stroke-width="2" tabindex="0" role="button">
-      <title>${esc(r.venue.n)} — ${esc(r.deal.t)}</title></circle>`;
+function renderCarousel() {
+  const host = el("carousel");
+  host.innerHTML = current.map((r) => {
+    const s = tone(r);
+    return `<button class="card" data-id="${esc(r.id)}" data-active="false">
+      <span class="venue-line">${r.deal.partner ? '<span class="flag">PARTNER</span>' : ""}
+        <span class="venue">${esc(r.venue.n)}</span></span>
+      <div class="deal-title">${esc(r.deal.t)}</div>
+      ${r.deal.p ? `<div class="price">${esc(r.deal.p)}</div>` : ""}
+      <div class="card-foot">
+        <span class="countdown" style="color:${s.c}">${esc(s.text)}</span>
+        <span class="dist">${esc(humanDistance(r.km))}</span>
+      </div></button>`;
   }).join("");
 
-  svg.innerHTML = `
-    <rect width="${SIZE}" height="${SIZE}" fill="var(--surface)"/>
-    ${grid.join("")}
-    <circle cx="${C}" cy="${C}" r="${state.radiusKm * px}" fill="var(--ring-fill)"
-            stroke="var(--ring)" stroke-width="1.5" stroke-dasharray="4 4"/>
-    <circle cx="${C}" cy="${C}" r="5" fill="var(--text)"/>
-    <circle cx="${C}" cy="${C}" r="11" fill="none" stroke="var(--text)" stroke-width="1" opacity=".35"/>
-    <text class="pin-label" x="${C}" y="${C + 24}" text-anchor="middle">YOU</text>
-    ${pins}`;
-
-  svg.querySelectorAll(".pin").forEach((node) => {
-    const open = () => openSheet(current[Number(node.dataset.i)]);
-    node.addEventListener("click", (event) => { event.stopPropagation(); open(); });
-    node.addEventListener("keydown", (event) => {
-      if (event.key === "Enter" || event.key === " ") { event.preventDefault(); open(); }
-    });
+  host.querySelectorAll(".card").forEach((card) => {
+    card.onclick = () => {
+      // First tap selects and flies to it; a tap on the active card opens it.
+      if (card.dataset.active === "true") openSheet(current.find((r) => r.id === card.dataset.id));
+      else selectDeal(card.dataset.id, { pan:true, scrollCard:true });
+    };
   });
 
-  // Tapping empty map space moves the search there — the "search this area" gesture.
-  svg.onclick = (event) => {
-    const box = svg.getBoundingClientRect();
-    const x = ((event.clientX - box.left) / box.width) * SIZE;
-    const y = ((event.clientY - box.top) / box.height) * SIZE;
-    state.pannedTo = {
-      lat: state.origin.lat - (y - C) / px / kmPerLat,
-      lon: state.origin.lon + (x - C) / px / kmPerLon,
-    };
-    syncOrigin();
+  // Swiping the carousel drives the map, the way a places strip does.
+  let scrollTimer = null;
+  host.onscroll = () => {
+    clearTimeout(scrollTimer);
+    scrollTimer = setTimeout(() => {
+      const middle = host.scrollLeft + host.clientWidth / 2;
+      let closest = null, best = Infinity;
+      host.querySelectorAll(".card").forEach((card) => {
+        const centre = card.offsetLeft + card.offsetWidth / 2;
+        const distance = Math.abs(centre - middle);
+        if (distance < best) { best = distance; closest = card; }
+      });
+      if (closest && closest.dataset.id !== state.selected) {
+        selectDeal(closest.dataset.id, { pan:true, scrollCard:false });
+      }
+    }, 90);
   };
-
-  el("mapCount").textContent = `${current.length} within ${state.radiusKm} km`;
 }
 
 function openSheet(r) {
   if (!r) return;
-  const t = tone(r);
-  const note = trustNote(r.deal);
+  const s = tone(r), note = trustNote(r.deal);
   const maps = `https://maps.google.com/?q=${encodeURIComponent(r.venue.n)}@${r.venue.lat},${r.venue.lon}`;
-
   el("sheetBody").innerHTML = `
     <h2>${esc(r.venue.n)}</h2>
     <p class="addr">${esc([r.venue.a, r.venue.c, "ON"].filter(Boolean).join(", "))}</p>
@@ -640,14 +930,14 @@ function openSheet(r) {
     ${r.deal.partner ? '<span class="flag">PARTNER DEAL</span>' : ""}
     <h2 style="font-size:20px;margin-top:8px">${esc(r.deal.t)}</h2>
     ${r.deal.p ? `<p class="price">${esc(r.deal.p)}</p>` : ""}
-    <p class="countdown" style="color:${t.c};font-size:14px">${esc(t.text)}</p>
+    <p class="countdown" style="color:${s.c};font-size:14px">${esc(s.text)}</p>
     ${r.deal.desc ? `<p style="color:var(--muted);margin-top:10px">${esc(r.deal.desc)}</p>` : ""}
     ${r.deal.fine ? `<div class="fine"><strong>Fine print.</strong> ${esc(r.deal.fine)}</div>` : ""}
     <div class="rule"></div>
     <span class="label">Full schedule</span>
     <div class="sched" style="margin-top:8px">
       ${r.deal.days.map((d) =>
-        `<div class="${d === r.day ? "on" : ""}">${esc(windowLabel(d, r.deal.s, r.deal.e))}</div>`).join("")}
+        `<div class="${d===r.day?"on":""}">${esc(windowLabel(d, r.deal.s, r.deal.e))}</div>`).join("")}
     </div>
     ${note ? `<p class="hint" style="margin-top:14px;font-style:italic">${esc(note)}</p>` : ""}
     <div class="sheet-actions">
@@ -655,7 +945,6 @@ function openSheet(r) {
       <a href="tel:${esc(r.venue.tel)}">Call</a>
       <button type="button" id="closeSheet">Close</button>
     </div>`;
-
   el("sheet").showModal();
   el("closeSheet").onclick = () => el("sheet").close();
 }
@@ -663,25 +952,20 @@ function openSheet(r) {
 /* ---------------- controls ---------------- */
 function buildChips() {
   el("timeChips").innerHTML = TIME_CHOICES.map((c) =>
-    `<button type="button" class="chip" data-id="${c.id}"
-       aria-pressed="${c.id === state.time.id}">${esc(c.label)}</button>`).join("");
+    `<button type="button" class="chip" data-id="${c.id}" aria-pressed="${c.id===state.time.id}">${esc(c.label)}</button>`).join("");
   el("timeChips").querySelectorAll(".chip").forEach((node) => {
     node.onclick = () => {
       state.time = TIME_CHOICES.find((c) => c.id === node.dataset.id);
-      el("timeChips").querySelectorAll(".chip").forEach((other) =>
-        other.setAttribute("aria-pressed", String(other === node)));
+      el("timeChips").querySelectorAll(".chip").forEach((o) => o.setAttribute("aria-pressed", String(o===node)));
       render();
     };
   });
-
   el("catChips").innerHTML = CATEGORIES.map((c) =>
-    `<button type="button" class="chip" data-id="${c.id ?? ""}"
-       aria-pressed="${c.id === state.category}">${esc(c.label)}</button>`).join("");
+    `<button type="button" class="chip" data-id="${c.id ?? ""}" aria-pressed="${c.id===state.category}">${esc(c.label)}</button>`).join("");
   el("catChips").querySelectorAll(".chip").forEach((node) => {
     node.onclick = () => {
       state.category = node.dataset.id || null;
-      el("catChips").querySelectorAll(".chip").forEach((other) =>
-        other.setAttribute("aria-pressed", String(other === node)));
+      el("catChips").querySelectorAll(".chip").forEach((o) => o.setAttribute("aria-pressed", String(o===node)));
       render();
     };
   });
@@ -689,10 +973,9 @@ function buildChips() {
 
 el("radius").oninput = (event) => {
   state.radiusKm = Number(event.target.value);
-  el("radiusValue").textContent =
-    state.radiusKm < 1 ? `${state.radiusKm * 1000} m` : `${state.radiusKm} km`;
+  el("radiusValue").textContent = state.radiusKm < 1 ? `${state.radiusKm*1000} m` : `${state.radiusKm} km`;
 };
-el("radius").onchange = render;
+el("radius").onchange = () => { render(); MapView.frameRadius(); };
 
 function setView(view) {
   state.view = view;
@@ -700,38 +983,50 @@ function setView(view) {
   el("mapView").hidden = view !== "map";
   el("viewList").setAttribute("aria-pressed", String(view === "list"));
   el("viewMap").setAttribute("aria-pressed", String(view === "map"));
-  if (view === "map") renderMap();
+  if (view === "map") {
+    // The canvas has no size while hidden, so measure after it is shown.
+    requestAnimationFrame(() => { MapView.resize(); MapView.frameRadius(); });
+  }
 }
 el("viewList").onclick = () => setView("list");
 el("viewMap").onclick = () => setView("map");
+el("zoomIn").onclick = () => MapView.zoomBy(1.35);
+el("zoomOut").onclick = () => MapView.zoomBy(1/1.35);
+el("recentre").onclick = () => {
+  state.pannedTo = null;
+  syncOrigin(true);
+};
+el("searchArea").onclick = () => {
+  state.pannedTo = MapView.centreLatLon();
+  el("searchArea").hidden = true;
+  syncOrigin(false);
+};
 el("sheet").addEventListener("click", (event) => {
   if (event.target === el("sheet")) el("sheet").close();
 });
 
-function syncOrigin() {
+function syncOrigin(reframe) {
   state.origin = state.pannedTo ?? state.deviceOrigin ?? DEFAULT_ORIGIN;
   render();
+  if (reframe !== false) MapView.frameRadius();
+  else MapView.updateSearchArea();
 }
 
 function locate() {
-  if (!navigator.geolocation) { syncOrigin(); return; }
+  if (!navigator.geolocation) { syncOrigin(true); return; }
   navigator.geolocation.getCurrentPosition(
     (position) => {
       state.deviceOrigin = { lat: position.coords.latitude, lon: position.coords.longitude };
       state.usingFallback = false;
       state.pannedTo = null;
-      syncOrigin();
+      syncOrigin(true);
     },
-    () => {
-      // Declined or unavailable: downtown Toronto keeps the app usable.
-      state.usingFallback = true;
-      syncOrigin();
-    },
-    { enableHighAccuracy: false, timeout: 8000, maximumAge: 60000 },
+    () => { state.usingFallback = true; syncOrigin(true); },
+    { enableHighAccuracy:false, timeout:8000, maximumAge:60000 },
   );
 }
 
 buildChips();
-syncOrigin();
+syncOrigin(true);
 locate();
 </script>

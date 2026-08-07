@@ -1,5 +1,5 @@
 {
-  "note": "Development dataset for the Ontario launch. Coordinates are real Toronto, Ottawa, and Hamilton locations, but every venue name and every deal is INVENTED. Do not ship this as real listings — publishing made-up happy hour times under a real restaurant's name misinforms customers and misrepresents the business. Replace it with crawled data (npm run scrape) and hand-entered partner deals (/admin).",
+  "note": "Development dataset for the Ontario launch. Coordinates are real Toronto, Ottawa, and Hamilton locations, but every venue name and every deal is INVENTED. Do not ship this as real listings \u2014 publishing made-up happy hour times under a real restaurant's name misinforms customers and misrepresents the business. Replace it with crawled data (npm run scrape) and hand-entered partner deals (/admin).",
   "timeZone": "America/Toronto",
   "venues": [
     {
@@ -21,7 +21,13 @@
           "finePrint": "Bar and patio only.",
           "confidence": 1,
           "partner": true,
-          "days": [1, 2, 3, 4, 5],
+          "days": [
+            1,
+            2,
+            3,
+            4,
+            5
+          ],
           "startMin": 960,
           "endMin": 1140
         },
@@ -32,7 +38,11 @@
           "category": "both",
           "finePrint": null,
           "confidence": 0.78,
-          "days": [4, 5, 6],
+          "days": [
+            4,
+            5,
+            6
+          ],
           "startMin": 1320,
           "endMin": 1560
         }
@@ -56,7 +66,12 @@
           "category": "both",
           "finePrint": "While supplies last.",
           "confidence": 0.88,
-          "days": [2, 3, 4, 5],
+          "days": [
+            2,
+            3,
+            4,
+            5
+          ],
           "startMin": 960,
           "endMin": 1110
         }
@@ -80,7 +95,9 @@
           "category": "both",
           "finePrint": null,
           "confidence": 0.94,
-          "days": [2],
+          "days": [
+            2
+          ],
           "startMin": 960,
           "endMin": 1320
         },
@@ -91,7 +108,10 @@
           "category": "both",
           "finePrint": "Two hour limit.",
           "confidence": 0.8,
-          "days": [0, 6],
+          "days": [
+            0,
+            6
+          ],
           "startMin": 600,
           "endMin": 870
         }
@@ -115,7 +135,10 @@
           "category": "drink",
           "finePrint": "Excludes reserve list.",
           "confidence": 0.83,
-          "days": [3, 4],
+          "days": [
+            3,
+            4
+          ],
           "startMin": 1020,
           "endMin": 1170
         }
@@ -139,7 +162,9 @@
           "category": "both",
           "finePrint": "Industry ID required.",
           "confidence": 0.71,
-          "days": [1],
+          "days": [
+            1
+          ],
           "startMin": 1200,
           "endMin": 1500
         },
@@ -150,7 +175,12 @@
           "category": "drink",
           "finePrint": null,
           "confidence": 0.9,
-          "days": [2, 3, 4, 5],
+          "days": [
+            2,
+            3,
+            4,
+            5
+          ],
           "startMin": 1020,
           "endMin": 1140
         }
@@ -174,7 +204,13 @@
           "category": "drink",
           "finePrint": null,
           "confidence": 0.87,
-          "days": [1, 2, 3, 4, 5],
+          "days": [
+            1,
+            2,
+            3,
+            4,
+            5
+          ],
           "startMin": 900,
           "endMin": 1080
         }
@@ -198,7 +234,13 @@
           "category": "both",
           "finePrint": "Dine-in only.",
           "confidence": 0.82,
-          "days": [0, 1, 2, 3, 4],
+          "days": [
+            0,
+            1,
+            2,
+            3,
+            4
+          ],
           "startMin": 990,
           "endMin": 1140
         }
@@ -222,7 +264,13 @@
           "category": "food",
           "finePrint": "Seated by 5:45pm.",
           "confidence": 0.76,
-          "days": [0, 1, 2, 3, 4],
+          "days": [
+            0,
+            1,
+            2,
+            3,
+            4
+          ],
           "startMin": 990,
           "endMin": 1080
         }
@@ -246,7 +294,13 @@
           "category": "both",
           "finePrint": null,
           "confidence": 0.85,
-          "days": [2, 3, 4, 5, 6],
+          "days": [
+            2,
+            3,
+            4,
+            5,
+            6
+          ],
           "startMin": 960,
           "endMin": 1110
         }
@@ -270,7 +324,13 @@
           "category": "both",
           "finePrint": null,
           "confidence": 0.89,
-          "days": [1, 2, 3, 4, 5],
+          "days": [
+            1,
+            2,
+            3,
+            4,
+            5
+          ],
           "startMin": 930,
           "endMin": 1080
         }
@@ -294,7 +354,13 @@
           "category": "both",
           "finePrint": null,
           "confidence": 0.86,
-          "days": [1, 2, 3, 4, 5],
+          "days": [
+            1,
+            2,
+            3,
+            4,
+            5
+          ],
           "startMin": 960,
           "endMin": 1110
         }
@@ -318,7 +384,377 @@
           "category": "both",
           "finePrint": "Bar seating only.",
           "confidence": 0.84,
-          "days": [2, 3, 4, 5, 6],
+          "days": [
+            2,
+            3,
+            4,
+            5,
+            6
+          ],
+          "startMin": 960,
+          "endMin": 1140
+        }
+      ]
+    },
+    {
+      "id": "ven_seed_college_st",
+      "name": "Bar Sorrento",
+      "address": "602 College St",
+      "city": "Toronto",
+      "region": "ON",
+      "lat": 43.6551,
+      "lon": -79.4139,
+      "website": "https://example.com/college_st",
+      "phone": "+1-416-555-0231",
+      "deals": [
+        {
+          "title": "Aperitivo Hour",
+          "description": "$8 negronis and free focaccia.",
+          "priceText": "$8 negronis",
+          "category": "drink",
+          "finePrint": "Bar only.",
+          "confidence": 0.86,
+          "days": [
+            1,
+            2,
+            3,
+            4,
+            5
+          ],
+          "startMin": 960,
+          "endMin": 1110
+        }
+      ]
+    },
+    {
+      "id": "ven_seed_roncy",
+      "name": "The Roncy Local",
+      "address": "380 Roncesvalles Ave",
+      "city": "Toronto",
+      "region": "ON",
+      "lat": 43.6465,
+      "lon": -79.4494,
+      "website": "https://example.com/roncy",
+      "phone": "+1-416-555-0245",
+      "deals": [
+        {
+          "title": "Neighbourhood Hour",
+          "description": "$5 pints and $8 burgers.",
+          "priceText": "$5 pints",
+          "category": "both",
+          "finePrint": null,
+          "confidence": 0.91,
+          "days": [
+            1,
+            2,
+            3,
+            4
+          ],
+          "startMin": 960,
+          "endMin": 1140
+        }
+      ]
+    },
+    {
+      "id": "ven_seed_junction",
+      "name": "Junction Craft Room",
+      "address": "2960 Dundas St W",
+      "city": "Toronto",
+      "region": "ON",
+      "lat": 43.6655,
+      "lon": -79.4692,
+      "website": "https://example.com/junction",
+      "phone": "+1-416-555-0259",
+      "deals": [
+        {
+          "title": "Taproom Special",
+          "description": "Half pints $4 all afternoon.",
+          "priceText": "$4 half pints",
+          "category": "drink",
+          "finePrint": null,
+          "confidence": 0.79,
+          "days": [
+            2,
+            3,
+            4,
+            5,
+            6
+          ],
+          "startMin": 900,
+          "endMin": 1080
+        }
+      ]
+    },
+    {
+      "id": "ven_seed_riverside",
+      "name": "Riverside Social",
+      "address": "720 Queen St E",
+      "city": "Toronto",
+      "region": "ON",
+      "lat": 43.6588,
+      "lon": -79.349,
+      "website": "https://example.com/riverside",
+      "phone": "+1-416-555-0263",
+      "deals": [
+        {
+          "title": "Patio Hour",
+          "description": "Half off wine by the glass, $6 snacks.",
+          "priceText": "Half off wine",
+          "category": "both",
+          "finePrint": "Patio only.",
+          "confidence": 0.88,
+          "days": [
+            3,
+            4,
+            5
+          ],
+          "startMin": 1020,
+          "endMin": 1170
+        }
+      ]
+    },
+    {
+      "id": "ven_seed_stlawrence",
+      "name": "Market Street Oyster Bar",
+      "address": "93 Front St E",
+      "city": "Toronto",
+      "region": "ON",
+      "lat": 43.6487,
+      "lon": -79.3716,
+      "website": "https://example.com/stlawrence",
+      "phone": "+1-416-555-0277",
+      "deals": [
+        {
+          "title": "Oyster Hour",
+          "description": "$1.75 oysters and $9 sparkling.",
+          "priceText": "$1.75 oysters",
+          "category": "both",
+          "finePrint": "While supplies last.",
+          "confidence": 1.0,
+          "partner": true,
+          "days": [
+            1,
+            2,
+            3,
+            4,
+            5
+          ],
+          "startMin": 960,
+          "endMin": 1110
+        }
+      ]
+    },
+    {
+      "id": "ven_seed_church",
+      "name": "The Village Tap",
+      "address": "488 Church St",
+      "city": "Toronto",
+      "region": "ON",
+      "lat": 43.665,
+      "lon": -79.381,
+      "website": "https://example.com/church",
+      "phone": "+1-416-555-0281",
+      "deals": [
+        {
+          "title": "Drag Brunch Deal",
+          "description": "$14 mimosa jugs with brunch.",
+          "priceText": "$14 mimosa jugs",
+          "category": "both",
+          "finePrint": null,
+          "confidence": 0.83,
+          "days": [
+            0,
+            6
+          ],
+          "startMin": 660,
+          "endMin": 900
+        },
+        {
+          "title": "Late Hour",
+          "description": "$6 highballs after 10pm.",
+          "priceText": "$6 highballs",
+          "category": "drink",
+          "finePrint": null,
+          "confidence": 0.66,
+          "days": [
+            4,
+            5,
+            6
+          ],
+          "startMin": 1320,
+          "endMin": 1500
+        }
+      ]
+    },
+    {
+      "id": "ven_seed_annex",
+      "name": "Bloor & Bathurst Public House",
+      "address": "730 Bloor St W",
+      "city": "Toronto",
+      "region": "ON",
+      "lat": 43.6656,
+      "lon": -79.4118,
+      "website": "https://example.com/annex",
+      "phone": "+1-416-555-0295",
+      "deals": [
+        {
+          "title": "Student Hour",
+          "description": "$4.50 pints, $7 nachos.",
+          "priceText": "$4.50 pints",
+          "category": "both",
+          "finePrint": "Student ID required.",
+          "confidence": 0.9,
+          "days": [
+            1,
+            2,
+            3,
+            4
+          ],
+          "startMin": 900,
+          "endMin": 1080
+        }
+      ]
+    },
+    {
+      "id": "ven_seed_corktown",
+      "name": "Corktown Cider House",
+      "address": "215 King St E",
+      "city": "Toronto",
+      "region": "ON",
+      "lat": 43.6522,
+      "lon": -79.3672,
+      "website": "https://example.com/corktown",
+      "phone": "+1-416-555-0308",
+      "deals": [
+        {
+          "title": "Cider Hour",
+          "description": "House ciders $6.",
+          "priceText": "$6 ciders",
+          "category": "drink",
+          "finePrint": null,
+          "confidence": 0.84,
+          "days": [
+            2,
+            3,
+            4,
+            5
+          ],
+          "startMin": 1020,
+          "endMin": 1140
+        }
+      ]
+    },
+    {
+      "id": "ven_seed_bellwoods",
+      "name": "Bellwoods Bottle Shop",
+      "address": "1010 Dundas St W",
+      "city": "Toronto",
+      "region": "ON",
+      "lat": 43.6501,
+      "lon": -79.4142,
+      "website": "https://example.com/bellwoods",
+      "phone": "+1-416-555-0312",
+      "deals": [
+        {
+          "title": "Bottle Night",
+          "description": "$15 off any bottle to stay.",
+          "priceText": "$15 off bottles",
+          "category": "drink",
+          "finePrint": null,
+          "confidence": 0.72,
+          "days": [
+            1
+          ],
+          "startMin": 1020,
+          "endMin": 1320
+        }
+      ]
+    },
+    {
+      "id": "ven_seed_parkdale",
+      "name": "Parkdale Supper Club",
+      "address": "1462 Queen St W",
+      "city": "Toronto",
+      "region": "ON",
+      "lat": 43.6395,
+      "lon": -79.437,
+      "website": "https://example.com/parkdale",
+      "phone": "+1-416-555-0326",
+      "deals": [
+        {
+          "title": "Early Supper",
+          "description": "Two courses for $32 before 6:30pm.",
+          "priceText": "$32 prix fixe",
+          "category": "food",
+          "finePrint": "Seated by 6:15pm.",
+          "confidence": 0.77,
+          "days": [
+            0,
+            1,
+            2,
+            3,
+            4
+          ],
+          "startMin": 1020,
+          "endMin": 1110
+        }
+      ]
+    },
+    {
+      "id": "ven_seed_entertainment",
+      "name": "The Duncan Room",
+      "address": "124 Duncan St",
+      "city": "Toronto",
+      "region": "ON",
+      "lat": 43.6478,
+      "lon": -79.3897,
+      "website": "https://example.com/entertainment",
+      "phone": "+1-416-555-0330",
+      "deals": [
+        {
+          "title": "Pre-Show Hour",
+          "description": "$9 cocktails and $6 bar bites before curtain.",
+          "priceText": "$9 cocktails",
+          "category": "both",
+          "finePrint": null,
+          "confidence": 0.87,
+          "days": [
+            2,
+            3,
+            4,
+            5,
+            6
+          ],
+          "startMin": 960,
+          "endMin": 1140
+        }
+      ]
+    },
+    {
+      "id": "ven_seed_northyork",
+      "name": "Sheppard & Yonge Tap",
+      "address": "4841 Yonge St",
+      "city": "Toronto",
+      "region": "ON",
+      "lat": 43.7615,
+      "lon": -79.411,
+      "website": "https://example.com/northyork",
+      "phone": "+1-416-555-0344",
+      "deals": [
+        {
+          "title": "Commuter Hour",
+          "description": "$5 drafts and half-price wings.",
+          "priceText": "$5 drafts",
+          "category": "both",
+          "finePrint": null,
+          "confidence": 0.85,
+          "days": [
+            1,
+            2,
+            3,
+            4,
+            5
+          ],
           "startMin": 960,
           "endMin": 1140
         }

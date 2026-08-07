@@ -4,7 +4,7 @@ import { describe, it } from "node:test";
 import { isAllowed, parseRobots, policyForStatus } from "../src/scraper/robots.ts";
 import { htmlToText, findPromisingLinks, decodeEntities } from "../src/scraper/html.ts";
 
-const UA = "LittleLemonBot/0.1";
+const UA = "ClocktailsBot/0.1";
 const url = (path: string) => new URL(`https://example.com${path}`);
 
 describe("parseRobots and isAllowed", () => {
@@ -16,7 +16,7 @@ describe("parseRobots and isAllowed", () => {
 
   it("prefers our named group over the wildcard, without merging them", () => {
     const policy = parseRobots(
-      ["User-agent: *", "Disallow: /", "", "User-agent: LittleLemonBot", "Disallow: /private"].join("\n"),
+      ["User-agent: *", "Disallow: /", "", "User-agent: ClocktailsBot", "Disallow: /private"].join("\n"),
       UA,
     );
     assert.equal(isAllowed(policy, url("/menu")), true, "the wildcard block does not apply to us");
@@ -54,7 +54,7 @@ describe("parseRobots and isAllowed", () => {
 
   it("groups consecutive user-agent lines together", () => {
     const policy = parseRobots(
-      "User-agent: SomeBot\nUser-agent: LittleLemonBot\nDisallow: /shared\n",
+      "User-agent: SomeBot\nUser-agent: ClocktailsBot\nDisallow: /shared\n",
       UA,
     );
     assert.equal(isAllowed(policy, url("/shared")), false);

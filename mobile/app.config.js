@@ -8,12 +8,12 @@
  */
 module.exports = {
   expo: {
-    name: "Little Lemon",
-    slug: "little-lemon",
+    name: "Clocktails",
+    slug: "clocktails",
     version: "0.1.0",
     orientation: "portrait",
     userInterfaceStyle: "automatic",
-    scheme: "littlelemon",
+    scheme: "clocktails",
     newArchEnabled: true,
     splash: {
       resizeMode: "contain",
@@ -21,14 +21,14 @@ module.exports = {
     },
     ios: {
       supportsTablet: true,
-      bundleIdentifier: "com.littlelemon.app",
+      bundleIdentifier: "com.clocktails.app",
       infoPlist: {
         NSLocationWhenInUseUsageDescription:
-          "Little Lemon uses your location to find happy hour deals near you. Your location is used on the device to search nearby venues and is not stored.",
+          "Clocktails uses your location to find happy hour deals near you. Your location is used on the device to search nearby venues and is not stored.",
       },
     },
     android: {
-      package: "com.littlelemon.app",
+      package: "com.clocktails.app",
       adaptiveIcon: { backgroundColor: "#12100E" },
       permissions: ["ACCESS_COARSE_LOCATION", "ACCESS_FINE_LOCATION"],
       config: {
@@ -42,7 +42,7 @@ module.exports = {
         "expo-location",
         {
           locationWhenInUsePermission:
-            "Little Lemon uses your location to find happy hour deals near you.",
+            "Clocktails uses your location to find happy hour deals near you.",
         },
       ],
     ],

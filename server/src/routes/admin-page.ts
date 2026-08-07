@@ -10,7 +10,7 @@ export const ADMIN_PAGE_HTML = `<!doctype html>
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Little Lemon — Partner deals</title>
+<title>Clocktails — Partner deals</title>
 <style>
   :root { color-scheme: dark; }
   * { box-sizing: border-box; }
@@ -145,7 +145,7 @@ export const ADMIN_PAGE_HTML = `<!doctype html>
 <script>
 const DAY_NAMES = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
 const $ = (id) => document.getElementById(id);
-let token = sessionStorage.getItem("ll_admin_token") || "";
+let token = sessionStorage.getItem("ct_admin_token") || "";
 
 DAY_NAMES.forEach((name, index) => {
   const label = document.createElement("label");
@@ -179,7 +179,7 @@ async function connect() {
   token = $("token").value.trim();
   try {
     const summary = await api("/api/admin/summary");
-    sessionStorage.setItem("ll_admin_token", token);
+    sessionStorage.setItem("ct_admin_token", token);
     $("app").hidden = false;
     show($("authMsg"), true,
       "Connected. " + summary.venues + " venues, " + summary.deals + " deals, " +
