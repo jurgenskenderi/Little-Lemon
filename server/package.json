@@ -14,7 +14,8 @@
     "verify:extractor": "node --experimental-strip-types src/scraper/verify-extractor.ts",
     "import:places": "node --experimental-strip-types src/places/cli.ts",
     "import:toronto": "node --experimental-strip-types src/places/cli.ts --preset toronto",
-    "export:preview": "node --experimental-strip-types src/places/export-preview.ts"
+    "export:preview": "node --experimental-strip-types src/places/export-preview.ts",
+    "build:deals": "node --experimental-strip-types src/build/dataset.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.115.0",

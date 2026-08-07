@@ -22,7 +22,7 @@ import type { Venue } from "../domain/types.ts";
 import { extractDealsFromText, type ExtractedDeal } from "./extract-heuristic.ts";
 import { extractDealsWithModel, isModelExtractionAvailable } from "./extract-model.ts";
 import { DisallowedByRobotsError, PoliteFetcher } from "./fetcher.ts";
-import { bestImage, findPromisingLinks, htmlToText } from "./html.ts";
+import { bestImage, findPromisingLinks, findSocialLinks, htmlToText } from "./html.ts";
 
 export interface CrawlStats {
   venuesConsidered: number;
@@ -30,6 +30,11 @@ export interface CrawlStats {
   pagesFetched: number;
   pagesSkipped: number;
   pagesDisallowed: number;
+  /** Social profiles found. Most refuse crawlers; we link to them instead. */
+  socialsFound: number;
+  socialsCrawled: number;
+  /** network -> profile URL for the venue just crawled. */
+  socials?: Map<string, string>;
   dealsWritten: number;
   modelCalls: number;
   modelRefusals: number;
@@ -43,12 +48,17 @@ function emptyStats(): CrawlStats {
     pagesFetched: 0,
     pagesSkipped: 0,
     pagesDisallowed: 0,
+    socialsFound: 0,
+    socialsCrawled: 0,
     dealsWritten: 0,
     modelCalls: 0,
     modelRefusals: 0,
     errors: [],
   };
 }
+
+/** Extra fetches allowed beyond the per-venue budget, for link-in-bio hosts. */
+const SOCIAL_PAGE_BUDGET = 2;
 
 function hashContent(text: string): string {
   return createHash("sha256").update(text).digest("hex");
@@ -85,18 +95,23 @@ export async function crawlVenue(
 
   const fetcher = options.fetcher ?? new PoliteFetcher();
   const maxPages = options.maxPagesPerVenue ?? config.scraper.maxPagesPerVenue;
+  // A link-in-bio page is one extra fetch on someone else's host, so it gets
+  // its own small allowance rather than eating the venue's page budget.
+  const pageCeiling = maxPages + SOCIAL_PAGE_BUDGET;
   const useModel = (options.useModel ?? true) && isModelExtractionAvailable();
   const log = options.onProgress ?? (() => {});
 
   const queue: string[] = [venue.website];
   const visited = new Set<string>();
+  /** network -> profile URL, for the app to link even when crawling is refused. */
+  const socials = new Map<string, string>();
   const dealsForVenue: Array<ExtractedDeal & { imageUrl: string | null }> = [];
   let crawledAnything = false;
   // Falls back to the entry page's photo when a deal page carries none of
   // its own — a venue's social image is still better than a blank card.
   let venueImage: string | null = null;
 
-  while (queue.length > 0 && visited.size < maxPages) {
+  while (queue.length > 0 && visited.size < pageCeiling) {
     const url = queue.shift();
     if (!url || visited.has(url)) continue;
     visited.add(url);
@@ -206,10 +221,26 @@ export async function crawlVenue(
         if (queue.length + visited.size >= maxPages) break;
         if (!visited.has(link.url)) queue.push(link.url);
       }
+
+      // Plenty of small bars put nothing on their own site and everything on
+      // Instagram or a link-in-bio page. Record every social profile so the
+      // app can link to it, and queue only the hosts that permit crawling —
+      // Instagram and Facebook do not, and the fetcher would refuse anyway.
+      for (const social of findSocialLinks(html, url)) {
+        stats.socialsFound += 1;
+        socials.set(social.network, social.url);
+        if (!social.crawlable) continue;
+        if (queue.length + visited.size >= maxPages + SOCIAL_PAGE_BUDGET) break;
+        if (!visited.has(social.url)) {
+          queue.push(social.url);
+          stats.socialsCrawled += 1;
+        }
+      }
     }
   }
 
   if (crawledAnything) stats.venuesCrawled = 1;
+  stats.socials = socials;
 
   // Only rewrite this venue's deals if we actually reached its site. A failed
   // crawl must not be read as "this venue has no deals any more".

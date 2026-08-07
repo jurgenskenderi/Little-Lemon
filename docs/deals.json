@@ -1,0 +1,20 @@
+{
+ "generatedAt": null,
+ "preset": "toronto",
+ "timeZone": "America/Toronto",
+ "note": "Placeholder. Replaced by .github/workflows/deals.yml, which crawls venue websites and commits the result. Run it from the Actions tab to populate this.",
+ "stats": {
+  "venuesConsidered": 0,
+  "venuesCrawled": 0,
+  "venuesWithDeals": 0,
+  "deals": 0,
+  "dealsWithImages": 0,
+  "pagesFetched": 0,
+  "pagesDisallowed": 0,
+  "socialsFound": 0,
+  "socialsCrawled": 0,
+  "modelCalls": 0,
+  "errors": 0
+ },
+ "venues": {}
+}

@@ -35,6 +35,9 @@ device:
   straight from OpenStreetMap;
 - **open now** is computed from each venue's `opening_hours`, including the
   ones that run past midnight;
+- **happy hour deals** are scraped from each venue's own site and shown with
+  their times, the price, a photo of what's on offer, and a **Happy hour only**
+  filter that reduces the map to venues that actually have one.
 - **Call, Directions and Website** are ordinary links on an ordinary page, so
   they do what links do.
 
@@ -63,7 +66,7 @@ The app finds the API automatically: it reuses the host Expo is already serving
 the bundle from, so a phone on the same Wi-Fi works without editing an IP.
 Override with `EXPO_PUBLIC_API_URL` if your setup differs.
 
-`npm test` runs the server suite (111 tests). `npm run typecheck` covers both
+`npm test` runs the server suite (119 tests). `npm run typecheck` covers both
 workspaces.
 
 ## Partner deals
@@ -303,6 +306,56 @@ Free, keyless, no terms to work around, and the data is ODbL — attribution
 required, and a derived database inherits the licence. Coverage is thinner and
 more uneven than Google's, and many venues carry no website tag at all. This is
 the path `npm run scrape` uses by default.
+
+## How the deals reach the web app
+
+A browser cannot scrape. The same-origin policy stops a page reading anyone
+else's site, so the app can never fetch a restaurant's homepage itself. And a
+polite crawl takes tens of minutes — one request per host at a time, with a
+delay — which is far too slow to sit behind a page load even if it were allowed.
+
+So the crawl runs in a GitHub Action and commits the result:
+
+```bash
+npm run build:deals -- --preset toronto     # writes docs/deals.json
+npm run build:deals -- --preset toronto-core --limit 20
+```
+
+`.github/workflows/deals.yml` runs that weekly and on demand, and the page
+fetches `deals.json` from its own origin — same-origin, so no CORS, no server,
+nothing to host. Venues are keyed by their OpenStreetMap id, which is exactly
+what the app already has for every pin it draws, so attaching a deal to a pin
+is a map lookup rather than a fuzzy name match.
+
+The file is a placeholder until the workflow has run. **Actions → Refresh happy
+hour deals → Run workflow** populates it; add an `ANTHROPIC_API_KEY` repository
+secret first if you want the model fallback, which materially widens coverage.
+If it never runs, the app is still a working "what's around me" — the deals
+layer is additive and its absence is not an error.
+
+### Social media
+
+**Instagram and Facebook are not scraped, and cannot honestly be.** Both
+disallow anonymous crawlers in robots.txt and serve a login wall besides, so
+the crawler declines them — which is the correct behaviour, not a limitation to
+work around. What it does instead is record the profile URLs it finds on the
+venue's own site, and the app links to them, because plenty of bars post the
+week's specials there and nowhere else.
+
+What *does* pay off is the link-in-bio hop: Linktree, Beacons, and hosted menu
+pages allow crawling and often carry the specials verbatim. Those get a small
+page budget of their own, on top of the venue's, so following one never costs
+the venue's own site a fetch.
+
+### Pictures
+
+Each deal carries a photo taken from the page it was found on — the venue's
+Open Graph image where there is one, otherwise the largest editorial-looking
+image, with logos, icons, social buttons, tracking pixels and anything under
+200×150 filtered out. The app shows it as the list thumbnail and at full size
+in the detail sheet, and falls back to a glyph when the image fails to load.
+These are URLs on the venue's own host, so **cache them into your own bucket
+before real traffic** — see the note further down.
 
 ## Before the deals exist
 

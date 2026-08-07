@@ -133,6 +133,82 @@ export function findPromisingLinks(html: string, baseUrl: string): DiscoveredLin
 }
 
 /* ------------------------------------------------------------------ *
+ * Social and off-site links
+ * ------------------------------------------------------------------ */
+
+/**
+ * Hosts worth following off the venue's own origin.
+ *
+ * `findPromisingLinks` deliberately stays on-origin so a crawl cannot wander
+ * into aggregators. But a lot of small bars publish nothing on their own site
+ * and everything on Instagram or a link-in-bio page, so those are worth
+ * naming explicitly.
+ *
+ * Be clear about the odds. Instagram and Facebook disallow anonymous crawling
+ * in robots.txt and serve a login wall to everyone else, so the fetcher will
+ * decline them and should — that is the correct behaviour, not a bug to work
+ * around. They are recorded anyway so the app can link a visitor straight to
+ * the page. The link-in-bio hosts are the ones that actually pay off: they
+ * allow crawling and often carry the specials verbatim.
+ */
+const SOCIAL_HOSTS = [
+  { pattern: /(^|\.)instagram\.com$/i, network: "instagram", crawlable: false },
+  { pattern: /(^|\.)facebook\.com$/i, network: "facebook", crawlable: false },
+  { pattern: /(^|\.)x\.com$/i, network: "x", crawlable: false },
+  { pattern: /(^|\.)twitter\.com$/i, network: "x", crawlable: false },
+  { pattern: /(^|\.)linktr\.ee$/i, network: "linktree", crawlable: true },
+  { pattern: /(^|\.)beacons\.ai$/i, network: "linktree", crawlable: true },
+  { pattern: /(^|\.)linkin\.bio$/i, network: "linktree", crawlable: true },
+  { pattern: /(^|\.)toasttab\.com$/i, network: "menu", crawlable: true },
+  { pattern: /(^|\.)square\.site$/i, network: "menu", crawlable: true },
+];
+
+export interface SocialLink {
+  url: string;
+  network: string;
+  /** False for hosts that refuse anonymous crawlers; link to them instead. */
+  crawlable: boolean;
+}
+
+/** Social and link-in-bio destinations referenced by a page. */
+export function findSocialLinks(html: string, baseUrl: string): SocialLink[] {
+  const base = new URL(baseUrl);
+  const found = new Map<string, SocialLink>();
+  const anchor = /<a\b[^>]*href=["']([^"']+)["']/gi;
+
+  let match: RegExpExecArray | null;
+  while ((match = anchor.exec(html)) !== null) {
+    const href = match[1];
+    if (!href) continue;
+
+    let resolved: URL;
+    try {
+      resolved = new URL(href, base);
+    } catch {
+      continue;
+    }
+    if (resolved.protocol !== "http:" && resolved.protocol !== "https:") continue;
+
+    const host = SOCIAL_HOSTS.find((candidate) => candidate.pattern.test(resolved.hostname));
+    if (!host) continue;
+
+    // A bare profile is what we want; share widgets and intent URLs are not.
+    if (/\/(sharer|share|intent|dialog)\b/i.test(resolved.pathname)) continue;
+    const handle = resolved.pathname.replace(/^\/+|\/+$/g, "");
+    if (!handle || handle.split("/").length > 2) continue;
+
+    resolved.hash = "";
+    resolved.search = "";
+    const key = resolved.toString();
+    if (!found.has(key)) {
+      found.set(key, { url: key, network: host.network, crawlable: host.crawlable });
+    }
+  }
+
+  return [...found.values()];
+}
+
+/* ------------------------------------------------------------------ *
  * Images
  * ------------------------------------------------------------------ */
 

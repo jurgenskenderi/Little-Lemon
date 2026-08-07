@@ -1,0 +1,89 @@
+name: Refresh happy hour deals
+
+# Crawls venue websites and commits docs/deals.json, which the web app reads.
+#
+# This runs here rather than in the browser because a page cannot scrape: the
+# same-origin policy stops it reading anyone else's site. And it runs on a
+# schedule rather than on demand because a polite crawl takes tens of minutes —
+# one request at a time per host, with a delay — which is far too slow to sit
+# behind a page load.
+on:
+  schedule:
+    # Mondays, early. Happy hours change on the scale of weeks, not minutes.
+    - cron: "17 8 * * 1"
+  workflow_dispatch:
+    inputs:
+      preset:
+        description: "Area preset to crawl"
+        type: choice
+        default: toronto
+        options: [toronto, toronto-core, ottawa, hamilton]
+      limit:
+        description: "Max venues discovered per area"
+        default: "60"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: deals
+  cancel-in-progress: false
+
+jobs:
+  crawl:
+    runs-on: ubuntu-latest
+    # A polite crawl of fifteen bar strips is slow by design. Well under the
+    # 6 h ceiling, but far past the 30 min a job gets if you leave the default.
+    timeout-minutes: 180
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - run: npm install
+
+      - name: Crawl and build the dataset
+        env:
+          # Optional. Without it the rule-based parser runs alone and skips
+          # pages it cannot read; with it, coverage is materially wider.
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: |
+          npm run build:deals -- \
+            --preset "${{ inputs.preset || 'toronto' }}" \
+            --limit "${{ inputs.limit || '60' }}"
+
+      - name: Commit the dataset if it changed
+        run: |
+          set -euo pipefail
+          if git diff --quiet -- docs/deals.json; then
+            echo "No change to docs/deals.json." >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add docs/deals.json
+          git commit -m "Refresh happy hour deals
+
+          Crawled by .github/workflows/deals.yml."
+          git push
+
+      - name: Summary
+        if: always()
+        run: |
+          python3 - <<'PY' >> "$GITHUB_STEP_SUMMARY"
+          import json
+          try:
+              data = json.load(open("docs/deals.json"))
+          except Exception as error:
+              print(f"Could not read docs/deals.json: {error}")
+              raise SystemExit
+          stats = data.get("stats", {})
+          print(f"### Deals refreshed\n")
+          print(f"Generated {data.get('generatedAt')} for preset `{data.get('preset')}`.\n")
+          print("| metric | value |")
+          print("| --- | --- |")
+          for key, value in stats.items():
+              print(f"| {key} | {value} |")
+          PY
