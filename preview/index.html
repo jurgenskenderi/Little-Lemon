@@ -385,6 +385,8 @@ const V = (n,a,c,lat,lon,tel,d) => ({ n,a,c,lat,lon,tel,d });
 const D = (t,p,cat,days,s,e,desc,opts={}) =>
   ({ t,p,cat,days,s,e,desc, fine:opts.fine??null, partner:opts.partner??false, conf:opts.conf??1 });
 
+/* CLOCKTAILS:VENUES:START — replaced wholesale by `npm run export:preview`.
+   Everything between the markers is generated; edit the source data, not this. */
 const VENUES = [
   V("The Alder & Oak","412 Queen St W","Toronto",43.6479,-79.3968,"+14165550118",[
     D("Happy Hour","$6 pints","both",[1,2,3,4,5],960,1140,"$6 local pints, $9 house cocktails, half off shared plates.",{partner:true,fine:"Bar and patio only."}),
@@ -454,6 +456,7 @@ const VENUES = [
   V("Kensington Taqueria","192 Augusta Ave","Toronto",43.6553,-79.4020,"+14165550465",[]),
   V("Danforth Meze House","1420 Danforth Ave","Toronto",43.6820,-79.3260,"+14165550479",[]),
 ];
+/* CLOCKTAILS:VENUES:END */
 
 const DEFAULT_ORIGIN = { lat: 43.6487, lon: -79.3980, label: "downtown Toronto" };
 

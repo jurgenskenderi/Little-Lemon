@@ -13,7 +13,8 @@
     "scrape:toronto": "node --experimental-strip-types src/scraper/cli.ts --preset toronto",
     "verify:extractor": "node --experimental-strip-types src/scraper/verify-extractor.ts",
     "import:places": "node --experimental-strip-types src/places/cli.ts",
-    "import:toronto": "node --experimental-strip-types src/places/cli.ts --preset toronto"
+    "import:toronto": "node --experimental-strip-types src/places/cli.ts --preset toronto",
+    "export:preview": "node --experimental-strip-types src/places/export-preview.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.115.0",

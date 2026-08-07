@@ -252,6 +252,19 @@ wherever you do show it you must display the "Powered by Google" credit — the
 `/api/places` response carries that string so the client renders it only when it
 applies.
 
+Once venues are in, one more command puts them in front of people:
+
+```bash
+npm run export:preview          # rewrite preview/index.html from the database
+npm run export:preview -- --dry-run
+```
+
+The preview is a single self-contained file with its venue table inlined,
+because a sandboxed page cannot call an API — which normally means it drifts
+from reality the moment you import anything. This closes the loop: import,
+crawl, export, and the page people open is showing the same data the app is.
+Only the block between the `CLOCKTAILS:VENUES` markers is rewritten.
+
 ### OpenStreetMap
 
 ```bash
