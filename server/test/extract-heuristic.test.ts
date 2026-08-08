@@ -36,6 +36,29 @@ describe("parseDays", () => {
 });
 
 describe("parseTimeRanges", () => {
+  // Found in production: Smoque N' Bones publishes "$ 9-10.5" as a price, and
+  // the parser shipped a "9pm-10pm" happy hour off the back of it.
+  it("does not read a price range as a time range", () => {
+    assert.deepEqual(parseTimeRanges("BBQ Bites $ 9-10.5"), []);
+    assert.deepEqual(parseTimeRanges("$10-14 Signature Cocktails"), []);
+    assert.deepEqual(parseTimeRanges("Wines £6-9 all night"), []);
+  });
+
+  it("still reads a real range that happens to follow a price", () => {
+    const [range] = parseTimeRanges("$6 pints, 4-6pm");
+    assert.ok(range, "the time range after a price was lost");
+    assert.equal(range.startMin, 16 * 60);
+    assert.equal(range.endMin, 18 * 60);
+  });
+
+  it("keeps a range written with a decimal clock, rather than discarding it", () => {
+    // A dot is not read as a minute separator here, so this lands on 4-6pm.
+    // Approximate beats absent; the model extractor handles the awkward pages.
+    const [range] = parseTimeRanges("Happy hour 4-6.30pm");
+    assert.ok(range, "4-6.30pm was discarded as a price");
+    assert.equal(range.startMin, 16 * 60);
+  });
+
   it("borrows the meridiem from the marked side", () => {
     const [range] = parseTimeRanges("Happy hour 4-6pm");
     assert.equal(range?.startMin, 16 * 60);

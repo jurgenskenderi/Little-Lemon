@@ -79,6 +79,7 @@ function parseArgs(argv: string[]) {
     presetName,
     preset,
     limitPerArea: Number(flags.get("limit") ?? 60),
+    minConfidence: Number(flags.get("min-confidence") ?? 0.4),
     useModel: !booleans.has("no-model"),
     skipPreflight: booleans.has("skip-preflight"),
   };
@@ -171,13 +172,20 @@ async function main(): Promise<void> {
 
   const dataset: Record<string, DatasetVenue> = {};
   let done = 0;
+  let dropped = 0;
 
   for (const venue of venues) {
     const stats = await crawlVenue(db, venue, { useModel: args.useModel });
     mergeStats(totals, stats);
     done += 1;
 
-    const deals = getDealsForVenue(db, venue.id).filter((deal) => deal.windows.length > 0);
+    // A guess below the floor is worse than nothing: it sends someone across
+    // town on a phantom. The app already warns about anything under 0.75, but
+    // there is a level below which the honest move is to publish silence.
+    const deals = getDealsForVenue(db, venue.id).filter(
+      (deal) => deal.windows.length > 0 && deal.confidence >= args.minConfidence,
+    );
+    dropped += getDealsForVenue(db, venue.id).length - deals.length;
     const socials = stats.socials && stats.socials.size > 0
       ? Object.fromEntries(stats.socials) : undefined;
 
@@ -212,6 +220,7 @@ async function main(): Promise<void> {
       venuesWithDeals: withDeals,
       deals: totals.dealsWritten,
       dealsWithImages: withImages,
+      dealsBelowConfidence: dropped,
       pagesFetched: totals.pagesFetched,
       pagesDisallowed: totals.pagesDisallowed,
       socialsFound: totals.socialsFound,
@@ -228,6 +237,7 @@ async function main(): Promise<void> {
   console.log(`\nWrote ${OUTPUT}`);
   console.log(`  ${withDeals} venues with deals, ${totals.dealsWritten} deals total`);
   console.log(`  ${withImages} deals carry a photo`);
+  console.log(`  ${dropped} dropped below the ${args.minConfidence} confidence floor`);
   console.log(`  ${totals.pagesFetched} pages fetched, ${totals.pagesDisallowed} refused by robots.txt`);
   console.log(`  ${totals.socialsFound} social profiles found, ${totals.socialsCrawled} crawlable`);
   if (totals.errors.length > 0) {

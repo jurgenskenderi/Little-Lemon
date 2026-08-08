@@ -168,6 +168,19 @@ export function parseTimeRanges(text: string): ParsedTimeRange[] {
   const ranges: ParsedTimeRange[] = [];
 
   for (const match of normalized.matchAll(TIME_RANGE)) {
+    const at = match.index ?? 0;
+
+    // A price range is not a time range. "$10-14 cocktails" and "$ 9-10.5"
+    // both match the shape exactly, and the second one shipped a phantom
+    // "9pm-10pm" happy hour to real users before this guard existed.
+    if (/[$£€¢]\s*$/.test(normalized.slice(Math.max(0, at - 3), at))) continue;
+
+    // A trailing decimal is money too — but only a single one. "$9-10.5" is a
+    // price; "4-6.30pm" is half past six in British usage, and two digits is
+    // what tells them apart.
+    const after = normalized.slice(at + match[0].length);
+    if (/^\.\d(?!\d)/.test(after)) continue;
+
     const startHour = Number(match[1]);
     const endHour = Number(match[4]);
     if (!Number.isFinite(startHour) || !Number.isFinite(endHour)) continue;
