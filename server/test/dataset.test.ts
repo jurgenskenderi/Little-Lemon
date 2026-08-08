@@ -128,7 +128,7 @@ before(async () => {
   const result = await new Promise<{ code: number; output: string }>((resolve, reject) => {
     const child = spawn(
       process.execPath,
-      ["--experimental-strip-types", "src/build/dataset.ts",
+      ["--experimental-strip-types", "src/dataset/build.ts",
        "--preset", "toronto-core", "--skip-preflight", "--no-model", "--limit", "5"],
       {
         env: {

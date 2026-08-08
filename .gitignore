@@ -1,5 +1,7 @@
 node_modules/
 dist/
+# Build *output*. Note this matches at any depth, so never name a source
+# directory `build/` — it will be silently untracked and only fail in CI.
 build/
 *.log
 .DS_Store
