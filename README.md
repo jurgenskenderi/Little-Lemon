@@ -29,8 +29,12 @@ device:
   your location and only calls `getCurrentPosition` from a button you press,
   which also satisfies the browsers that require a gesture. Grant it once and
   you are never asked again; block it and the page says how to undo that.
-- **the map** is OpenStreetMap's own tiles through Leaflet, so every street is
-  there because it is a real map, not a drawing of one;
+- **the map** is a real map — OpenStreetMap data through Leaflet — in three
+  styles. The default is deliberately quiet: the standard OSM raster draws
+  every shop, bus stop and footpath, which is right for a general-purpose map
+  and wrong when our own pins are the content. *Quiet* and *Midnight* are the
+  same data rendered in muted greys so the pins carry the eye; *Detailed* is
+  the standard style for when you want the shops back;
 - **the venues** are real, queried live from [Overpass](https://overpass-api.de)
   as you move — names, addresses, phone numbers, websites and opening hours
   straight from OpenStreetMap;
@@ -49,11 +53,24 @@ device:
   your device because there is no account; and every distance carries the
   minutes it takes to walk, which is the number the decision actually turns on.
 - **Call, Directions and Website** are ordinary links on an ordinary page, so
-  they do what links do.
+  they do what links do, plus **Share** with a clipboard fallback where the
+  Web Share API is missing.
+- **it installs.** A manifest and a service worker make it a home-screen app
+  that opens without browser chrome and survives losing signal. The worker is
+  deliberately narrow: same-origin GETs only, network-first everywhere so a
+  stale shell can never strand a fix, and a message hook that lets a wedged
+  worker be told to stand down.
+- **you can ask about later.** "What's on now" is the common case, but the
+  question at five o'clock is "what's on when I get there at nine". Set a time
+  and the whole search — filters, statuses, counts — is evaluated against it,
+  rolling to tomorrow when the time has already passed.
 
-The map credits OpenStreetMap and nothing else. The "Leaflet" prefix is
-courtesy and is turned off; the OpenStreetMap line stays, because the data is
-ODbL and attribution is a condition of using it rather than a default setting.
+**On removing the OpenStreetMap credit: it cannot be done.** The tiles are
+rendered from ODbL data, and attribution is a licence condition rather than a
+default setting — the same is true of Google, Mapbox or any other provider. The
+"Leaflet" prefix *is* courtesy and is turned off. What the credit does not have
+to be is loud: it collapses to a small ⓘ and expands on hover or focus, which
+is the pattern Leaflet itself uses on narrow screens.
 
 Your position is not sent anywhere. Distances are computed on your device from
 the exact fix; the coordinate that goes to Overpass is rounded to three decimals

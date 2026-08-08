@@ -9,6 +9,7 @@
 
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
       integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
+<link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230E1518'/%3E%3Ctext x='32' y='44' font-size='34' text-anchor='middle'%3E%F0%9F%8D%B8%3C/text%3E%3C/svg%3E">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ctext x='32' y='48' font-size='44' text-anchor='middle'%3E%F0%9F%8D%B8%3C/text%3E%3C/svg%3E">
 
@@ -53,8 +54,13 @@
   .where strong { color:var(--text); }
 
   /* ---------- controls ---------- */
-  .controls { display:grid; gap:10px; margin-top:12px; }
-  .row { display:flex; align-items:center; gap:10px; }
+  /* `min-width:0` on both is load-bearing. A grid track and a flex item both
+     size to their content by default, so one wide row — the search controls —
+     stretched the whole column past the viewport and cut the radius value off
+     the right-hand edge. */
+  .controls { display:grid; gap:10px; margin-top:12px; min-width:0; }
+  .controls > * { min-width:0; }
+  .row { display:flex; align-items:center; gap:10px; min-width:0; }
   .label { font-family:var(--display); text-transform:uppercase; letter-spacing:.12em;
            font-size:11px; color:var(--muted); font-weight:600; white-space:nowrap; }
   input[type=range] { flex:1; accent-color:var(--accent); min-width:0; }
@@ -92,14 +98,32 @@
   .gate-fine { margin-top:14px!important; font-size:12px!important; color:var(--faint)!important;
                line-height:1.5; }
 
+  /* Wraps rather than overflows: the search field takes its own line on a
+     phone, and the three pickers share the next one. */
+  .search-row { flex-wrap:wrap; }
   .search-row input, .search-row select { font:inherit; font-size:14px; color:var(--text);
     background:var(--surface); border:1px solid var(--border); border-radius:11px;
     padding:9px 12px; min-width:0; }
-  .search-row input { flex:1; }
+  .search-row input[type=search] { flex:1 1 100%; }
   .search-row input::placeholder { color:var(--faint); }
   .search-row input:focus-visible, .search-row select:focus-visible {
     outline:2px solid var(--accent); outline-offset:1px; }
-  .search-row select { flex:0 0 auto; max-width:42%; }
+  .search-row select { flex:1 1 0; min-width:96px; max-width:none; }
+  .search-row input[type=time] { flex:0 1 auto; width:auto; min-width:0; }
+  #atNow { flex:0 0 auto; padding:9px 12px; border-radius:11px; border:1px solid var(--accent);
+    background:var(--accent); color:var(--on-accent); font:inherit; font-size:13px;
+    font-weight:700; cursor:pointer; }
+  #atNow[hidden] { display:none; }
+
+  .install { width:100%; margin-top:12px; padding:11px; border-radius:11px;
+    border:1px dashed var(--accent); background:transparent; color:var(--accent);
+    font:inherit; font-size:13.5px; font-weight:700; cursor:pointer; }
+  .install[hidden] { display:none; }
+  .ios-install { margin-top:18px; padding:11px 13px; border-radius:11px;
+    background:var(--raised); border:1px solid var(--border);
+    color:var(--muted); font-size:12.5px; }
+  .ios-install[hidden] { display:none; }
+  .ios-install b { color:var(--text); }
 
   .count { margin:12px 0 0; font-size:13px; color:var(--muted); }
   .count strong { color:var(--text); }
@@ -115,8 +139,22 @@
   .leaflet-popup-content a { color:var(--accent); }
   .leaflet-bar a { background:var(--surface); color:var(--text); border-color:var(--border); }
   .leaflet-bar a:hover { background:var(--raised); color:var(--text); }
-  .leaflet-control-attribution { background:rgba(0,0,0,.55)!important; color:#CFE0DD!important; }
-  .leaflet-control-attribution a { color:#9FD0FF!important; }
+  /* The credit is a licence condition, so it is always in the DOM and always
+     reachable. It does not have to shout: collapsed to a hairline strip until
+     hovered or focused, which is the same pattern Leaflet uses on phones. */
+  .leaflet-control-attribution {
+    background:color-mix(in srgb, var(--surface) 82%, transparent)!important;
+    color:var(--faint)!important; font-size:9.5px!important; line-height:1.5;
+    padding:1px 6px!important; border-radius:8px 0 0 0;
+    max-width:34px; overflow:hidden; white-space:nowrap; text-overflow:ellipsis;
+    transition:max-width .18s ease, color .18s ease; }
+  .leaflet-control-attribution:hover, .leaflet-control-attribution:focus-within {
+    max-width:min(85vw, 420px); color:var(--muted)!important; }
+  .leaflet-control-attribution a { color:var(--muted)!important; }
+  .leaflet-control-attribution::before { content:"ⓘ "; }
+
+  .status .note { display:block; margin-bottom:6px; color:var(--accent); }
+  .status .note:only-child { margin-bottom:0; }
 
   .pin { display:grid; place-items:center; width:26px; height:26px; border-radius:50%;
          border:2px solid var(--surface); font-size:13px; line-height:1;
@@ -219,6 +257,12 @@
   .actions .primary { background:var(--accent); border-color:var(--accent);
                       color:var(--on-accent); }
 
+  .flash { position:fixed; left:50%; bottom:calc(20px + env(safe-area-inset-bottom));
+    transform:translateX(-50%); z-index:1000; max-width:calc(100vw - 32px);
+    padding:11px 16px; border-radius:999px; background:var(--text); color:var(--ink);
+    font-size:13px; font-weight:600; box-shadow:0 8px 24px rgba(0,0,0,.3); }
+  .flash[hidden] { display:none; }
+
   footer { margin-top:26px; padding-top:16px; border-top:1px solid var(--border);
            color:var(--faint); font-size:12px; line-height:1.6; }
   footer a { color:var(--faint); }
@@ -260,6 +304,13 @@
     <div class="row search-row">
       <input type="search" id="search" placeholder="Search by name or cuisine…"
              autocomplete="off" aria-label="Search places">
+      <input type="time" id="atTime" aria-label="See what's on at a chosen time">
+      <button type="button" id="atNow" hidden title="Back to now">Now</button>
+      <select id="basemap" aria-label="Map style">
+        <option value="quiet">Quiet map</option>
+        <option value="midnight">Midnight</option>
+        <option value="detailed">Detailed</option>
+      </select>
       <select id="sort" aria-label="Sort results">
         <option value="near">Nearest</option>
         <option value="soon">Ending soonest</option>
@@ -267,6 +318,8 @@
       </select>
     </div>
   </div>
+
+  <button type="button" class="install" id="install" hidden>Add to home screen</button>
 
   <div class="tabs" role="group" aria-label="View">
     <button type="button" id="tabMap" aria-pressed="true">Map</button>
@@ -286,6 +339,10 @@
   <div class="status" id="status" hidden></div>
   </div>
 
+  <p class="ios-install" id="iosInstall" hidden>
+    Add Clocktails to your home screen: tap <b>Share</b>, then <b>Add to Home Screen</b>.
+  </p>
+
   <footer>
     Places and opening hours from <a href="https://www.openstreetmap.org/copyright"
     target="_blank" rel="noopener">OpenStreetMap</a> contributors, queried live from your
@@ -295,6 +352,7 @@
 </div>
 
 <dialog id="sheet"><div class="sheet" id="sheetBody"></div></dialog>
+<div class="flash" id="flash" role="status" hidden></div>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
         integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
@@ -343,7 +401,10 @@ const state = {
   origin: null, accuracyM: null, locError: null, locating: false, manual: false,
   radiusM: 1000, kind: "all", openFilter: "now", dealFilter: "all",
   deals: null, dealsError: null, areaName: "",
-  query: "", favourites: new Set(), sort: "near",
+  query: "", favourites: new Set(), sort: "near", basemap: "quiet",
+  /** Minutes from local midnight to evaluate against, or null for "now". */
+  atMinute: null,
+  statusNote: null,
   venues: [], loading: false, dataError: null, view: "map",
 };
 
@@ -774,11 +835,29 @@ function matchesQuery(venue, query) {
   return query.split(/\s+/).every((term) => haystack.includes(term));
 }
 
+/**
+ * The moment being asked about.
+ *
+ * "What is on right now" is the common case, but the question people actually
+ * have at 5pm is "what is on when I get there at nine". A chosen time rolls
+ * forward to tomorrow when it has already passed today, because nobody asking
+ * about 1am means the one that went by sixteen hours ago.
+ */
+function askedAt() {
+  const now = new Date();
+  if (state.atMinute === null) return now;
+
+  const at = new Date(now);
+  at.setHours(Math.floor(state.atMinute / 60), state.atMinute % 60, 0, 0);
+  if (at.getTime() < now.getTime() - 60_000) at.setDate(at.getDate() + 1);
+  return at;
+}
+
 /* ---------------- search over what we loaded ---------------- */
 function results() {
   if (!state.origin) return [];
   const kind = KINDS.find((k) => k.id === state.kind);
-  const now = new Date();
+  const now = askedAt();
   const within = state.openFilter === "soon" ? 120 : 0;
 
   const dealsOnly = state.dealFilter === "deals";
@@ -858,9 +937,84 @@ function stateLabel(status) {
 }
 
 /* ==================================================================
- * The map — Leaflet over OpenStreetMap's own tiles.
+ * The map.
+ *
+ * The standard OpenStreetMap raster style draws every shop, bus stop and
+ * footpath, which is the right call for a general-purpose map and the wrong
+ * one here: our own pins are the content, and the basemap should recede.
+ * CARTO's Positron and Dark Matter are the same data rendered quietly — muted
+ * greys, few icons, thin labels — so the pins carry the eye.
+ *
+ * Attribution is not a style choice. The tiles are rendered from ODbL data and
+ * crediting it is a licence condition, so it stays. What it does not have to be
+ * is loud: the credit collapses to a small "ⓘ" and expands when tapped, which
+ * is standard practice and what Leaflet already does on narrow screens.
  * ================================================================== */
+const OSM_CREDIT =
+  '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>';
+
+const BASEMAPS = {
+  quiet: {
+    label: "Quiet",
+    url: "https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png",
+    attribution: `${OSM_CREDIT}, &copy; <a href="https://carto.com/attributions">CARTO</a>`,
+    maxZoom: 20,
+  },
+  midnight: {
+    label: "Midnight",
+    url: "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png",
+    attribution: `${OSM_CREDIT}, &copy; <a href="https://carto.com/attributions">CARTO</a>`,
+    maxZoom: 20,
+  },
+  detailed: {
+    label: "Detailed",
+    url: "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
+    attribution: OSM_CREDIT,
+    maxZoom: 19,
+  },
+};
+
 let map = null, markerLayer = null, meMarker = null, accuracyCircle = null;
+let tileLayer = null;
+
+/**
+ * Swap the basemap, and fall back if the new one will not load.
+ *
+ * A tile host can rate-limit, move, or start demanding a key, and the symptom
+ * is a grey rectangle with no explanation. Counting tile errors and dropping
+ * back to OpenStreetMap's own tiles — which have no key and no vendor — means
+ * the map degrades to plainer rather than to nothing.
+ */
+function applyBasemap(name) {
+  if (!map) return;
+  const style = BASEMAPS[name] ?? BASEMAPS.quiet;
+  if (tileLayer) map.removeLayer(tileLayer);
+
+  let failures = 0;
+  tileLayer = L.tileLayer(style.url, {
+    maxZoom: style.maxZoom,
+    attribution: style.attribution,
+    crossOrigin: true,
+  });
+
+  tileLayer.on("tileerror", () => {
+    failures += 1;
+    // A handful of misses is normal at the edges of a pan; a wall of them is
+    // the host refusing us.
+    if (failures === 8 && name !== "detailed") {
+      state.basemap = "detailed";
+      try { localStorage.setItem(BASEMAP_KEY, "detailed"); } catch { /* ignore */ }
+      el("basemap").value = "detailed";
+      applyBasemap("detailed");
+      setStatusNote(`The ${style.label.toLowerCase()} map style is unavailable, ` +
+        `so this fell back to the detailed one.`);
+    }
+  });
+
+  tileLayer.addTo(map);
+}
+
+const BASEMAP_KEY = "clocktails:basemap";
 
 function initMap() {
   if (typeof L === "undefined") {
@@ -895,10 +1049,7 @@ function buildMap() {
   // a cosmetic problem, not a reason to lose the map.
   map.attributionControl?.setPrefix(false);
 
-  L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
-    maxZoom: 19,
-    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
-  }).addTo(map);
+  applyBasemap(state.basemap);
 
   markerLayer = L.layerGroup().addTo(map);
 
@@ -1205,18 +1356,34 @@ function renderCount(list) {
     ? `${state.radiusM} m` : `${(state.radiusM / 1000).toFixed(1)} km`;
   const openNow = list.filter((venue) => venue.status.open).length;
   const kind = KINDS.find((k) => k.id === state.kind);
+  const at = askedAt();
+  const clock = at.toLocaleTimeString([], { hour:"numeric", minute:"2-digit" });
+  const tomorrow = at.getDate() !== new Date().getDate() ? " tomorrow" : "";
+
+  // When a time has been chosen, say so even if nothing is open then —
+  // otherwise "2 places within 1 km" reads as an answer about right now.
+  const when = state.atMinute === null
+    ? (openNow > 0 ? ` · ${openNow} open now` : "")
+    : ` · <strong>${openNow}</strong> open at <strong>${clock}</strong>${tomorrow}`;
+
   node.innerHTML =
     `<strong>${list.length}</strong> ` +
     `${kind.id === "all" ? "place" : kind.label.toLowerCase().replace(/s$/, "")}` +
-    `${list.length === 1 ? "" : "s"} within <strong>${range}</strong>` +
-    (openNow > 0 ? ` · ${openNow} open now` : "");
+    `${list.length === 1 ? "" : "s"} within <strong>${range}</strong>${when}`;
 }
 
 function renderStatus(list) {
   const status = el("status");
-  const show = (html) => { status.hidden = false; status.innerHTML = html; };
+  const note = state.statusNote
+    ? `<span class="note">${esc(state.statusNote)}</span>` : "";
+  const show = (html) => { status.hidden = false; status.innerHTML = note + html; };
 
-  if (state.loading) return show("Looking up real places around you from OpenStreetMap…");
+  if (state.statusNote && !state.loading && list.length > 0) {
+    status.hidden = false;
+    status.innerHTML = note;
+    return;
+  }
+  if (state.loading) return show("Looking up places around you…");
 
   if (state.dataError && state.dataError !== "no-results") {
     return show(
@@ -1282,7 +1449,8 @@ function renderRows(list) {
 
 function openSheet(venue) {
   const distance = venue.distanceM ?? haversineM(state.origin, venue);
-  const label = stateLabel(venue.status ?? openState(parseOpeningHours(venue.hoursRaw), new Date()));
+  const label = stateLabel(
+    venue.status ?? openState(parseOpeningHours(venue.hoursRaw), askedAt()));
   const directions =
     `https://www.google.com/maps/dir/?api=1&destination=${venue.lat},${venue.lon}` +
     `&destination_place_id=&travelmode=walking`;
@@ -1307,6 +1475,7 @@ function openSheet(venue) {
       <a class="primary" href="${directions}" target="_blank" rel="noopener">Directions</a>
       ${venue.phone ? `<a href="tel:${esc(venue.phone.replace(/[^\d+]/g,""))}">Call</a>` : ""}
       ${venue.website ? `<a href="${esc(venue.website)}" target="_blank" rel="noopener">Website</a>` : ""}
+      <button type="button" id="shareVenue">Share</button>
       <button type="button" id="closeSheet">Close</button>
     </div>
     <p class="addr" style="margin-top:14px;font-size:12px">
@@ -1315,6 +1484,48 @@ function openSheet(venue) {
 
   el("sheet").showModal();
   el("closeSheet").onclick = () => el("sheet").close();
+  el("shareVenue").onclick = () => void shareVenue(venue, label.text);
+}
+
+/**
+ * Hand a place to whatever the device shares with, and cope where it cannot.
+ *
+ * Web Share exists on phones and mostly not on desktop, and it rejects when
+ * the user dismisses the sheet — which is not an error. The clipboard is the
+ * fallback, and saying so beats a button that appears to do nothing.
+ */
+async function shareVenue(venue, statusText) {
+  const deal = venue.deal ?? dealsFor(venue.id)[0] ?? null;
+  const lines = [
+    venue.name,
+    deal ? `${deal.priceText ?? deal.title} — ${windowLabel(deal)}` : statusText,
+    venue.address,
+    `https://www.openstreetmap.org/${venue.id}`,
+  ].filter(Boolean);
+  const text = lines.join("\n");
+
+  try {
+    if (navigator.share) {
+      await navigator.share({ title: venue.name, text });
+      return;
+    }
+    await navigator.clipboard.writeText(text);
+    flash("Copied to the clipboard");
+  } catch (error) {
+    // AbortError is the user closing the share sheet; nothing to report.
+    if (error && error.name === "AbortError") return;
+    flash("Couldn't share — the details are on screen to copy.");
+  }
+}
+
+/** A brief message that does not need a place in the layout. */
+let flashTimer = null;
+function flash(message) {
+  const node = el("flash");
+  node.textContent = message;
+  node.hidden = false;
+  clearTimeout(flashTimer);
+  flashTimer = setTimeout(() => { node.hidden = true; }, 2600);
 }
 
 /**
@@ -1334,7 +1545,7 @@ function dealsHtml(venue) {
       ${socialLinks(socials)}</p>`;
   }
 
-  const now = new Date();
+  const now = askedAt();
   const cards = deals.map((deal) => {
     const status = openState(dealRules(deal), now, 0);
     const label = stateLabel(status);
@@ -1403,6 +1614,33 @@ el("search").oninput = () => {
 };
 el("sort").onchange = () => { state.sort = el("sort").value; render(); };
 
+el("atTime").onchange = () => {
+  const value = el("atTime").value;
+  const [hours, minutes] = value.split(":").map(Number);
+  state.atMinute = value && Number.isFinite(hours) ? hours * 60 + (minutes || 0) : null;
+  el("atNow").hidden = state.atMinute === null;
+  render();
+};
+
+el("atNow").onclick = () => {
+  state.atMinute = null;
+  el("atTime").value = "";
+  el("atNow").hidden = true;
+  render();
+};
+
+el("basemap").onchange = () => {
+  state.basemap = el("basemap").value;
+  try { localStorage.setItem(BASEMAP_KEY, state.basemap); } catch { /* private mode */ }
+  applyBasemap(state.basemap);
+};
+
+/** A one-off line in the status area, for things the user did not ask about. */
+function setStatusNote(text) {
+  state.statusNote = text;
+  render();
+}
+
 el("radius").oninput = () => {
   state.radiusM = Number(el("radius").value);
   framedFor = null;
@@ -1429,14 +1667,75 @@ document.addEventListener("click", (event) => {
   if (event.target?.id === "retryData") void loadVenues();
 });
 
+/* ==================================================================
+ * Installing it.
+ *
+ * A home-screen icon is the difference between a link someone loses and an app
+ * they open on the way out. Chrome hands us the prompt to fire when we like;
+ * iOS has no such API, so there the honest move is to say where the button is
+ * rather than pretend a button exists.
+ * ================================================================== */
+let installPrompt = null;
+
+window.addEventListener("beforeinstallprompt", (event) => {
+  event.preventDefault();
+  installPrompt = event;
+  el("install").hidden = false;
+});
+
+window.addEventListener("appinstalled", () => {
+  installPrompt = null;
+  el("install").hidden = true;
+});
+
+el("install").onclick = async () => {
+  if (!installPrompt) return;
+  el("install").hidden = true;
+  installPrompt.prompt();
+  await installPrompt.userChoice;
+  installPrompt = null;
+};
+
+/** Standalone means it is already installed; no point offering. */
+const isInstalled = () =>
+  matchMedia("(display-mode: standalone)").matches || window.navigator.standalone === true;
+
+function offerIosInstall() {
+  const ua = navigator.userAgent;
+  const iOS = /iPad|iPhone|iPod/.test(ua) ||
+    (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+  if (!iOS || isInstalled() || !/Safari/.test(ua) || /CriOS|FxiOS/.test(ua)) return;
+  el("iosInstall").hidden = false;
+}
+
+if ("serviceWorker" in navigator) {
+  // After load: registering during startup competes with the first data fetch
+  // for connections, and the worker is worth nothing on a first visit anyway.
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("sw.js").catch(() => {
+      // No offline support is a missing nicety, not a failure worth reporting.
+    });
+  });
+}
+
 /* ---------------- go ---------------- */
 buildChips("kindChips", KINDS, state.kind, (id) => { state.kind = id; });
 buildChips("openChips", OPEN_FILTERS, state.openFilter, (id) => { state.openFilter = id; });
 buildChips("dealChips", DEAL_FILTERS, state.dealFilter, (id) => { state.dealFilter = id; });
 loadFavourites();
+
+try {
+  const saved = localStorage.getItem(BASEMAP_KEY);
+  state.basemap = saved && saved in BASEMAPS ? saved
+    : (matchMedia("(prefers-color-scheme: dark)").matches ? "midnight" : "quiet");
+} catch {
+  state.basemap = "quiet";
+}
+el("basemap").value = state.basemap;
 initMap();
 setView("map");
 render();
+offerIosInstall();
 void start();
 void loadDeals();
 </script>
