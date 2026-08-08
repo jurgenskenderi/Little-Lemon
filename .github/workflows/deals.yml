@@ -49,8 +49,10 @@ jobs:
           # Optional. Without it the rule-based parser runs alone and skips
           # pages it cannot read; with it, coverage is materially wider.
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        # The explicit workspace form, not the root alias: it forwards arguments
+        # unambiguously and does not depend on a root script existing.
         run: |
-          npm run build:deals -- \
+          npm run build:deals --workspace server -- \
             --preset "${{ inputs.preset || 'toronto' }}" \
             --limit "${{ inputs.limit || '60' }}"
 
