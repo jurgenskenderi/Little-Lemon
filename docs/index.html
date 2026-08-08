@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#0E1518">
-<meta name="description" content="Real bars and restaurants near you in Toronto, with the ones open right now.">
+<meta name="description" content="Real bars and restaurants near you, with the happy hours that are on right now.">
 <title>Clocktails — bars and restaurants near you</title>
 
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
@@ -41,8 +41,12 @@
 
   header { padding:18px 0 10px; }
   .wordmark { font-family:var(--display); text-transform:uppercase; letter-spacing:.18em;
-              font-size:12px; color:var(--accent); font-weight:700; margin:0 0 4px; }
-  h1 { font-family:var(--display); font-size:31px; line-height:1.05; margin:0; font-weight:700; }
+              font-size:12px; color:var(--accent); font-weight:700; margin:0 0 4px;
+              display:flex; gap:8px; align-items:baseline; }
+  .wordmark span + span { color:var(--muted); }
+  .wordmark span + span:not(:empty)::before { content:"·"; margin-right:8px; }
+  h1 { font-family:var(--display); font-size:33px; line-height:1.03; margin:0; font-weight:700;
+       letter-spacing:-.01em; text-wrap:balance; }
   .where { color:var(--muted); font-size:13.5px; margin:7px 0 0; }
   .where button { background:none; border:0; color:var(--accent); font:inherit;
                   text-decoration:underline; cursor:pointer; padding:0; }
@@ -88,6 +92,15 @@
   .gate-fine { margin-top:14px!important; font-size:12px!important; color:var(--faint)!important;
                line-height:1.5; }
 
+  .search-row input, .search-row select { font:inherit; font-size:14px; color:var(--text);
+    background:var(--surface); border:1px solid var(--border); border-radius:11px;
+    padding:9px 12px; min-width:0; }
+  .search-row input { flex:1; }
+  .search-row input::placeholder { color:var(--faint); }
+  .search-row input:focus-visible, .search-row select:focus-visible {
+    outline:2px solid var(--accent); outline-offset:1px; }
+  .search-row select { flex:0 0 auto; max-width:42%; }
+
   .count { margin:12px 0 0; font-size:13px; color:var(--muted); }
   .count strong { color:var(--text); }
 
@@ -123,24 +136,49 @@
   .status button { background:none; border:0; color:var(--accent); font:inherit;
                    text-decoration:underline; cursor:pointer; padding:0; }
 
-  .rows { margin-top:12px; display:grid; gap:8px; }
-  .venue { width:100%; text-align:left; display:flex; gap:12px; align-items:center;
-           padding:12px 13px; border-radius:12px; border:1px solid var(--border);
-           background:var(--surface); color:inherit; font:inherit; cursor:pointer; }
-  .venue:hover { border-color:var(--accent); }
-  .glyph { flex:0 0 40px; height:40px; border-radius:10px; background:var(--raised);
-           display:grid; place-items:center; font-size:19px; }
+  .rows { margin-top:12px; display:grid; gap:9px; }
+
+  .venue { position:relative; display:flex; align-items:stretch;
+           border-radius:14px; border:1px solid var(--border); background:var(--surface);
+           overflow:hidden; transition:border-color .15s, transform .15s; }
+  .venue:hover { border-color:color-mix(in srgb, var(--accent) 60%, var(--border)); }
+  .venue:active { transform:scale(.995); }
+  /* A saved place gets a spine down its left edge — legible at a glance in a
+     long list without stealing space from the content. */
+  .venue.saved::before { content:""; position:absolute; inset:0 auto 0 0; width:3px;
+                         background:var(--accent); }
+  .venue-main { flex:1; min-width:0; display:flex; gap:12px; align-items:center;
+                padding:12px 6px 12px 13px; text-align:left;
+                background:none; border:0; color:inherit; font:inherit; cursor:pointer; }
+
+  .star { flex:0 0 44px; border:0; background:none; cursor:pointer; font-size:19px;
+          color:var(--faint); line-height:1; padding:0 12px 0 0; }
+  .star[aria-pressed=true] { color:var(--accent); }
+  .star:hover { color:var(--accent); }
+  .star:focus-visible { outline:2px solid var(--accent); outline-offset:-4px; border-radius:8px; }
+
+  .meta { display:flex; gap:9px; align-items:baseline; margin-top:4px; flex-wrap:wrap;
+          font-family:var(--data); font-size:11px; color:var(--faint); }
+  .meta .dist::before, .meta .walk::before { content:"·"; margin-right:9px; }
+  .glyph { flex:0 0 48px; height:48px; border-radius:11px; background:var(--raised);
+           display:grid; place-items:center; font-size:21px; }
   .glyph.shot { object-fit:cover; }
   .venue.has-deal { border-color:color-mix(in srgb, var(--accent) 55%, var(--border)); }
-  .tag { font-size:9.5px; letter-spacing:.08em; font-weight:800; color:var(--on-accent);
-         background:var(--accent); border-radius:4px; padding:1px 4px; vertical-align:1px; }
+  .tag { flex:0 0 auto; font-size:9px; letter-spacing:.09em; font-weight:800;
+         color:var(--on-accent); background:var(--accent); border-radius:4px;
+         padding:2px 5px; }
   .venue .body { flex:1; min-width:0; }
-  .name { font-weight:700; font-size:15px; white-space:nowrap; overflow:hidden;
-          text-overflow:ellipsis; }
-  .sub { color:var(--muted); font-size:12.5px; white-space:nowrap; overflow:hidden;
-         text-overflow:ellipsis; }
-  .right { text-align:right; display:grid; gap:3px; }
-  .state { font-size:12px; font-weight:700; white-space:nowrap; }
+  /* `display:block`/`flex` is load-bearing: these are spans, and text-overflow
+     does nothing on an inline box — the deal text ran under the status column.
+     The badge sits outside the truncating text so a long name shortens around
+     it rather than swallowing it. */
+  .name { display:flex; align-items:center; gap:5px; font-weight:700; font-size:15px;
+          min-width:0; }
+  .name-text { min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .sub { display:block; color:var(--muted); font-size:12.5px; white-space:nowrap;
+         overflow:hidden; text-overflow:ellipsis; }
+  .state { font-size:11.5px; font-weight:800; white-space:nowrap;
+           font-family:var(--body); letter-spacing:.01em; }
   .dist { font-family:var(--data); font-size:11.5px; color:var(--faint); }
 
   /* ---------- sheet ---------- */
@@ -190,7 +228,7 @@
 
 <div class="app">
   <header>
-    <p class="wordmark">Clocktails · Toronto</p>
+    <p class="wordmark"><span>Clocktails</span><span id="areaName"></span></p>
     <h1>Bars &amp; restaurants near you</h1>
     <p class="where" id="where">Finding you…</p>
   </header>
@@ -219,6 +257,15 @@
     <div class="chips" id="kindChips" role="group" aria-label="Kind of place"></div>
     <div class="chips" id="openChips" role="group" aria-label="Opening filter"></div>
     <div class="chips" id="dealChips" role="group" aria-label="Happy hour filter"></div>
+    <div class="row search-row">
+      <input type="search" id="search" placeholder="Search by name or cuisine…"
+             autocomplete="off" aria-label="Search places">
+      <select id="sort" aria-label="Sort results">
+        <option value="near">Nearest</option>
+        <option value="soon">Ending soonest</option>
+        <option value="name">A–Z</option>
+      </select>
+    </div>
   </div>
 
   <div class="tabs" role="group" aria-label="View">
@@ -268,6 +315,10 @@ const el = (id) => document.getElementById(id);
 const esc = (s) => String(s ?? "").replace(/[&<>"']/g,
   (c) => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[c]));
 
+/**
+ * Only used when there is no fix at all. The app works anywhere OpenStreetMap
+ * has data; this is a starting view, not an assumption about where you are.
+ */
 const DEFAULT_ORIGIN = { lat: 43.6487, lon: -79.3980, label: "downtown Toronto" };
 
 const KINDS = [
@@ -291,7 +342,8 @@ const OPEN_FILTERS = [
 const state = {
   origin: null, accuracyM: null, locError: null, locating: false, manual: false,
   radiusM: 1000, kind: "all", openFilter: "now", dealFilter: "all",
-  deals: null, dealsError: null,
+  deals: null, dealsError: null, areaName: "",
+  query: "", favourites: new Set(), sort: "near",
   venues: [], loading: false, dataError: null, view: "map",
 };
 
@@ -540,6 +592,49 @@ async function loadVenues() {
 }
 
 /* ==================================================================
+ * Where am I, in words.
+ *
+ * The header used to say "Toronto" because that is where this was built, which
+ * is wrong the moment anyone opens it anywhere else. Nominatim turns the fix
+ * into a name — neighbourhood if it has one, otherwise the town — so the app
+ * describes the place you are actually standing in.
+ *
+ * One request per meaningful move, cached, and entirely optional: if it fails
+ * the header simply says nothing rather than guessing.
+ * ================================================================== */
+async function nameThisPlace(lat, lon) {
+  const key = `clocktails:place:${lat.toFixed(2)}:${lon.toFixed(2)}`;
+  try {
+    const cached = localStorage.getItem(key);
+    if (cached) { state.areaName = cached; render(); return; }
+  } catch { /* private mode */ }
+
+  try {
+    const url = "https://nominatim.openstreetmap.org/reverse?format=jsonv2&zoom=14" +
+      `&lat=${lat.toFixed(4)}&lon=${lon.toFixed(4)}`;
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 8000);
+    const response = await fetch(url, { signal: controller.signal });
+    clearTimeout(timer);
+    if (!response.ok) return;
+
+    const place = (await response.json())?.address ?? {};
+    // Most specific name that is still a place a person would say out loud.
+    const local = place.neighbourhood || place.suburb || place.quarter ||
+      place.city_district || place.town || place.village || place.city;
+    const region = place.city && local !== place.city ? place.city : place.state;
+    const name = [local, region].filter(Boolean).slice(0, 2).join(", ");
+    if (!name) return;
+
+    state.areaName = name;
+    try { localStorage.setItem(key, name); } catch { /* private mode */ }
+    render();
+  } catch {
+    // A missing area name costs nothing; every other feature works without it.
+  }
+}
+
+/* ==================================================================
  * Happy hour deals.
  *
  * OpenStreetMap knows opening hours; it does not know that oysters are $1.75
@@ -636,6 +731,49 @@ function windowLabel(deal) {
   }).join(" · ");
 }
 
+/* ==================================================================
+ * Saved places.
+ *
+ * Kept in localStorage rather than anywhere else — there is no account and no
+ * server, which is a feature. A saved place always sorts first, because if you
+ * bothered to star it you want to see whether it is on tonight.
+ * ================================================================== */
+const FAVOURITES_KEY = "clocktails:favourites";
+
+function loadFavourites() {
+  try {
+    const raw = JSON.parse(localStorage.getItem(FAVOURITES_KEY) || "[]");
+    if (Array.isArray(raw)) state.favourites = new Set(raw.filter((id) => typeof id === "string"));
+  } catch { /* unreadable storage is not worth surfacing */ }
+}
+
+function toggleFavourite(id) {
+  if (state.favourites.has(id)) state.favourites.delete(id);
+  else state.favourites.add(id);
+  try {
+    localStorage.setItem(FAVOURITES_KEY, JSON.stringify([...state.favourites]));
+  } catch { /* private mode: it still works for this session */ }
+  render();
+}
+
+/**
+ * Walking time at a brisk 5 km/h, which is what "is it worth it" actually
+ * turns on. A distance in metres makes you do the arithmetic yourself.
+ */
+function walkMinutes(distanceM) {
+  return Math.max(1, Math.round(distanceM / 83));
+}
+
+/** Case-insensitive match across the fields someone would actually type. */
+function matchesQuery(venue, query) {
+  if (!query) return true;
+  const haystack = [
+    venue.name, venue.cuisine, venue.address, venue.amenity,
+    ...(venue.deals ?? []).flatMap((deal) => [deal.title, deal.priceText, deal.description]),
+  ].filter(Boolean).join(" ").toLowerCase();
+  return query.split(/\s+/).every((term) => haystack.includes(term));
+}
+
 /* ---------------- search over what we loaded ---------------- */
 function results() {
   if (!state.origin) return [];
@@ -644,6 +782,7 @@ function results() {
   const within = state.openFilter === "soon" ? 120 : 0;
 
   const dealsOnly = state.dealFilter === "deals";
+  const query = state.query.trim().toLowerCase();
 
   const out = [];
   for (const venue of state.venues) {
@@ -653,6 +792,7 @@ function results() {
 
     const deals = dealsFor(venue.id);
     if (dealsOnly && deals.length === 0) continue;
+    if (!matchesQuery({ ...venue, deals }, query)) continue;
 
     // With the happy-hour filter on, "open now" has to mean the deal is on,
     // not that the doors are open. Otherwise a bar open till 2am looks like it
@@ -673,15 +813,31 @@ function results() {
       if (!passes) continue;
     }
 
-    out.push({ ...venue, distanceM, status, deals, deal: onDeal?.deal ?? deals[0] ?? null });
+    out.push({
+      ...venue, distanceM, status, deals,
+      deal: onDeal?.deal ?? deals[0] ?? null,
+      saved: state.favourites.has(venue.id),
+      walkMin: walkMinutes(distanceM),
+    });
   }
 
+  // Saved first, then a known deal, then open, then whatever you asked for.
+  // The first three are about relevance and never change; only the tail is
+  // yours to pick, which is why the control is a tie-breaker rather than the
+  // whole ordering.
+  const tiebreak = {
+    near: (a, b) => a.distanceM - b.distanceM,
+    soon: (a, b) =>
+      (a.status.minutesUntilClose ?? Infinity) - (b.status.minutesUntilClose ?? Infinity) ||
+      a.distanceM - b.distanceM,
+    name: (a, b) => a.name.localeCompare(b.name),
+  }[state.sort] ?? ((a, b) => a.distanceM - b.distanceM);
+
   out.sort((a, b) => {
-    // A venue with a known deal outranks one without, then open beats closed,
-    // then nearest wins.
+    const saved = (v) => (v.saved ? 0 : 1);
     const hasDeal = (v) => (v.deals.length > 0 ? 0 : 1);
     const rank = (v) => (v.status.open ? 0 : v.status.known ? 2 : 1);
-    return hasDeal(a) - hasDeal(b) || rank(a) - rank(b) || a.distanceM - b.distanceM;
+    return saved(a) - saved(b) || hasDeal(a) - hasDeal(b) || rank(a) - rank(b) || tiebreak(a, b);
   });
   return out;
 }
@@ -716,8 +872,28 @@ function initMap() {
       "the list still works." + "</div>";
     return;
   }
+  try {
+    buildMap();
+  } catch (error) {
+    // The map is one feature. Losing it must not cost the list, the filters,
+    // or the location — all of which work perfectly well without it.
+    map = null;
+    el("map").innerHTML =
+      '<div style="padding:22px;color:var(--muted);font-size:13.5px">' +
+      `Couldn't start the map (${esc(error instanceof Error ? error.message : String(error))}). ` +
+      "The list still works." + "</div>";
+  }
+}
+
+function buildMap() {
   map = L.map("map", { zoomControl:true, attributionControl:true })
     .setView([DEFAULT_ORIGIN.lat, DEFAULT_ORIGIN.lon], 15);
+
+  // `prefix:false` removes the "Leaflet" credit, which is courtesy. The
+  // OpenStreetMap line below is not: the data is ODbL and attribution is a
+  // condition of using it, so it stays. Optional call — a missing control is
+  // a cosmetic problem, not a reason to lose the map.
+  map.attributionControl?.setPrefix(false);
 
   L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
     maxZoom: 19,
@@ -972,7 +1148,10 @@ function setOrigin(point, { manual = false, fallback = false } = {}) {
   framedFor = null;
   render();
   frameMap();
-  if (moved) void loadVenues();
+  if (moved) {
+    void loadVenues();
+    void nameThisPlace(point.lat, point.lon);
+  }
 }
 
 function locationLine() {
@@ -1003,6 +1182,7 @@ function locationLine() {
  * Rendering.
  * ================================================================== */
 function render() {
+  el("areaName").textContent = state.areaName;
   el("where").innerHTML = locationLine();
   const retry = el("retryLoc");
   if (retry) retry.onclick = () => { state.manual = false; state.accuracyM = null; locate(); };
@@ -1069,24 +1249,34 @@ function renderRows(list) {
              referrerpolicy="no-referrer" onerror="this.replaceWith(Object.assign(
                document.createElement('span'),{className:'glyph',textContent:'🍸'}))">`
       : `<span class="glyph">${GLYPHS[venue.amenity] || "🍽"}</span>`;
-    return `<button class="venue${deal ? " has-deal" : ""}" data-id="${esc(venue.id)}">
-      ${thumb}
-      <span class="body">
-        <span class="name">${esc(venue.name)}${deal ? ' <b class="tag">HAPPY HOUR</b>' : ""}</span>
-        <span class="sub">${esc(sub)}</span>
-      </span>
-      <span class="right">
-        <span class="state" style="color:${label.colour}">${esc(label.text)}</span>
-        <span class="dist">${esc(humanDistance(venue.distanceM).replace(/ away$/, ""))}</span>
-      </span>
-    </button>`;
+    return `<div class="venue${deal ? " has-deal" : ""}${venue.saved ? " saved" : ""}">
+      <button class="venue-main" data-id="${esc(venue.id)}">
+        ${thumb}
+        <span class="body">
+          <span class="name"><span class="name-text">${esc(venue.name)}</span>${
+            deal ? '<b class="tag">HAPPY HOUR</b>' : ""}</span>
+          <span class="sub">${esc(sub)}</span>
+          <span class="meta">
+            <span class="state" style="color:${label.colour}">${esc(label.text)}</span>
+            <span class="dist">${esc(humanDistance(venue.distanceM).replace(/ away$/, ""))}</span>
+            <span class="walk">${venue.walkMin} min walk</span>
+          </span>
+        </span>
+      </button>
+      <button class="star" data-star="${esc(venue.id)}" aria-pressed="${venue.saved}"
+        aria-label="${venue.saved ? "Remove from saved" : "Save"} ${esc(venue.name)}"
+        title="${venue.saved ? "Saved" : "Save"}">${venue.saved ? "★" : "☆"}</button>
+    </div>`;
   }).join("");
 
-  el("rows").querySelectorAll(".venue").forEach((node) => {
+  el("rows").querySelectorAll(".venue-main").forEach((node) => {
     node.onclick = () => {
       const venue = list.find((v) => v.id === node.dataset.id);
       if (venue) openSheet(venue);
     };
+  });
+  el("rows").querySelectorAll(".star").forEach((node) => {
+    node.onclick = () => toggleFavourite(node.dataset.star);
   });
 }
 
@@ -1205,6 +1395,14 @@ function buildChips(hostId, choices, current, onPick) {
   });
 }
 
+// Debounced so typing does not re-render and re-draw the map per keystroke.
+let queryTimer = null;
+el("search").oninput = () => {
+  clearTimeout(queryTimer);
+  queryTimer = setTimeout(() => { state.query = el("search").value; render(); }, 160);
+};
+el("sort").onchange = () => { state.sort = el("sort").value; render(); };
+
 el("radius").oninput = () => {
   state.radiusM = Number(el("radius").value);
   framedFor = null;
@@ -1235,6 +1433,7 @@ document.addEventListener("click", (event) => {
 buildChips("kindChips", KINDS, state.kind, (id) => { state.kind = id; });
 buildChips("openChips", OPEN_FILTERS, state.openFilter, (id) => { state.openFilter = id; });
 buildChips("dealChips", DEAL_FILTERS, state.dealFilter, (id) => { state.dealFilter = id; });
+loadFavourites();
 initMap();
 setView("map");
 render();

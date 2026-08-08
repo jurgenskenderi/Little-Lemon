@@ -18,7 +18,8 @@ server/     Fastify API, SQLite storage, scraper, and the partner console
 **[https://jurgenskenderi.github.io/Little-Lemon/](https://jurgenskenderi.github.io/Little-Lemon/)**
 
 Real bars and restaurants near you, on a real map, with a Call button that
-dials. Open it on your phone in Toronto. No key, no account, no server —
+dials. Open it on your phone anywhere OpenStreetMap has data. No key, no
+account, no server —
 `docs/index.html` is one self-contained page and everything happens on your
 device:
 
@@ -38,8 +39,21 @@ device:
 - **happy hour deals** are scraped from each venue's own site and shown with
   their times, the price, a photo of what's on offer, and a **Happy hour only**
   filter that reduces the map to venues that actually have one.
+- **it knows where it is.** The header used to say "Toronto" because that is
+  where this was built — wrong the moment anyone opens it elsewhere. The fix is
+  reverse-geocoded to a neighbourhood name, so it says where you actually are.
+  Nothing in the app is Toronto-specific; the default view is only a fallback
+  for when there is no fix at all.
+- **search, saved places, and walking time.** Filter by name, cuisine or deal
+  text; star a venue and it sorts to the top and survives a reload, stored on
+  your device because there is no account; and every distance carries the
+  minutes it takes to walk, which is the number the decision actually turns on.
 - **Call, Directions and Website** are ordinary links on an ordinary page, so
   they do what links do.
+
+The map credits OpenStreetMap and nothing else. The "Leaflet" prefix is
+courtesy and is turned off; the OpenStreetMap line stays, because the data is
+ODbL and attribution is a condition of using it rather than a default setting.
 
 Your position is not sent anywhere. Distances are computed on your device from
 the exact fix; the coordinate that goes to Overpass is rounded to three decimals
@@ -66,7 +80,7 @@ The app finds the API automatically: it reuses the host Expo is already serving
 the bundle from, so a phone on the same Wi-Fi works without editing an IP.
 Override with `EXPO_PUBLIC_API_URL` if your setup differs.
 
-`npm test` runs the server suite (119 tests). `npm run typecheck` covers both
+`npm test` runs the server suite (124 tests). `npm run typecheck` covers both
 workspaces.
 
 ## Partner deals
