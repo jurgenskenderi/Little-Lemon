@@ -13,6 +13,14 @@ on:
     paths:
       - "docs/**"
       - ".github/workflows/pages.yml"
+  # The deals crawl commits docs/deals.json with GITHUB_TOKEN, and GitHub
+  # deliberately does not let a token-authored push trigger another workflow —
+  # otherwise workflows could loop. So the mirror never ran for a refreshed
+  # dataset, and the live site kept serving the deals from the previous deploy.
+  # Chaining off the crawl's completion is the supported way out.
+  workflow_run:
+    workflows: ["Refresh happy hour deals"]
+    types: [completed]
   workflow_dispatch:
 
 permissions:
