@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Clocktails">
+  <rect width="512" height="512" rx="112" fill="#0E1518"/>
+  <g fill="none" stroke="#E8A33D" stroke-width="26" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M136 152h240L256 296z"/>
+    <path d="M256 296v96"/>
+    <path d="M196 392h120"/>
+  </g>
+  <circle cx="352" cy="176" r="30" fill="#4FB477"/>
+</svg>
