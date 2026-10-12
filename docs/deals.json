@@ -1,20 +1,20 @@
 {
- "generatedAt": "2026-10-05T17:31:56.554Z",
+ "generatedAt": "2026-10-12T18:18:20.538Z",
  "preset": "toronto",
  "timeZone": "America/Toronto",
  "stats": {
-  "venuesConsidered": 231,
-  "venuesCrawled": 203,
-  "venuesWithDeals": 9,
-  "deals": 18,
-  "dealsWithImages": 12,
-  "dealsBelowConfidence": 5,
-  "pagesFetched": 439,
+  "venuesConsidered": 252,
+  "venuesCrawled": 223,
+  "venuesWithDeals": 7,
+  "deals": 17,
+  "dealsWithImages": 9,
+  "dealsBelowConfidence": 7,
+  "pagesFetched": 486,
   "pagesDisallowed": 25,
-  "socialsFound": 381,
+  "socialsFound": 396,
   "socialsCrawled": 5,
-  "modelCalls": 170,
-  "errors": 10
+  "modelCalls": 202,
+  "errors": 9
  },
  "venues": {
   "node/130168189": {
@@ -547,18 +547,11 @@
     "x": "https://twitter.com/earlsrestaurant"
    }
   },
-  "node/2611063039": {
-   "name": "Fusaro's Kitchen",
-   "deals": [],
-   "socials": {
-    "instagram": "https://www.instagram.com/p/Cmudk8EuPMG/"
-   }
-  },
   "node/2611092413": {
    "name": "WVRST",
    "deals": [],
    "socials": {
-    "instagram": "https://www.instagram.com/p/DdXSCTcRMFi/"
+    "instagram": "https://www.instagram.com/p/DdekTU3xgHk/"
    }
   },
   "node/2669569548": {
@@ -603,158 +596,6 @@
     "instagram": "https://www.instagram.com/tenrenstea/"
    }
   },
-  "node/244884014": {
-   "name": "Harry's Charbroiled",
-   "deals": [],
-   "socials": {
-    "facebook": "https://www.facebook.com/harryscharbroiled",
-    "instagram": "https://www.instagram.com/harryscharbroiled"
-   }
-  },
-  "node/527025595": {
-   "name": "Sushi Momo",
-   "deals": [],
-   "socials": {
-    "instagram": "https://instagram.com/sushimomomtl",
-    "facebook": "https://www.facebook.com/sushimomomontreal/"
-   }
-  },
-  "node/579253710": {
-   "name": "Terrazza",
-   "deals": [],
-   "socials": {
-    "menu": "https://order.toasttab.com/egiftcards/terrazza-372-harbord-st",
-    "instagram": "http://instagram.com/terrazzato"
-   }
-  },
-  "node/803214077": {
-   "name": "Bar Libretto",
-   "deals": [
-    {
-     "title": "Happy Hour",
-     "priceText": null,
-     "description": "Happy hour : 4-6pm | Late night: 9pm-late",
-     "category": "both",
-     "finePrint": null,
-     "confidence": 0.75,
-     "imageUrl": "https://pizzerialibretto.agencydominion.net/uploads/2026/02/Housemade-Sausage_DSC3281-1200x630.jpg",
-     "sourceUrl": "https://www.pizzerialibretto.com/bar-libretto/",
-     "windows": [
-      {
-       "day": 0,
-       "start": 960,
-       "end": 1080
-      },
-      {
-       "day": 1,
-       "start": 960,
-       "end": 1080
-      },
-      {
-       "day": 2,
-       "start": 960,
-       "end": 1080
-      },
-      {
-       "day": 3,
-       "start": 960,
-       "end": 1080
-      },
-      {
-       "day": 4,
-       "start": 960,
-       "end": 1080
-      },
-      {
-       "day": 5,
-       "start": 960,
-       "end": 1080
-      },
-      {
-       "day": 6,
-       "start": 960,
-       "end": 1080
-      }
-     ]
-    },
-    {
-     "title": "Happy Hour",
-     "priceText": null,
-     "description": "During Happy Hour | 2-6pm",
-     "category": "both",
-     "finePrint": null,
-     "confidence": 0.75,
-     "imageUrl": "https://pizzerialibretto.agencydominion.net/uploads/2026/06/DSC3675-1200x630.jpg",
-     "sourceUrl": "https://www.pizzerialibretto.com/bar-libretto/",
-     "windows": [
-      {
-       "day": 0,
-       "start": 840,
-       "end": 1080
-      },
-      {
-       "day": 1,
-       "start": 840,
-       "end": 1080
-      },
-      {
-       "day": 2,
-       "start": 840,
-       "end": 1080
-      },
-      {
-       "day": 3,
-       "start": 840,
-       "end": 1080
-      },
-      {
-       "day": 4,
-       "start": 840,
-       "end": 1080
-      },
-      {
-       "day": 5,
-       "start": 840,
-       "end": 1080
-      },
-      {
-       "day": 6,
-       "start": 840,
-       "end": 1080
-      }
-     ]
-    }
-   ],
-   "socials": {
-    "instagram": "https://www.instagram.com/pizzerialibretto/",
-    "facebook": "https://www.facebook.com/PizzeriaLibretto",
-    "x": "https://www.twitter.com/pizzalibretto"
-   }
-  },
-  "node/2342827690": {
-   "name": "BellyBuster",
-   "deals": [],
-   "socials": {
-    "facebook": "https://www.facebook.com/soundscapesmusic",
-    "x": "https://twitter.com/soundscapesTO",
-    "instagram": "http://instagram.com/soundscapesto"
-   }
-  },
-  "node/2580208957": {
-   "name": "Pizzeria Badiali",
-   "deals": [],
-   "socials": {
-    "facebook": "https://www.facebook.com/pizzeriabadiali/",
-    "instagram": "https://www.instagram.com/pizzeriabadiali/"
-   }
-  },
-  "node/2603838231": {
-   "name": "Rhum Corner",
-   "deals": [],
-   "socials": {
-    "instagram": "https://www.instagram.com/rhumcorner/"
-   }
-  },
   "node/2848619201": {
    "name": "Noce Restaurant & Bar",
    "deals": [],
@@ -763,13 +604,63 @@
     "instagram": "https://www.instagram.com/nocetoronto/"
    }
   },
-  "node/3275353556": {
-   "name": "The Caledonian",
+  "node/3119032737": {
+   "name": "Jimmy's Coffee",
    "deals": [],
    "socials": {
-    "facebook": "https://www.facebook.com/CaledonianPub",
-    "instagram": "https://www.instagram.com/thecaledonian",
-    "x": "https://www.x.com/@CaledonianPub"
+    "instagram": "https://www.instagram.com/jimmys_coffee/"
+   }
+  },
+  "node/3229217219": {
+   "name": "MARBL",
+   "deals": [],
+   "socials": {
+    "facebook": "https://www.facebook.com/marbltoronto/",
+    "instagram": "https://www.instagram.com/100daystoronto/"
+   }
+  },
+  "node/3337181356": {
+   "name": "Brassaii",
+   "deals": [],
+   "socials": {
+    "facebook": "https://www.facebook.com/rmhtaruhan88"
+   }
+  },
+  "node/3368595238": {
+   "name": "Cheffry's Bistro",
+   "deals": [],
+   "socials": {
+    "instagram": "https://www.instagram.com/chefrysglobalkitchen/",
+    "facebook": "https://www.facebook.com/chefrysglobalkitchen"
+   }
+  },
+  "node/3370253300": {
+   "name": "Bar Hop",
+   "deals": [],
+   "socials": {
+    "instagram": "http://instagram.com/barhopbar",
+    "facebook": "http://www.facebook.com/barhopbar"
+   }
+  },
+  "node/3420803493": {
+   "name": "Yuzuki Fish Market",
+   "deals": [],
+   "socials": {
+    "instagram": "https://www.instagram.com/yuzukifish_to/"
+   }
+  },
+  "node/3587012517": {
+   "name": "Ruby Soho",
+   "deals": [],
+   "socials": {
+    "instagram": "http://www.instagram.com/rubysohobar"
+   }
+  },
+  "node/3790946157": {
+   "name": "BarChef",
+   "deals": [],
+   "socials": {
+    "instagram": "https://www.instagram.com/barchef/"
    }
   },
   "node/3796227793": {
@@ -780,96 +671,76 @@
     "facebook": "https://www.facebook.com/profile.php"
    }
   },
-  "node/4035832189": {
-   "name": "Get Well",
+  "node/3871214113": {
+   "name": "Vagabondo Restobar",
    "deals": [],
    "socials": {
-    "instagram": "https://www.instagram.com/getwellbar/"
+    "facebook": "https://www.facebook.com/vagabondorestobar",
+    "instagram": "https://www.instagram.com/vagabondorestobar/"
    }
   },
-  "node/4213257017": {
-   "name": "La Chingada",
-   "deals": [
-    {
-     "title": "Happy Hour",
-     "priceText": null,
-     "description": "Toronto time · Happy Hour every day, 4–7 PM.",
-     "category": "both",
-     "finePrint": null,
-     "confidence": 0.87,
-     "imageUrl": "https://lachingada.ca/wp-content/plugins/la-chingada-website/site/images/street-corn-hero.jpg",
-     "sourceUrl": "https://lachingada.ca/",
-     "windows": [
-      {
-       "day": 0,
-       "start": 960,
-       "end": 1140
-      },
-      {
-       "day": 1,
-       "start": 960,
-       "end": 1140
-      },
-      {
-       "day": 2,
-       "start": 960,
-       "end": 1140
-      },
-      {
-       "day": 3,
-       "start": 960,
-       "end": 1140
-      },
-      {
-       "day": 4,
-       "start": 960,
-       "end": 1140
-      },
-      {
-       "day": 5,
-       "start": 960,
-       "end": 1140
-      },
-      {
-       "day": 6,
-       "start": 960,
-       "end": 1140
-      }
-     ]
-    }
-   ],
-   "socials": {
-    "instagram": "https://www.instagram.com/la_chingada/"
-   }
-  },
-  "node/4425187037": {
-   "name": "Local Public Eatery",
+  "node/4036638717": {
+   "name": "HotBlack Coffee",
    "deals": [],
    "socials": {
-    "instagram": "https://www.instagram.com/localpubliceatery",
-    "facebook": "https://www.facebook.com/LOCALLibertyVil/"
+    "instagram": "https://www.instagram.com/hotblack_coffee/",
+    "x": "https://twitter.com/hotblack_coffee"
    }
   },
-  "node/4538706285": {
-   "name": "The Dog & Bear Pub",
+  "node/4194343981": {
+   "name": "The Fifth Grill & Terrace",
    "deals": [],
    "socials": {
-    "instagram": "https://www.instagram.com/thedogandbear/"
+    "facebook": "https://facebook.com/BBQ-Digest-597378134271967",
+    "x": "https://x.com/bbq_digest"
    }
   },
-  "node/4600965873": {
-   "name": "Oyster Boy",
+  "node/60701401": {
+   "name": "Smith Social House",
    "deals": [],
    "socials": {
-    "facebook": "https://www.facebook.com/Oyster-Boy-Restaurant-114064535281453/",
-    "instagram": "https://www.instagram.com/oysterboytoronto/"
+    "instagram": "https://www.instagram.com/thesmithhousetoronto/",
+    "facebook": "https://www.facebook.com/thesmithhousetoronto"
    }
   },
-  "node/4600975095": {
-   "name": "Le Swan",
+  "node/244884014": {
+   "name": "Harry's Charbroiled",
    "deals": [],
    "socials": {
-    "instagram": "http://www.instagram.com/leswanfrenchdiner"
+    "facebook": "https://www.facebook.com/harryscharbroiled",
+    "instagram": "https://www.instagram.com/harryscharbroiled"
+   }
+  },
+  "node/752192420": {
+   "name": "Dreyfus",
+   "deals": [],
+   "socials": {
+    "instagram": "https://www.instagram.com/dreyfustoronto"
+   }
+  },
+  "node/752192433": {
+   "name": "Almond Butterfly",
+   "deals": [],
+   "socials": {
+    "menu": "https://almond-butterfly.square.site/s/order",
+    "instagram": "http://instagram.com/almondbutterflycafe",
+    "facebook": "https://www.facebook.com/almondbutterfly/"
+   }
+  },
+  "node/2806099855": {
+   "name": "FreePlay",
+   "deals": [],
+   "socials": {
+    "instagram": "https://www.instagram.com/freeplaytoronto",
+    "facebook": "https://www.facebook.com/freeplaytoronto"
+   }
+  },
+  "node/4192033189": {
+   "name": "Contrada",
+   "deals": [],
+   "socials": {
+    "facebook": "https://facebook.com/PlazaIt/",
+    "instagram": "https://www.instagram.com/plazait"
    }
   },
   "node/4636338081": {
@@ -879,137 +750,300 @@
     "instagram": "https://www.instagram.com/alphas_shawarma"
    }
   },
-  "node/4846277121": {
-   "name": "Louie Coffee",
+  "node/4742515394": {
+   "name": "Otto's Berlin Döner",
    "deals": [],
    "socials": {
-    "facebook": "https://www.facebook.com/louiecoffeeshop",
-    "instagram": "https://www.instagram.com/louiecoffeeshop/",
-    "x": "https://twitter.com/Louiecoffeeshop"
+    "facebook": "http://www.facebook.com/ottosdoner",
+    "instagram": "http://instagram.com/ottosdoner"
    }
   },
-  "node/4919962390": {
-   "name": "The Dock Ellis",
+  "node/5051870621": {
+   "name": "King's Café",
    "deals": [],
    "socials": {
-    "x": "https://twitter.com/TheDockEllis",
-    "facebook": "https://www.facebook.com/thedockellis",
-    "instagram": "https://www.instagram.com/thedockellis/"
+    "instagram": "https://www.instagram.com/kingscaferestaurantca"
    }
   },
-  "node/4919963779": {
+  "node/5054029022": {
+   "name": "Fusaro's Italian Kitchen",
+   "deals": [],
+   "socials": {
+    "instagram": "https://www.instagram.com/p/Cmudk8EuPMG/"
+   }
+  },
+  "node/5120625026": {
+   "name": "Comma",
+   "deals": [
+    {
+     "title": "Happy Hour",
+     "priceText": null,
+     "description": "Happy Hour 9PM-2AM",
+     "category": "both",
+     "finePrint": null,
+     "confidence": 0.75,
+     "imageUrl": "https://cdn.prod.website-files.com/65a5fe08e8b13697aa537421/6627e3372da78c7d5b1c528d_Comma%20-%20Modern%20Korean%20Restaurant%20%26%20Cocktail%20Bar.webp",
+     "sourceUrl": "https://www.commatoronto.com/",
+     "windows": [
+      {
+       "day": 0,
+       "start": 1260,
+       "end": 1560
+      },
+      {
+       "day": 1,
+       "start": 1260,
+       "end": 1560
+      },
+      {
+       "day": 2,
+       "start": 1260,
+       "end": 1560
+      },
+      {
+       "day": 3,
+       "start": 1260,
+       "end": 1560
+      },
+      {
+       "day": 4,
+       "start": 1260,
+       "end": 1560
+      },
+      {
+       "day": 5,
+       "start": 1260,
+       "end": 1560
+      },
+      {
+       "day": 6,
+       "start": 1260,
+       "end": 1560
+      }
+     ]
+    }
+   ],
+   "socials": {
+    "instagram": "https://www.instagram.com/commatoronto"
+   }
+  },
+  "node/5120631022": {
+   "name": "La Palette",
+   "deals": [],
+   "socials": {
+    "instagram": "https://www.instagram.com/lapalettequeenwest/"
+   }
+  },
+  "node/5276543923": {
+   "name": "Maker Pizza",
+   "deals": [],
+   "socials": {
+    "instagram": "https://www.instagram.com/makerpizza/",
+    "x": "https://twitter.com/makerpizza"
+   }
+  },
+  "node/5294931924": {
+   "name": "Bovine Sex Club",
+   "deals": [],
+   "socials": {
+    "facebook": "https://www.facebook.com/bovinesexclub",
+    "instagram": "https://www.instagram.com/bovinesexclub/"
+   }
+  },
+  "node/5366324122": {
+   "name": "Manic Coffee",
+   "deals": [],
+   "socials": {
+    "instagram": "https://instagram.com/maniccoffee/",
+    "x": "https://twitter.com/maniccoffee",
+    "facebook": "https://www.facebook.com/maniccoffee/"
+   }
+  },
+  "node/5401779121": {
+   "name": "Eative Film Cafe",
+   "deals": [],
+   "socials": {
+    "facebook": "https://www.facebook.com/100315798451772",
+    "instagram": "https://www.instagram.com/filmcafe.kensington"
+   }
+  },
+  "node/5431559423": {
+   "name": "Little Jerry",
+   "deals": [],
+   "socials": {
+    "x": "https://twitter.com/littlejerryTO",
+    "facebook": "https://facebook.com/thelittlejerry",
+    "instagram": "https://www.instagram.com/littlejerryto/"
+   }
+  },
+  "node/5448317525": {
    "name": "Jimmy's Coffee",
    "deals": [],
    "socials": {
     "instagram": "https://www.instagram.com/jimmys_coffee/"
    }
   },
-  "node/5051702221": {
-   "name": "Harlem Underground",
+  "node/3383888393": {
+   "name": "Tapas at Embrujo",
    "deals": [],
    "socials": {
-    "instagram": "http://instagram.com/harlemrestaurant"
+    "facebook": "https://facebook.com/VEGA168",
+    "x": "https://twitter.com/VEGA168",
+    "instagram": "https://instagram.com/VEGA168"
    }
   },
-  "node/5255134746": {
-   "name": "Frankie's Diner",
+  "node/4922951501": {
+   "name": "Off the Hook",
    "deals": [],
    "socials": {
-    "instagram": "https://www.instagram.com/frankiesdiner_queenwest/"
+    "instagram": "https://www.instagram.com/offthehookfishbar/",
+    "facebook": "https://www.facebook.com/oth749/"
    }
   },
-  "node/5278931424": {
-   "name": "Golden Turtle",
+  "node/5437889821": {
+   "name": "Menali",
    "deals": [],
    "socials": {
-    "facebook": "https://www.facebook.com/Pho-Rua-Vang-Golden-Turtle-Restaurant-192115654236042/",
-    "instagram": "https://www.instagram.com/p/B_vTa5dhG_p/"
+    "facebook": "https://www.facebook.com/MenaliRestaurant/",
+    "instagram": "https://www.instagram.com/menalirestaurant/"
    }
   },
-  "node/5380694564": {
-   "name": "Banu",
+  "node/5467605638": {
+   "name": "Douce France",
    "deals": [],
    "socials": {
-    "facebook": "https://www.facebook.com/BanuToronto/",
-    "instagram": "https://www.instagram.com/banutoronto/",
-    "x": "https://twitter.com/Banutoronto"
+    "facebook": "https://www.facebook.com/DouceFranceTO",
+    "instagram": "https://www.instagram.com/douce.france/"
    }
   },
-  "node/5448604821": {
-   "name": "Salt Wine Bar",
+  "node/6873597400": {
+   "name": "Herby",
    "deals": [],
    "socials": {
-    "instagram": "https://www.instagram.com/saltwinebar/",
-    "x": "https://twitter.com/SALTwinebar/"
+    "instagram": "https://www.instagram.com/herbyrestaurant",
+    "facebook": "https://www.facebook.com/herbyrestaurant/"
    }
   },
-  "node/5459454321": {
-   "name": "Bar Piquette",
+  "node/6920879988": {
+   "name": "Athens Restaurant",
    "deals": [],
    "socials": {
-    "instagram": "https://www.instagram.com/barpiquette/"
+    "instagram": "https://www.instagram.com/athensrestaurantdanforth",
+    "facebook": "https://www.facebook.com/121147344594717"
    }
   },
-  "node/5459509221": {
-   "name": "Jamil's Chaat House",
+  "node/7062381028": {
+   "name": "Riverdale Perk Cafe",
    "deals": [],
    "socials": {
-    "instagram": "https://www.instagram.com/jamils.to"
+    "facebook": "https://www.facebook.com/riverdaleperkcafe/",
+    "instagram": "https://www.instagram.com/riverdaleperkcafe/"
    }
   },
-  "node/5721127452": {
-   "name": "Snakes & Lattes",
+  "node/9105144425": {
+   "name": "Hanamaru Market and Bento",
    "deals": [],
    "socials": {
-    "instagram": "https://www.instagram.com/snakesandlattes/",
-    "facebook": "https://www.facebook.com/snakesandlattes"
+    "instagram": "https://www.instagram.com/hanamaru.pape"
    }
   },
-  "node/5721514621": {
-   "name": "La Cantina",
+  "node/10159822796": {
+   "name": "Wanas Shawarma",
    "deals": [],
    "socials": {
-    "instagram": "https://www.instagram.com/lacantinadelpueblo/",
-    "facebook": "https://www.facebook.com/lacantinadelpueblo"
+    "facebook": "https://www.facebook.com/p/Wanas-Shawarma-61552387923532/",
+    "instagram": "https://www.instagram.com/wanas_shawarma/"
    }
   },
-  "node/5723568721": {
-   "name": "Old School",
+  "node/10815499795": {
+   "name": "Sinaloa Factory",
    "deals": [],
    "socials": {
-    "instagram": "https://www.instagram.com/oldschoolyyz/",
-    "facebook": "https://www.facebook.com/OldSchoolyyz/"
+    "facebook": "http://www.facebook.com/sinaloafactory",
+    "instagram": "http://www.instagram.com/sinaloafactory",
+    "x": "http://www.twitter.com/sinaloafactory"
    }
   },
-  "node/5723671021": {
-   "name": "Patois",
+  "node/10885293440": {
+   "name": "Papyrus",
    "deals": [],
    "socials": {
-    "menu": "https://order.toasttab.com/egiftcards/patoistoronto",
-    "instagram": "https://www.instagram.com/hardostudios/"
+    "x": "https://twitter.com/papyrus_toronto",
+    "facebook": "https://www.facebook.com/papyrusfood/",
+    "instagram": "https://www.instagram.com/papyrus_toronto/"
    }
   },
-  "node/5750547495": {
-   "name": "The Dog's Bollocks",
+  "node/10920466485": {
+   "name": "Casa Manila",
    "deals": [],
    "socials": {
-    "facebook": "https://www.facebook.com/istudiosg",
-    "instagram": "https://www.instagram.com/istudiosg/"
+    "menu": "https://order.toasttab.com/online/casa-manila-danforth-508-danforth-ave",
+    "instagram": "https://instagram.com/casamanilaca",
+    "facebook": "https://facebook.com/casamanilarestaurant",
+    "x": "https://twitter.com/CasamanilaCa"
    }
   },
-  "node/6181451952": {
-   "name": "Dirty Laundry Bar",
+  "node/10920466487": {
+   "name": "The Friendly Greek",
    "deals": [],
    "socials": {
-    "instagram": "https://www.instagram.com/thedirtttylaundry/"
+    "facebook": "https://www.facebook.com/thefriendlygreek",
+    "instagram": "https://www.instagram.com/friendlygreekdanforth/"
    }
   },
-  "node/6181451955": {
-   "name": "Nunu",
+  "node/11142519588": {
+   "name": "Sugar Kane",
    "deals": [],
    "socials": {
-    "facebook": "https://www.facebook.com/Nunu-119303614801994/",
-    "instagram": "https://www.instagram.com/nunuethiopianfusion/"
+    "instagram": "https://www.instagram.com/sugarkanerestaurant/",
+    "facebook": "https://www.facebook.com/SugarKanerestaurant/",
+    "x": "https://twitter.com/SugarkaneTO"
+   }
+  },
+  "node/11663320718": {
+   "name": "SUPERNOVA Coffee",
+   "deals": [],
+   "socials": {
+    "instagram": "https://www.instagram.com/supernova_coffee"
+   }
+  },
+  "node/13016349410": {
+   "name": "Mocha Mocha",
+   "deals": [],
+   "socials": {
+    "instagram": "https://www.instagram.com/mochamochatoronto",
+    "facebook": "https://www.facebook.com/mochamochacafe/"
+   }
+  },
+  "node/13021796663": {
+   "name": "La Diperie",
+   "deals": [],
+   "socials": {
+    "instagram": "https://www.instagram.com/ladiperie/",
+    "facebook": "https://www.facebook.com/ladiperie/"
+   }
+  },
+  "node/13025820697": {
+   "name": "Zed*80",
+   "deals": [],
+   "socials": {
+    "instagram": "http://instagram.com/zedeighty",
+    "facebook": "http://www.facebook.com/zedeighty"
+   }
+  },
+  "node/13850695727": {
+   "name": "Pho Challenge",
+   "deals": [],
+   "socials": {
+    "facebook": "https://www.facebook.com/phochallenge/"
+   }
+  },
+  "node/13953080601": {
+   "name": "Mezes",
+   "deals": [],
+   "socials": {
+    "instagram": "https://www.instagram.com/mezesdanforth/",
+    "facebook": "https://www.facebook.com/MezesRestaurant/community/"
    }
   },
   "node/241276547": {
@@ -1438,6 +1472,13 @@
     "instagram": "https://www.instagram.com/rolltation_ca/"
    }
   },
+  "node/7835427950": {
+   "name": "Molly Tea",
+   "deals": [],
+   "socials": {
+    "instagram": "https://www.instagram.com/mollytea_canada/"
+   }
+  },
   "node/11037673540": {
    "name": "Avelo",
    "deals": [],
@@ -1490,11 +1531,117 @@
     "instagram": "https://instagram.com/alternity.hub"
    }
   },
+  "node/527025595": {
+   "name": "Sushi Momo",
+   "deals": [],
+   "socials": {
+    "instagram": "https://instagram.com/sushimomomtl",
+    "facebook": "https://www.facebook.com/sushimomomontreal/"
+   }
+  },
+  "node/2580208957": {
+   "name": "Pizzeria Badiali",
+   "deals": [],
+   "socials": {
+    "facebook": "https://www.facebook.com/pizzeriabadiali/",
+    "instagram": "https://www.instagram.com/pizzeriabadiali/"
+   }
+  },
+  "node/4425187037": {
+   "name": "Local Public Eatery",
+   "deals": [],
+   "socials": {
+    "instagram": "https://www.instagram.com/localpubliceatery",
+    "facebook": "https://www.facebook.com/LOCALLibertyVil/"
+   }
+  },
   "node/4425245677": {
    "name": "School",
    "deals": [],
    "socials": {
-    "instagram": "https://www.instagram.com/p/DdWqaZVyNXY/"
+    "instagram": "https://www.instagram.com/p/Ddf044IuR70/"
+   }
+  },
+  "node/4538706285": {
+   "name": "The Dog & Bear Pub",
+   "deals": [],
+   "socials": {
+    "instagram": "https://www.instagram.com/thedogandbear/"
+   }
+  },
+  "node/4600965873": {
+   "name": "Oyster Boy",
+   "deals": [],
+   "socials": {
+    "facebook": "https://www.facebook.com/Oyster-Boy-Restaurant-114064535281453/",
+    "instagram": "https://www.instagram.com/oysterboytoronto/"
+   }
+  },
+  "node/4600975095": {
+   "name": "Le Swan",
+   "deals": [],
+   "socials": {
+    "instagram": "http://www.instagram.com/leswanfrenchdiner"
+   }
+  },
+  "node/4846277121": {
+   "name": "Louie Coffee",
+   "deals": [],
+   "socials": {
+    "facebook": "https://www.facebook.com/louiecoffeeshop",
+    "instagram": "https://www.instagram.com/louiecoffeeshop/",
+    "x": "https://twitter.com/Louiecoffeeshop"
+   }
+  },
+  "node/4919963779": {
+   "name": "Jimmy's Coffee",
+   "deals": [],
+   "socials": {
+    "instagram": "https://www.instagram.com/jimmys_coffee/"
+   }
+  },
+  "node/5255134746": {
+   "name": "Frankie's Diner",
+   "deals": [],
+   "socials": {
+    "instagram": "https://www.instagram.com/frankiesdiner_queenwest/"
+   }
+  },
+  "node/5278931424": {
+   "name": "Golden Turtle",
+   "deals": [],
+   "socials": {
+    "facebook": "https://www.facebook.com/Pho-Rua-Vang-Golden-Turtle-Restaurant-192115654236042/",
+    "instagram": "https://www.instagram.com/p/B_vTa5dhG_p/"
+   }
+  },
+  "node/5459454321": {
+   "name": "Bar Piquette",
+   "deals": [],
+   "socials": {
+    "instagram": "https://www.instagram.com/barpiquette/"
+   }
+  },
+  "node/5459509221": {
+   "name": "Jamil's Chaat House",
+   "deals": [],
+   "socials": {
+    "instagram": "https://www.instagram.com/jamils.to"
+   }
+  },
+  "node/6181451952": {
+   "name": "Dirty Laundry Bar",
+   "deals": [],
+   "socials": {
+    "instagram": "https://www.instagram.com/thedirtttylaundry/"
+   }
+  },
+  "node/6181451955": {
+   "name": "Nunu",
+   "deals": [],
+   "socials": {
+    "facebook": "https://www.facebook.com/Nunu-119303614801994/",
+    "instagram": "https://www.instagram.com/nunuethiopianfusion/"
    }
   },
   "node/6201102929": {
@@ -1624,8 +1771,8 @@
    "name": "The Lunch Lady of Saigon",
    "deals": [],
    "socials": {
-    "instagram": "https://www.instagram.com/thelunchlady",
-    "facebook": "https://www.facebook.com/thelunchladyvan/"
+    "instagram": "https://www.instagram.com/thelunchladymanila",
+    "facebook": "https://www.facebook.com/thelunchladymanila"
    }
   },
   "node/6240360538": {
@@ -1716,173 +1863,6 @@
    "socials": {
     "facebook": "https://www.facebook.com/BellwoodsBrewery",
     "instagram": "https://www.instagram.com/bellwoodsbeer/"
-   }
-  },
-  "node/515553262": {
-   "name": "UB Social",
-   "deals": [],
-   "socials": {
-    "instagram": "https://www.instagram.com/ubsocial/",
-    "facebook": "https://www.facebook.com/UBSocial"
-   }
-  },
-  "node/2081154459": {
-   "name": "Spuntini Street Eats",
-   "deals": [],
-   "socials": {
-    "instagram": "http://instagram.com/spuntini.streeteats"
-   }
-  },
-  "node/2571785122": {
-   "name": "Halibut House",
-   "deals": [],
-   "socials": {
-    "facebook": "https://www.facebook.com/Halibuthousefishandchips/",
-    "instagram": "https://www.instagram.com/halibuthousefishandchips"
-   }
-  },
-  "node/2819797454": {
-   "name": "Lokum Eats",
-   "deals": [],
-   "socials": {
-    "instagram": "https://www.instagram.com/p/ChuZeiAuhci/",
-    "facebook": "https://www.facebook.com/lokumeats"
-   }
-  },
-  "node/4558083657": {
-   "name": "Honest Weigth",
-   "deals": [],
-   "socials": {
-    "x": "https://twitter.com/honest_weight",
-    "facebook": "https://www.facebook.com/honestweightTO/",
-    "instagram": "https://www.instagram.com/honest_weight/"
-   }
-  },
-  "node/5054381523": {
-   "name": "Playa Cabana Cantina",
-   "deals": [
-    {
-     "title": "Happy Hour",
-     "priceText": null,
-     "description": "Please visit us for Happy Hour 2-5pm every day that we are open",
-     "category": "both",
-     "finePrint": null,
-     "confidence": 0.87,
-     "imageUrl": "http://www.playacabana.ca/images/assets/menu.png",
-     "sourceUrl": "http://www.playacabana.ca/cantina/",
-     "windows": [
-      {
-       "day": 0,
-       "start": 840,
-       "end": 1020
-      },
-      {
-       "day": 1,
-       "start": 840,
-       "end": 1020
-      },
-      {
-       "day": 2,
-       "start": 840,
-       "end": 1020
-      },
-      {
-       "day": 3,
-       "start": 840,
-       "end": 1020
-      },
-      {
-       "day": 4,
-       "start": 840,
-       "end": 1020
-      },
-      {
-       "day": 5,
-       "start": 840,
-       "end": 1020
-      },
-      {
-       "day": 6,
-       "start": 840,
-       "end": 1020
-      }
-     ]
-    }
-   ]
-  },
-  "node/5443462221": {
-   "name": "Wallace Espresso",
-   "deals": [],
-   "socials": {
-    "instagram": "https://www.instagram.com/wallaceespresso/",
-    "facebook": "https://www.facebook.com/WallaceEspresso/",
-    "x": "https://twitter.com/Squarespace"
-   }
-  },
-  "node/6491253882": {
-   "name": "Dirty Food Eatery",
-   "deals": [],
-   "socials": {
-    "facebook": "https://www.facebook.com/DirtyFoodTO",
-    "instagram": "https://www.instagram.com/dirtyfoodto/"
-   }
-  },
-  "node/6491503965": {
-   "name": "Momotaro Sushi",
-   "deals": [],
-   "socials": {
-    "facebook": "https://www.facebook.com/Momotaro-Sushi-Toronto-100328729375870",
-    "instagram": "https://www.instagram.com/momotarosushitoronto/"
-   }
-  },
-  "node/6765141941": {
-   "name": "Ondak",
-   "deals": [],
-   "socials": {
-    "instagram": "https://www.instagram.com/torontojunction/",
-    "facebook": "https://www.facebook.com/TorontoJunction",
-    "x": "https://twitter.com/TorontoJunction"
-   }
-  },
-  "node/7178328455": {
-   "name": "Bevi Birra",
-   "deals": [],
-   "socials": {
-    "instagram": "https://www.instagram.com/bevibirra.ca/"
-   }
-  },
-  "node/9441154267": {
-   "name": "Botham's",
-   "deals": [],
-   "socials": {
-    "x": "https://twitter.com/home"
-   }
-  },
-  "node/9960687234": {
-   "name": "See-Scape",
-   "deals": [],
-   "socials": {
-    "facebook": "https://www.facebook.com/SeeScapeToronto/",
-    "instagram": "https://www.instagram.com/Seescapeto/",
-    "x": "https://twitter.com/see_scape"
-   }
-  },
-  "node/12412246446": {
-   "name": "Mangiare Italian Family Dining",
-   "deals": [],
-   "socials": {
-    "facebook": "https://www.facebook.com/mangiareitalianrestaurant/",
-    "instagram": "https://www.instagram.com/mangiare.to/",
-    "x": "https://x.com/boom_breakfast"
-   }
-  },
-  "node/12511373774": {
-   "name": "BOOM Breakfast & Co. Junction",
-   "deals": [],
-   "socials": {
-    "facebook": "https://www.facebook.com/BoomBreakfast/",
-    "instagram": "https://www.instagram.com/boom_breakfast/",
-    "x": "https://x.com/boom_breakfast"
    }
   }
  }
